@@ -761,10 +761,10 @@ function buildCard(baseLoc) {
     ? `<span class="loc-opened">Est. ${loc.opened}</span>`
     : `<span class="loc-opened" style="color:var(--tase-c)">Coming Soon</span>`;
 
-  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">📍 Directions</a>`;
+  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">Directions</a>`;
   const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">3D Tour</a>` : '';
   const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">📷 Live Cam</a>` : '';
-  const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">👤 Team</button>` : '';
+  const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">Team</button>` : '';
 
   const slots = [
     { key:'ext', label:'Exterior' },
