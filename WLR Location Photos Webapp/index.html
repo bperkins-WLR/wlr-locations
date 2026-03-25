@@ -776,7 +776,7 @@ function buildCard(baseLoc) {
     const fileNum  = s.key === 'ext' ? '01' : '02';
     const fileSrc  = `images/loc-${pad(displayNum)}/${fileNum}.jpg`;
     const localSrc = getPhotoSrc(loc.num, s.key);
-    const src      = localSrc || (comingSoon ? 'images/tase-Coming soon.JPG' : fileSrc);
+    const src      = localSrc || (comingSoon ? 'images/tase-coming-soon.jpg' : fileSrc);
     const isLocal  = !!localSrc;
     const useStatic = !isLocal && comingSoon;
     return `
@@ -905,10 +905,11 @@ function openLightboxForLoc(num, startSlot) {
   const dn     = loc.numOverride || num;
   const slots  = ['ext','int'];
   const photos = [];
+  const locComingSoon = !loc.opened;
   slots.forEach(s => {
     const local = getPhotoSrc(num, s);
     const file  = `images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`;
-    const src   = local || file;
+    const src   = local || (locComingSoon ? 'images/tase-coming-soon.jpg' : file);
     photos.push({ src, label: s === 'ext' ? 'Exterior' : 'Interior', caption: `#${pad(dn)} ${loc.name} — ${s==='ext'?'Exterior':'Interior'}` });
   });
 
