@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WLR Locations">
+  <meta name="theme-color" content="#0d3268">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+  <title>WLR Automotive Group — Locations</title>
+  <style>
+    :root {
+      --blue:   #1a55a2;
+      --deep:   #0d3268;
+      --mid:    #0f3d82;
+      --yellow: #FADC00;
+      --green:  #22c55e;
+      --bord:   rgba(255,255,255,0.14);
+      --text:   #ffffff;
+      --muted:  rgba(255,255,255,0.55);
+      --tlc-c:  #FADC00;
+      --tas-c:  #0C4D8F;
+      --tar-c:  #1a1a1a;
+      --tase-c: #0C4D8F;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--deep);
+      color: var(--text);
+      min-height: 100vh;
+      overscroll-behavior: none;
+    }
+
+    /* ══ HEADER ══════════════════════════════════════════ */
+    header {
+      background: linear-gradient(160deg, #0a2755 0%, #1248a0 100%);
+      padding: max(env(safe-area-inset-top), 10px) 14px 8px;
+      border-bottom: 3px solid var(--yellow);
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 3px 18px rgba(0,0,0,.45);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .h-logo-img { height: 38px; width: auto; object-fit: contain; flex-shrink: 0; }
+    .h-logo-fb  { height: 38px; width: 46px; background: var(--yellow); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--deep); flex-shrink: 0; }
+    .h-title    { font-size: 17px; font-weight: 800; line-height: 1.1; flex: 1; }
+    .h-title span { color: var(--yellow); }
+    .h-sub      { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .slideshow-btn {
+      flex-shrink: 0; padding: 7px 12px; border-radius: 10px;
+      background: var(--yellow); border: none; color: var(--deep);
+      font-size: 12px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px;
+    }
+    .slideshow-btn:active { opacity: 0.8; }
+
+    /* ══ HERO SECTION ════════════════════════════════════ */
+    .hero {
+      background: linear-gradient(170deg, #0a2755 0%, #1248a0 60%, #0d3268 100%);
+      padding: 28px 20px 24px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-logo {
+      height: auto; width: 100%; max-width: 480px; object-fit: contain;
+      margin: 0 auto 18px; display: block;
+    }
+    .hero-logo-fb {
+      width: 96px; height: 72px; background: var(--yellow); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 900; color: var(--deep);
+      margin: 0 auto 18px;
+    }
+    .hero-tagline {
+      font-size: 13px; color: rgba(255,255,255,0.6);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 22px;
+    }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 0;
+      margin-bottom: 16px;
+    }
+    .hero-stat {
+      flex: 1; max-width: 110px; padding: 12px 8px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+    }
+    .hero-stat:last-child { border-right: none; }
+    .hero-stat-num {
+      font-size: 40px; font-weight: 900; color: var(--yellow);
+      line-height: 1; display: block;
+    }
+    .hero-stat-label {
+      font-size: 10px; color: rgba(255,255,255,0.55);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-top: 4px; display: block;
+    }
+    .hero-states {
+      font-size: 13px; color: rgba(255,255,255,0.75);
+      letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .hero-note {
+      font-size: 11px; color: rgba(255,255,255,0.35);
+      margin-top: 10px; line-height: 1.5;
+    }
+    .hero-note a { color: rgba(255,255,255,0.45); text-decoration: underline; cursor: pointer; }
+
+    /* ══ CONTROLS ════════════════════════════════════════ */
+    .controls {
+      background: var(--mid);
+      padding: 10px 14px 8px;
+      position: sticky; top: 58px; z-index: 190;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
+    .search-wrap { position: relative; margin-bottom: 8px; }
+    .search-wrap input {
+      width: 100%; padding: 8px 36px 8px 34px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px; color: #fff; font-size: 14px; outline: none; -webkit-appearance: none;
+    }
+    .search-wrap input::placeholder { color: rgba(255,255,255,0.45); }
+    .search-wrap input:focus { background: rgba(255,255,255,0.18); border-color: var(--yellow); }
+    .search-wrap .icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+    .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; display: none; padding: 2px; }
+
+    .filter-row { display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      flex-shrink: 0; padding: 5px 12px; border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,0.15); background: #000;
+      color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s; white-space: nowrap; -webkit-appearance: none;
+    }
+    .filter-btn.active                { color: var(--deep); border-color: transparent; }
+    .filter-btn[data-type="ALL"].active  { background: rgba(255,255,255,0.9); }
+    .filter-btn[data-type="TLC"].active  { background: var(--tlc-c); }
+    .filter-btn[data-type="TAS"].active  { background: var(--tas-c); }
+    .filter-btn[data-type="TAR"].active  { background: var(--tar-c); }
+    .filter-btn[data-type="TASE"].active { background: var(--tase-c); }
+
+    .sort-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+    .sort-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+    .sort-btn { padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: #000; color: rgba(255,255,255,0.6); font-size: 11px; cursor: pointer; -webkit-appearance: none; transition: all 0.15s; }
+    .sort-btn.active { background: #000; color: #fff; border-color: rgba(255,255,255,0.5); }
+    .state-select { display: none; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: #000; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; -webkit-appearance: none; outline: none; }
+    .state-select.show { display: block; }
+    .state-select option { background: #0d3268; color: #fff; }
+
+    .stats-bar { padding: 6px 14px; background: rgba(255,255,255,0.05); font-size: 11px; color: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(255,255,255,0.07); }
+
+    /* ══ GRID ════════════════════════════════════════════ */
+    .grid { padding: 12px 12px 90px; display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 560px; margin: 0 auto; }
+    @media(min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+    /* ══ CARD ════════════════════════════════════════════ */
+    .card {
+      background: linear-gradient(145deg, #0d0d0d 0%, #050505 100%);
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 5px 22px rgba(0,0,0,.6);
+      transition: transform 0.15s;
+    }
+    .card:active { transform: scale(0.983); }
+    .card.hidden { display: none; }
+
+    .card-stripe { display: none; }
+
+    .card-header { display: flex; align-items: stretch; padding: 0; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+    /* ── LOGO COLUMN (left side, brand color bg) ── */
+    .logo-col {
+      width: 76px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      padding: 14px 8px;
+      text-align: center;
+    }
+    .num-bar-TLC, .num-bar-TAS, .num-bar-TAR, .num-bar-TASE { background: transparent; border-right: 1px solid rgba(255,255,255,0.08); }
+
+    .brand-logo { height: 40px; width: auto; max-width: 60px; object-fit: contain; display: block; }
+    .type-badge { padding: 4px 9px; border-radius: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; color: #ffffff; }
+    .type-TLC  { background: var(--tlc-c); }
+    .type-TAS  { background: var(--tas-c); }
+    .type-TAR  { background: var(--tar-c); }
+    .type-TASE { background: var(--tase-c); }
+
+    .years-badge {
+      font-size: 9px; font-weight: 800;
+      padding: 2px 5px; border-radius: 4px; display: inline-block;
+    }
+    .yb-new  { background: rgba(0,0,0,0.25); color: #ffffff; }
+    .yb-old  { background: rgba(0,0,0,0.2);  color: #ffffff; }
+
+    .loc-info  { flex: 1; min-width: 0; padding: 11px 12px; display: flex; flex-direction: column; justify-content: center; }
+    .loc-name  { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
+    .loc-name.has-overflow { cursor: pointer; text-overflow: clip; }
+    .loc-name-text { display: inline-block; }
+    .loc-name.has-overflow:hover .loc-name-text {
+      animation: name-scroll 4s ease-in-out 0.2s infinite;
+    }
+    @keyframes name-scroll {
+      0%,  12% { transform: translateX(0); }
+      75%, 88% { transform: translateX(var(--name-overflow, 0px)); }
+      100%     { transform: translateX(0); }
+    }
+    .loc-name .loc-num-prefix { color: rgba(255,255,255,0.55); font-weight: 600; }
+    .loc-name .loc-pipe       { color: rgba(255,255,255,0.3);  font-weight: 400; margin: 0 4px; }
+    .loc-city  { display: none; }
+    .loc-addr  { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .loc-phone { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+    .loc-notes { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; font-style: italic; line-height: 1.4; }
+    .loc-status { font-size: 10px; font-weight: 700; }
+    .loc-meta  { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .loc-opened { display: inline-flex; align-items: center; gap: 3px; padding: 0; font-size: 10px; color: rgba(255,255,255,0.55); }
+    .loc-maps   { display: inline-flex; align-items: center; gap: 3px; background: rgba(245,200,0,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: var(--yellow); text-decoration: none; border: 1px solid rgba(245,200,0,0.25); }
+    .loc-maps:active { background: rgba(245,200,0,0.3); }
+    .loc-3d     { display: inline-flex; align-items: center; gap: 3px; background: rgba(167,139,250,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #c4b5fd; text-decoration: none; border: 1px solid rgba(167,139,250,0.3); }
+    .loc-3d:active { background: rgba(167,139,250,0.3); }
+    .loc-cam    { display: inline-flex; align-items: center; gap: 3px; background: rgba(34,197,94,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #4ade80; text-decoration: none; border: 1px solid rgba(34,197,94,0.3); }
+    .loc-cam:active { background: rgba(34,197,94,0.3); }
+    .type-full { font-size: 9px; color: rgba(255,255,255,0.45); text-align: right; max-width: 80px; line-height: 1.2; }
+
+    /* ══ PHOTOS ══════════════════════════════════════════ */
+    .photos { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .photo-slot {
+      position: relative; border-radius: 9px; overflow: hidden;
+      aspect-ratio: 4/3; background: rgba(0,0,0,0.25);
+      border: 1.5px dashed rgba(255,255,255,0.18); cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .photo-slot:active { opacity: 0.85; }
+    .photo-slot.has-photo { border-style: solid; border-color: rgba(255,255,255,0.1); }
+    .photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-num { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.68); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 5px; pointer-events: none; }
+    .photo-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 6px 5px; background: linear-gradient(transparent, rgba(0,0,0,.75)); font-size: 9px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
+    .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5px; position: absolute; inset: 0; }
+    .ph-icon { font-size: 24px; opacity: .2; }
+    .ph-text { font-size: 9px; color: rgba(255,255,255,0.35); text-align: center; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+
+    /* ══ LIGHTBOX ════════════════════════════════════════ */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97); z-index: 1000;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .lightbox.open { display: flex; animation: lbIn 0.18s ease; }
+    @keyframes lbIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+
+    .lightbox img {
+      max-width: 100%; max-height: calc(100vh - 110px);
+      width: auto; height: auto;
+      object-fit: contain; border-radius: 10px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6);
+      touch-action: pinch-zoom; user-select: none;
+      transition: opacity 0.15s;
+    }
+
+    /* Prev / Next arrows */
+    .lb-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px); color: #fff;
+      font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      z-index: 10; transition: background 0.15s;
+    }
+    .lb-arrow:active { background: rgba(255,255,255,0.3); }
+    .lb-arrow.hidden { opacity: 0.2; pointer-events: none; }
+    #lbPrev { left: 12px; }
+    #lbNext { right: 12px; }
+
+    /* Dot indicators */
+    .lb-dots { display: flex; gap: 6px; margin-top: 10px; }
+    .lb-dot  { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: background 0.2s; }
+    .lb-dot.active { background: var(--yellow); }
+
+    /* Caption */
+    .lightbox-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 14px 70px 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      font-size: 13px; color: rgba(255,255,255,0.85);
+      text-align: center; letter-spacing: 0.3px;
+    }
+    /* Close */
+    .lightbox-close {
+      position: absolute; top: max(env(safe-area-inset-top), 16px); right: 16px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px); color: #fff; font-size: 18px;
+      width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+
+    /* ══ SLIDESHOW ════════════════════════════════════════ */
+    .slideshow {
+      display: none; position: fixed; inset: 0;
+      background: #000; z-index: 900;
+      flex-direction: column;
+    }
+    .slideshow.open { display: flex; }
+
+    /* Progress bar */
+    .ss-progress { height: 3px; background: rgba(255,255,255,0.15); position: relative; flex-shrink: 0; }
+    .ss-progress-fill { height: 100%; background: var(--yellow); width: 0%; transition: none; }
+
+    /* Photo area */
+    .ss-photo-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .ss-photo-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .ss-photo-wrap .ss-no-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: rgba(255,255,255,0.3); }
+    .ss-no-photo-icon { font-size: 48px; opacity: 0.3; }
+    .ss-no-photo-text { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Info overlay at bottom */
+    .ss-info {
+      background: linear-gradient(transparent, rgba(0,0,0,0.9));
+      padding: 40px 20px 20px;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      pointer-events: none;
+    }
+    .ss-type-badge { display: inline-flex; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; color: var(--deep); margin-bottom: 6px; }
+    .ss-loc-num  { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 2px; }
+    .ss-loc-name { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .ss-loc-city { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+    .ss-opened   { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+    /* Slideshow controls */
+    .ss-controls {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px max(env(safe-area-inset-bottom), 12px);
+      background: rgba(0,0,0,0.9); flex-shrink: 0; gap: 10px;
+    }
+    .ss-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ss-btn:active { background: rgba(255,255,255,0.25); }
+    .ss-counter    { font-size: 13px; color: rgba(255,255,255,0.55); text-align: center; flex: 1; }
+    .ss-photo-label { font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; }
+    .ss-close-btn {
+      position: absolute; top: max(env(safe-area-inset-top), 14px); right: 14px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+
+    /* No results */
+    .no-results { display: none; text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); }
+    .no-results.show { display: block; }
+    .no-results-icon { font-size: 38px; margin-bottom: 10px; }
+    .no-results p { font-size: 14px; }
+
+    /* ══ FOOTER ══════════════════════════════════════════ */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(10,27,75,0.97); backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 8px 16px max(env(safe-area-inset-bottom), 8px);
+      text-align: center; border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .legend { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); }
+    .legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .scroll-top {
+      position: fixed; bottom: 56px; right: 16px;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--yellow); border: none; color: var(--deep);
+      font-size: 18px; font-weight: 900; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: 0 3px 12px rgba(0,0,0,.4); z-index: 150;
+    }
+    .scroll-top.show { display: flex; }
+
+    /* ══ TEAM BUTTON ══════════════════════════════════════ */
+    .loc-team { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; -webkit-appearance: none; }
+    .loc-team:active { background: rgba(255,255,255,0.22); }
+
+    /* ══ TEAM MODAL ════════════════════════════════════════ */
+    .team-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 800;
+      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    }
+    .team-overlay.open { display: block; }
+    .team-panel {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(170deg, #102f6b 0%, #0a1f45 100%);
+      border-top: 3px solid var(--yellow);
+      border-radius: 20px 20px 0 0;
+      padding-bottom: max(env(safe-area-inset-bottom), 24px);
+      z-index: 801; max-height: 78vh; overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+    }
+    .team-panel.open { transform: translateY(0); }
+    .team-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px; margin: 12px auto 4px; }
+    .team-header { padding: 10px 20px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .team-header-text { flex: 1; min-width: 0; }
+    .team-title { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .team-subtitle { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; letter-spacing: 0.3px; }
+    .team-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .team-body { padding: 16px 20px 4px; display: flex; flex-direction: column; gap: 0; }
+    .team-row { padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .team-row:last-child { border-bottom: none; }
+    .team-role { font-size: 9px; font-weight: 800; color: var(--yellow); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+    .team-name { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.5; }
+    .team-name.open { color: rgba(255,255,255,0.35); font-style: italic; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header>
+  <img class="h-logo-img" src="images/logo-wlr.png" alt="WLR"
+       onerror="this.style.display='none'; document.getElementById('hFB').style.display='flex';">
+  <div class="h-logo-fb" id="hFB" style="display:none">WLR</div>
+  <div style="flex:1">
+    <div class="h-title"><span>WLR</span> Automotive Group</div>
+    <div class="h-sub">Location Gallery</div>
+  </div>
+  <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
+</header>
+
+<!-- ══ HERO SECTION ════════════════════════════════════ -->
+<div class="hero">
+  <img class="hero-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+       onerror="this.style.display='none'; document.getElementById('heroFB').style.display='flex';">
+  <div class="hero-logo-fb" id="heroFB" style="display:none">WLR</div>
+
+  <div class="hero-tagline">Serving the Mid-Atlantic Since 1987</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statLocs">30</span>
+      <span class="hero-stat-label">Locations</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statYears">38</span>
+      <span class="hero-stat-label">Years</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statStates">3</span>
+      <span class="hero-stat-label">States</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">4</span>
+      <span class="hero-stat-label">Brands</span>
+    </div>
+  </div>
+
+  <div class="hero-states">Maryland &nbsp;·&nbsp; Pennsylvania &nbsp;·&nbsp; West Virginia</div>
+
+  <div class="hero-note">
+    Location numbers reflect WLR's history — some numbers represent locations that have been converted or closed over the years.
+    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations ↓</a>
+  </div>
+</div>
+
+<!-- ══ CONTROLS ════════════════════════════════════════ -->
+<div class="controls">
+  <div class="search-wrap">
+    <span class="icon">🔍</span>
+    <input type="search" id="search" placeholder="Search by name, city, or number…" autocomplete="off" autocorrect="off">
+    <button class="search-clear" id="searchClear" title="Clear">✕</button>
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="filter-btn active" data-type="ALL">All</button>
+    <button class="filter-btn" data-type="TLC">TLC — Lube Centers</button>
+    <button class="filter-btn" data-type="TAS">TAS — Auto Spas</button>
+    <button class="filter-btn" data-type="TAR">TAR — Auto Repair</button>
+    <button class="filter-btn" data-type="TASE">TASe — Expresses</button>
+  </div>
+  <div class="sort-row">
+    <span class="sort-label">Sort:</span>
+    <button class="sort-btn active" data-sort="num">By #</button>
+    <button class="sort-btn" data-sort="date">By Date</button>
+    <button class="sort-btn" data-sort="state">By State</button>
+    <select class="state-select" id="stateSelect">
+      <option value="">All States</option>
+      <option value="MD">MD</option>
+      <option value="PA">PA</option>
+      <option value="WV">WV</option>
+    </select>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+<div class="grid" id="grid"></div>
+<div class="no-results" id="noResults">
+  <div class="no-results-icon">🔍</div>
+  <p>No locations found.</p>
+</div>
+
+<!-- ══ LIGHTBOX ════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <button class="lb-arrow" id="lbPrev">‹</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lb-dots" id="lbDots"></div>
+  <button class="lb-arrow" id="lbNext">›</button>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<!-- ══ SLIDESHOW ═══════════════════════════════════════ -->
+<div class="slideshow" id="slideshow">
+  <div class="ss-progress"><div class="ss-progress-fill" id="ssProgressFill"></div></div>
+  <div class="ss-photo-wrap" id="ssPhotoWrap">
+    <img id="ssPhoto" src="" alt="">
+    <div class="ss-info" id="ssInfo"></div>
+  </div>
+  <button class="ss-close-btn" id="ssClose">✕</button>
+  <div class="ss-controls">
+    <button class="ss-btn" id="ssPrev">‹</button>
+    <div style="flex:1;text-align:center">
+      <div class="ss-counter" id="ssCounter"></div>
+      <div class="ss-photo-label" id="ssPhotoLabel"></div>
+    </div>
+    <button class="ss-btn" id="ssPause">⏸</button>
+    <div style="width:10px"></div>
+    <button class="ss-btn" id="ssNext">›</button>
+  </div>
+</div>
+
+<!-- ══ TEAM MODAL ══════════════════════════════════════════ -->
+<div class="team-overlay" id="teamOverlay"></div>
+<div class="team-panel" id="teamPanel">
+  <div class="team-handle"></div>
+  <div class="team-header">
+    <div class="team-header-text">
+      <div class="team-title" id="teamPanelTitle"></div>
+      <div class="team-subtitle" id="teamPanelSubtitle"></div>
+    </div>
+    <button class="team-close" id="teamClose">✕</button>
+  </div>
+  <div class="team-body" id="teamPanelBody"></div>
+</div>
+
+<!-- ══ SCROLL TOP / FOOTER ══════════════════════════════ -->
+<button class="scroll-top" id="scrollTop">↑</button>
+
+<footer>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tlc-c)"></div>TLC</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tas-c)"></div>TAS</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tar-c)"></div>TAR</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tase-c)"></div>TASe</div>
+    <div class="legend-item" style="margin-left:8px">
+      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none">⚙️</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══ DATA ══════════════════════════════════════════════════
+const locations = [
+  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP" },
+  { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000",    ts:20000901, addr:"", render3d:"https://my.matterport.com/show/?m=MLW9rLGqcbs" },
+  { num:  3, name:"Columbia",               type:"TLC",  city:"Columbia",        state:"MD", opened:"June 1990",         ts:19900601, addr:"" },
+  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995",          ts:19950501, addr:"", render3d:"https://my.matterport.com/show/?m=qnr2UL3QC8D" },
+  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998",         ts:19980601, addr:"" },
+  { num:  6, name:"Frederick Auto Spa",     type:"TAS",  city:"Frederick",       state:"MD", opened:"December 2003",     ts:20031201, addr:"", render3d:"https://my.matterport.com/show/?m=3yPoA8UP24q" },
+  { num:  7, name:"Arundel Mills",           type:"TLC",  city:"Arundel Mills",   state:"MD", opened:"July 2020",         ts:20200701, addr:"", render3d:"https://my.matterport.com/show/?m=hPA3o1R1VSu" },
+  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004",     ts:20040201, addr:"" },
+  { num:  9, name:"Germantown",             type:"TLC",  city:"Germantown",      state:"MD", opened:"March 2005",        ts:20050301, addr:"", render3d:"https://my.matterport.com/show/?m=9iZMvGzWgXr" },
+  { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=epV8TadAFMN" },
+  { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=e2MiWFq9RGG" },
+  { num: 12, name:"Jefferson Street",       type:"TLC",  city:"Frederick",       state:"MD", opened:"July 2006",         ts:20060701, addr:"", render3d:"https://my.matterport.com/show/?m=TcwUF3VtomK" },
+  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007",      ts:20070101, addr:"" },
+  { num: 14, name:"Gambrills",              type:"TAS",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=6V2c8wKRigk" },
+  { num: 15, name:"Laurel",                 type:"TLC",  city:"Laurel",          state:"MD", opened:"January 2008",      ts:20080101, addr:"", render3d:"https://my.matterport.com/show/?m=wiYN1jCYHqp" },
+  { num: 16, name:"Shrewsbury",             type:"TLC",  city:"Shrewsbury",      state:"PA", opened:"August 2007",       ts:20070801, addr:"", render3d:"https://my.matterport.com/show/?m=NgVDg6Upqpu" },
+  { num: 17, name:"West York",              type:"TLC",  city:"York",            state:"PA", opened:"December 2007",     ts:20071201, addr:"", render3d:"https://my.matterport.com/show/?m=FeZxaocj5S5" },
+  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013",    ts:20130901, addr:"" },
+  { num: 19, name:"North Bel Air",           type:"TASE", city:"Bel Air",         state:"MD", opened:"December 2016",     ts:20161201, addr:"" },
+  { num: 21, name:"Route 85",               type:"TASE", city:"Frederick",       state:"MD", opened:"July 2019",         ts:20190701, addr:"", render3d:"https://my.matterport.com/show/?m=JnddbfPPLzV" },
+  { num: 22, name:"Lanham",                 type:"TLC",  city:"Lanham",          state:"MD", opened:"December 2018",     ts:20181201, addr:"", render3d:"https://my.matterport.com/show/?m=7YZmUbEoW6g" },
+  { num: 23, name:"Route 26",               type:"TASE", city:"Frederick",       state:"MD", opened:"January 2021",      ts:20210101, addr:"", render3d:"https://my.matterport.com/show/?m=qQnfWMTXamK" },
+  { num: 24, name:"West York",              type:"TASE", city:"West York",       state:"PA", opened:"September 2021",    ts:20210901, addr:"", render3d:"https://my.matterport.com/show/?m=xj4ksn7N7EP" },
+  { num: 25, name:"Ritchie Station",        type:"TASE", city:"Capitol Heights", state:"MD", opened:"December 2021",     ts:20211201, addr:"" },
+  { num: 26, name:"Halethorpe",             type:"TASE", city:"Halethorpe",      state:"MD", opened:"January 2024",      ts:20240101, addr:"" },
+  { num: 27, name:"Odenton",                type:"TASE", city:"Odenton",         state:"MD", opened:"June 2022",         ts:20220601, addr:"" },
+  { num: 28, name:"Martinsburg",            type:"TASE", city:"Martinsburg",     state:"WV", opened:"October 2023",      ts:20231001, addr:"", render3d:"https://my.matterport.com/show/?m=Jed9u6AZUbS" },
+  { num: 31, name:"Arundel Mills",          type:"TASE", city:"Hanover",         state:"MD", opened:"May 2023",          ts:20230501, addr:"", render3d:"https://my.matterport.com/show/?m=SKtqzQLJaVW" },
+  { num: 32, name:"West Hagerstown",        type:"TASE", city:"Hagerstown",      state:"MD", opened:"October 2022",      ts:20221001, addr:"", render3d:"https://my.matterport.com/show/?m=TgogTei79Nn" },
+  { num: 35, name:"Dundalk",                type:"TASE", city:"Dundalk",         state:"MD", opened:"November 17, 2025", ts:20251117, addr:"", render3d:"https://my.matterport.com/show/?m=PPxhyrfqCZg" },
+  { num: 20, name:"East York",              type:"TASE", city:"York",             state:"PA", opened:"", ts:20991231, addr:"1715 Whiteford Rd, York, PA 17402",                       cam:"https://app.truelook.cloud/link?code=eJR8Tu4OyH-nKKLiHyMu5g&type=sharing_link" },
+  { num: 29, name:"Aviation Station",      type:"TASE", city:"Linthicum",        state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 30, name:"South Laurel",          type:"TASE", city:"Laurel",           state:"MD", opened:"", ts:20991231, addr:"13401 Mid Atlantic Blvd, Laurel, MD 20708",               hidden:true },
+  { num: 33, name:"Ellicott City",         type:"TASE", city:"Ellicott City",    state:"MD", opened:"", ts:20991231, addr:"8532 Baltimore National Pike, Ellicott City, MD 21043", cam:"https://app.truelook.cloud/link?code=xb0XT2acpeP8jSc0AqZ4Fg&type=sharing_link" },
+  { num: 34, name:"Cockeysville",          type:"TASE", city:"Cockeysville",     state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 36, name:"Fields Road",           type:"TASE", city:"Gaithersburg",     state:"MD", opened:"", ts:20991231, addr:"10009 Fields Rd, Gaithersburg, MD 20878",                 hidden:true },
+  { num: 37, name:"Elkridge",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 38, name:"East Bel Air",          type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"710 Baltimore Pike, Bel Air, MD 21014",                   hidden:true },
+  { num: 39, name:"Reisterstown Rd Plaza", type:"TASE", city:"Reisterstown",     state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 40, name:"Columbia",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"8181 Lark Brown Rd, Elkridge, MD 21075",                  hidden:true },
+  { num: 41, name:"Bel Air Village",       type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 42, name:"Capitol Heights",       type:"TASE", city:"Capitol Heights",  state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 43, name:"Beltway Plaza",         type:"TASE", city:"Greenbelt",        state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 44, name:"Charles Town",          type:"TASE", city:"Charles Town",     state:"WV", opened:"", ts:20991231, addr:"60 Patrick Henry Way, Charles Town, WV 25414",            hidden:true },
+  { num: 45, name:"East Hagerstown",       type:"TASE", city:"Hagerstown",       state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+];
+
+// Merge in any custom locations added via the admin panel
+(function() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('wlr_custom_locs') || '[]');
+    custom.forEach(loc => {
+      if (!locations.find(l => l.num === loc.num)) locations.push(loc);
+    });
+    locations.sort((a,b) => a.num - b.num);
+  } catch(e) {}
+})();
+
+const TYPE_FULL = { TLC:"The Lube Center", TAS:"The Auto Spa", TAR:"The Auto Repair", TASE:"The Auto Spa Express" };
+const TYPE_LOGO = { TLC:"images/logo-tlc.png", TAS:"images/logo-tas.png", TAR:"images/logo-tar.png", TASE:"images/logo-tase.png" };
+// Per-location logo overrides (loc number → image path)
+const LOC_LOGO  = { 6:"images/logo-tas-06.png" };
+
+// ── MANAGEMENT TEAM DATA ──────────────────────────────────
+// mp=Managing Partner, dm=District Manager, lm=Location Manager
+// am[]=Asst Manager(s), sup[]=Supervisor(s)
+const MGMT = {
+  1:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Tyler DeGrange',                       am:['Michael Morris'],                                 sup:['Open'] },
+  2:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Michael "Mike" Bower',                 am:['John Strott'],                                    sup:['Carl Kongo'] },
+  3:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Brian Haire',                          am:['Cesar Quinteros'],                                sup:['Lorraine Eiland'] },
+  4:  { mp:'Michael Allen',   dm:null,                    lm:'Jorge Urizar',                         am:['Douglas "DJ" Allen'],                             sup:[] },
+  5:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Cristian Botero',                      am:['Jorge Lacayo'],                                   sup:['Open'] },
+  6:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Erik Borkman',                         am:['Willian Reyes','Open'],                           sup:['Aaron Bravo'] },
+  7:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Shane Seales',                         am:['Shelton Willett'],                                sup:['Mekhi Anderson'] },
+  8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                   sup:['Open'] },
+  9:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'José "JR" Diosdado-Quintana',          am:['Enrique Alfaro'],                                 sup:['Open'] },
+  10: { mp:'Michael Allen',   dm:null,                    lm:'Michael Clark',                        am:['Clyde McGee','Aaron Gotthardt'],                  sup:[] },
+  11: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Ismaila "Ismail" Bangura',             am:['Sean Smith','Dustardi Davis'],                    sup:[] },
+  12: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Alec Shackett',                        am:['Marriah Gunder'],                                 sup:['Wendi Molina'] },
+  13: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'William Simms',                        am:['Jackson Krasche'],                                sup:['Open'] },
+  14: { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Mohammad (Nick) Imani',                am:['Monica Aguilar Pena'],                            sup:['Open'] },
+  15: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Irwin Kelly',                          am:['Kyle Allen'],                                     sup:['Open'] },
+  16: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Bruce Haire',                          am:['Cooper Taylor'],                                  sup:['Elliot Rojas'] },
+  17: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Nathan "Nate" Markle',                 am:['Jacob "Jake" Leiphart','Brandon Little'],          sup:['Open'] },
+  18: { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:null,                                   am:[],                                                 sup:[] },
+  19: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Jose Velez',                           am:['Chiquetta Hooper'],                               sup:['Paige Pollard','Nicholas Tunzi'] },
+  21: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Samantha "Sam" Taylor',                am:['Jacob Chilcoat'],                                 sup:['Ignacio Rodriguez','Bill McKenna','Triston Barzey'] },
+  22: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Dakota Belcher',                       am:['Walter Benitez'],                                 sup:['Kristen Alvarez'] },
+  23: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Garrett Mayhew',                       am:['Maura Rivera Ramos'],                             sup:['Jonathan Hacen','Ethyn Benning'] },
+  24: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Joseph Youngblood',                    am:['Levi Lauer'],                                     sup:['Thomas "Tom" Hollway','Damian Smith','Karley Atwell'] },
+  25: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Daeshawn Covington',                   am:['Desmone Collins','Marcel Parrott'],                sup:['Marquise Higgs'] },
+  26: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Jamila Mitchell',                      am:['Cavon Daniels','Demetrius "Demi" Wilson'],         sup:['Ella Martin','Max Keepers'] },
+  27: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Christine Reuling',                    am:['Denia Sanders'],                                  sup:['Tariq Robinson','Quincy Brown','Michael Shorter'] },
+  28: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Peter Martin',                         am:['Kimberly "Kym" Hart'],                            sup:['Kimberly Pett','Sigourney Rodriguez'] },
+  31: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Jada Jordan',                          am:['Yania Stewart'],                                  sup:['Ijanai Harris','Christine Pena','Kevin Hooker'] },
+  32: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Douglas Breeden',                      am:['Ryan Ross'],                                      sup:['Samantha Mays','Ashauna Calder'] },
+  35: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Felicia Fitez',                        am:['Open'],                                           sup:['Donte Winfield','Jessica Stumbo','Hunter Smith'] },
+};
+
+const PHOTO_PREFIX = 'wlr_photo_';
+const INFO_PREFIX  = 'wlr_info_';
+const NOW_YEAR = new Date().getFullYear();
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ── INDEXEDDB PHOTO CACHE ──────────────────────────────────
+const DB_NAME = 'wlr_photos', DB_VER = 1, DB_STORE = 'photos';
+let photoCache = {};
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(DB_STORE);
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = () => rej(req.error);
+  });
+}
+function dbGetAll() {
+  return openDB().then(db => new Promise((res, rej) => {
+    const result = {};
+    const req = db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).openCursor();
+    req.onsuccess = e => {
+      const c = e.target.result;
+      if (c) { result[c.key] = c.value; c.continue(); } else res(result);
+    };
+    req.onerror = () => rej(req.error);
+  }));
+}
+
+// Reads from in-memory cache (populated at startup)
+function getPhotoSrc(num, slot) {
+  return photoCache[`${PHOTO_PREFIX}loc${pad(num)}_${slot}`] || null;
+}
+function getLocInfo(num) {
+  try {
+    const raw = localStorage.getItem(`${INFO_PREFIX}loc${pad(num)}`);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+// Returns false if location is hidden and not yet published via admin
+function isLocVisible(baseLoc) {
+  if (!baseLoc.hidden) return true;
+  return getLocInfo(baseLoc.num).published === true;
+}
+
+function yearsOpen(ts) {
+  if (!ts || ts > 20991200) return null;
+  const yr = Math.floor(ts / 10000);
+  return NOW_YEAR - yr;
+}
+
+function mapsUrl(loc) {
+  const q = loc.addr
+    ? `${loc.addr}, ${loc.city}, ${loc.state}`
+    : `${TYPE_FULL[loc.type]} ${loc.name} ${loc.city} ${loc.state}`;
+  return `https://maps.google.com/?q=${encodeURIComponent(q)}`;
+}
+
+// ══ HERO COUNTER ANIMATION ═════════════════════════════════
+function animateNum(el, target, dur) {
+  let s = 0; const step = target / (dur / 16);
+  const t = setInterval(() => {
+    s = Math.min(s + step, target);
+    el.textContent = Math.floor(s);
+    if (s >= target) clearInterval(t);
+  }, 16);
+}
+window.addEventListener('load', () => {
+  const yrs = NOW_YEAR - 1987;
+  document.getElementById('statYears').textContent = yrs;
+  animateNum(document.getElementById('statLocs'),   locations.filter(isLocVisible).length, 800);
+  animateNum(document.getElementById('statYears'),  yrs, 1200);
+  animateNum(document.getElementById('statStates'), 3, 600);
+});
+
+// ══ CARD BUILDER ══════════════════════════════════════════
+function buildCard(baseLoc) {
+  const overrides = getLocInfo(baseLoc.num);
+  const loc = { ...baseLoc, ...overrides };
+  const displayNum = loc.numOverride || loc.num;
+  const yrs    = yearsOpen(loc.ts);
+  const yrsBadge = yrs === null
+    ? ''
+    : yrs <= 2
+      ? `<span class="years-badge yb-new">New!</span>`
+      : `<span class="years-badge yb-old">${yrs} yrs</span>`;
+
+  const statusMap = {
+    'Coming Soon':         { icon:'🔜', color:'var(--tase-c)' },
+    'Temporarily Closed':  { icon:'🚧', color:'#fca044' },
+    'Permanently Closed':  { icon:'🚫', color:'rgba(255,80,80,0.85)' },
+  };
+  const statusInfo = statusMap[loc.status] || null;
+  const statusBadge = statusInfo
+    ? `<span class="loc-status" style="color:${statusInfo.color}">${statusInfo.icon} ${loc.status}</span>`
+    : '';
+
+  const opened = loc.opened
+    ? `<span class="loc-opened">Est. ${loc.opened}</span>`
+    : `<span class="loc-opened" style="color:var(--tase-c)">Coming Soon</span>`;
+
+  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">📍 Directions</a>`;
+  const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">3D Tour</a>` : '';
+  const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">📷 Live Cam</a>` : '';
+  const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">👤 Team</button>` : '';
+
+  const slots = [
+    { key:'ext', label:'Exterior' },
+    { key:'int', label:'Interior' },
+  ];
+
+  const comingSoon = !loc.opened;
+  const photoHtml = slots.map(s => {
+    const fileNum  = s.key === 'ext' ? '01' : '02';
+    const fileSrc  = `images/loc-${pad(displayNum)}/${fileNum}.jpg`;
+    const localSrc = getPhotoSrc(loc.num, s.key);
+    const src      = localSrc || (comingSoon ? 'images/tase-Coming soon.JPG' : fileSrc);
+    const isLocal  = !!localSrc;
+    const useStatic = !isLocal && comingSoon;
+    return `
+      <div class="photo-slot has-photo" data-num="${loc.num}" data-slot="${s.key}">
+        <img src="${src}" alt="${loc.name} ${s.label}"
+             ${(!isLocal && !useStatic) ? `onerror="this.style.display='none'; this.parentElement.querySelector('.ph').style.display='flex';"` : ''}
+             onload="this.parentElement.querySelector('.ph').style.display='none';">
+        <div class="ph" style="display:none">
+          <div class="ph-icon">📷</div>
+          <div class="ph-text">${s.label}</div>
+        </div>
+        <div class="photo-label">${s.label}</div>
+      </div>`;
+  }).join('');
+
+  const addrLine  = loc.addr  ? `<div class="loc-addr">📍 ${loc.addr}</div>` : '';
+  const phoneLine = loc.phone ? `<div class="loc-phone">📞 ${loc.phone}</div>` : '';
+  const notesLine = loc.notes ? `<div class="loc-notes">${loc.notes}</div>` : '';
+
+  return `
+    <div class="card" data-type="${loc.type}" data-num="${loc.num}" data-ts="${loc.ts}" data-state="${loc.state}">
+      <div class="card-header">
+        <div class="logo-col num-bar-${loc.type}">
+          <img class="brand-logo" src="${LOC_LOGO[loc.num] || TYPE_LOGO[loc.type]}" alt="${TYPE_FULL[loc.type]}"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div class="type-badge type-${loc.type}" style="display:none">${loc.type==='TASE'?'TASe':loc.type}</div>
+          ${yrsBadge}
+        </div>
+        <div class="loc-info">
+          <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${loc.name}</span></div>
+          <div class="loc-city">${loc.city}, ${loc.state}</div>
+          ${addrLine}
+          ${phoneLine}
+          ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
+          ${opened}
+          <div class="loc-meta" style="flex-wrap:nowrap">${mapsBtn}${tourBtn}${camBtn}${teamBtn}</div>
+          ${notesLine}
+        </div>
+      </div>
+      <div class="photos">${photoHtml}</div>
+    </div>`;
+}
+
+// ══ STATE ══════════════════════════════════════════════════
+let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
+
+function getSorted() {
+  let list = [...locations];
+  if (activeSort === 'num')   list.sort((a,b) => a.num - b.num);
+  if (activeSort === 'date')  list.sort((a,b) => a.ts  - b.ts);
+  if (activeSort === 'state') list.sort((a,b) => a.state.localeCompare(b.state) || a.city.localeCompare(b.city));
+  return list;
+}
+function matches(baseLoc) {
+  if (activeFilter !== 'ALL' && baseLoc.type !== activeFilter) return false;
+  if (activeState && baseLoc.state !== activeState) return false;
+  if (searchQuery) {
+    const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
+    return `${loc.num} ${loc.name} ${loc.city} ${loc.state} ${loc.phone||''} ${loc.notes||''}`.toLowerCase().includes(searchQuery.toLowerCase());
+  }
+  return true;
+}
+
+// ══ RENDER ══════════════════════════════════════════════════
+function render() {
+  const grid    = document.getElementById('grid');
+  const noR     = document.getElementById('noResults');
+  const statBar = document.getElementById('statsBar');
+  const visible = getSorted().filter(l => isLocVisible(l) && matches(l));
+
+  grid.innerHTML = visible.map(buildCard).join('');
+
+  // Attach photo-slot click → lightbox
+  grid.querySelectorAll('.photo-slot').forEach(slot => {
+    slot.addEventListener('click', () => {
+      const img = slot.querySelector('img');
+      const ph  = slot.querySelector('.ph');
+      if (!img || img.style.display === 'none') return;
+      if (ph && ph.style.display !== 'none') return;
+      const num  = parseInt(slot.dataset.num);
+      const slot2 = slot.dataset.slot;
+      openLightboxForLoc(num, slot2);
+    });
+  });
+
+  noR.classList.toggle('show', visible.length === 0);
+
+  const counts = {};
+  locations.forEach(l => { counts[l.type] = (counts[l.type]||0)+1; });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const t = btn.dataset.type, s = { TLC:'Lube Centers', TAS:'Auto Spas', TAR:'Auto Repair', TASE:'Expresses' };
+    btn.textContent = t === 'ALL' ? `All (${locations.length})` : `${t==='TASE'?'TASe':t} — ${s[t]} (${counts[t]||0})`;
+  });
+
+  statBar.textContent = activeFilter === 'ALL'
+    ? `Showing all ${locations.length} locations`
+    : `Showing ${visible.length} of ${locations.length} — ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
+
+  // Detect overflowing names — measure inner text span vs container for accuracy
+  const measureOverflow = () => {
+    grid.querySelectorAll('.loc-name').forEach(el => {
+      const inner = el.querySelector('.loc-name-text');
+      const textWidth = inner ? inner.offsetWidth : el.scrollWidth;
+      const ov = textWidth - el.clientWidth;
+      if (ov > 0) {
+        el.style.setProperty('--name-overflow', `-${ov}px`);
+        el.classList.add('has-overflow');
+      } else {
+        el.classList.remove('has-overflow');
+        el.style.removeProperty('--name-overflow');
+      }
+    });
+  };
+  requestAnimationFrame(measureOverflow);
+  // Re-run after fonts load in case Work Sans renders wider than the fallback
+  document.fonts.ready.then(measureOverflow);
+}
+
+// ══ LIGHTBOX ══════════════════════════════════════════════
+let lbPhotos = [], lbIdx = 0;
+
+function openLightboxForLoc(num, startSlot) {
+  const baseLoc = locations.find(l => l.num === num);
+  if (!baseLoc) return;
+  const loc = { ...baseLoc, ...getLocInfo(num) };
+  const dn     = loc.numOverride || num;
+  const slots  = ['ext','int'];
+  const photos = [];
+  slots.forEach(s => {
+    const local = getPhotoSrc(num, s);
+    const file  = `images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`;
+    const src   = local || file;
+    photos.push({ src, label: s === 'ext' ? 'Exterior' : 'Interior', caption: `#${pad(dn)} ${loc.name} — ${s==='ext'?'Exterior':'Interior'}` });
+  });
+
+  // Filter to only photos that are actually loaded (either local or file that might exist)
+  // We open with whatever slot was clicked
+  lbPhotos = photos;
+  lbIdx    = slots.indexOf(startSlot);
+  if (lbIdx < 0) lbIdx = 0;
+  showLightboxSlide();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showLightboxSlide() {
+  const p   = lbPhotos[lbIdx];
+  const img = document.getElementById('lightboxImg');
+  img.style.opacity = '0.4';
+  img.src = p.src;
+  img.onload = () => { img.style.opacity = '1'; };
+  img.onerror = () => { img.style.opacity = '0.3'; };
+  document.getElementById('lightboxCaption').textContent = p.caption;
+
+  // Dots
+  const dots = document.getElementById('lbDots');
+  dots.innerHTML = lbPhotos.map((_, i) =>
+    `<div class="lb-dot ${i===lbIdx?'active':''}"></div>`
+  ).join('');
+
+  // Arrow visibility
+  document.getElementById('lbPrev').classList.toggle('hidden', lbIdx === 0);
+  document.getElementById('lbNext').classList.toggle('hidden', lbIdx === lbPhotos.length - 1);
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightboxImg').src = '';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+document.getElementById('lbPrev').addEventListener('click', () => { if(lbIdx>0){ lbIdx--; showLightboxSlide(); } });
+document.getElementById('lbNext').addEventListener('click', () => { if(lbIdx<lbPhotos.length-1){ lbIdx++; showLightboxSlide(); } });
+
+// Touch swipe for lightbox
+(function() {
+  let sx=0, sy=0;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, { passive:true });
+  lb.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0 && lbIdx < lbPhotos.length-1) { lbIdx++; showLightboxSlide(); }
+      if (dx > 0 && lbIdx > 0)                  { lbIdx--; showLightboxSlide(); }
+    } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+      closeLightbox();
+    }
+  }, { passive:true });
+  lb.addEventListener('click', e => { if(e.target === lb) closeLightbox(); });
+})();
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key==='Escape')      closeLightbox();
+  if (e.key==='ArrowRight' && lbIdx < lbPhotos.length-1) { lbIdx++; showLightboxSlide(); }
+  if (e.key==='ArrowLeft'  && lbIdx > 0)                  { lbIdx--; showLightboxSlide(); }
+});
+
+// ══ SLIDESHOW ══════════════════════════════════════════════
+let ssLocs=[], ssLocIdx=0, ssSlotIdx=0, ssTimer=null, ssPaused=false;
+const SS_DURATION = 4000; // ms per photo
+
+function buildSSPhotos(loc) {
+  const dn = loc.numOverride || loc.num;
+  return ['ext','int'].map(s => ({
+    src:   getPhotoSrc(loc.num,s) || `images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`,
+    label: s==='ext' ? 'Exterior' : 'Interior',
+    local: !!getPhotoSrc(loc.num,s),
+  }));
+}
+
+function startSlideshow() {
+  ssLocs = getSorted().filter(l => isLocVisible(l) && matches(l));
+  if (ssLocs.length === 0) return;
+  ssLocIdx  = 0; ssSlotIdx = 0; ssPaused = false;
+  document.getElementById('slideshow').classList.add('open');
+  document.getElementById('ssPause').textContent = '⏸';
+  document.body.style.overflow = 'hidden';
+  showSSSlide();
+  startSSTimer();
+}
+
+function stopSlideshow() {
+  clearTimeout(ssTimer);
+  document.getElementById('slideshow').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showSSSlide() {
+  const loc    = { ...ssLocs[ssLocIdx], ...getLocInfo(ssLocs[ssLocIdx].num) };
+  const photos = buildSSPhotos(loc);
+  const photo  = photos[ssSlotIdx] || photos[0];
+  const yrs    = yearsOpen(loc.ts);
+
+  // Photo
+  const ssImg  = document.getElementById('ssPhoto');
+  ssImg.src    = photo.src;
+  ssImg.onerror = function() { this.style.opacity='0.1'; };
+  ssImg.onload  = function() { this.style.opacity='1'; };
+
+  // Info overlay
+  const tc = { TLC:' background:#FADC00;color:#0d3268', TAS:' background:#0C4D8F;color:#ffffff', TAR:' background:#fca044;color:#0d3268', TASE:' background:#0C4D8F;color:#ffffff' };
+  document.getElementById('ssInfo').innerHTML = `
+    <div class="ss-type-badge" style="${tc[loc.type]}">${loc.type==='TASE'?'TASe':loc.type} — ${TYPE_FULL[loc.type]}</div>
+    <div class="ss-loc-num">Location #${pad(loc.numOverride || loc.num)}</div>
+    <div class="ss-loc-name">${loc.name}</div>
+    <div class="ss-loc-city">${loc.city}, ${loc.state}</div>
+    <div class="ss-opened">${loc.opened ? `Opened ${loc.opened}` : ''}${yrs ? ` · ${yrs} years` : ''}</div>
+  `;
+
+  // Counter & label
+  const totalPhotos = ssLocs.length * 2;
+  const curPhoto    = ssLocIdx * 2 + ssSlotIdx + 1;
+  document.getElementById('ssCounter').textContent   = `${ssLocIdx+1} of ${ssLocs.length} locations`;
+  document.getElementById('ssPhotoLabel').textContent = photo.label;
+
+  // Progress bar
+  const pct = ((curPhoto-1) / totalPhotos) * 100;
+  const fill = document.getElementById('ssProgressFill');
+  fill.style.transition = 'none';
+  fill.style.width = pct + '%';
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${SS_DURATION}ms linear`;
+    fill.style.width = ((pct + (100/totalPhotos))) + '%';
+  });
+}
+
+function ssAdvance() {
+  const photos = buildSSPhotos(ssLocs[ssLocIdx]);
+  if (ssSlotIdx < photos.length - 1) {
+    ssSlotIdx++;
+  } else if (ssLocIdx < ssLocs.length - 1) {
+    ssLocIdx++; ssSlotIdx = 0;
+  } else {
+    stopSlideshow(); return;
+  }
+  showSSSlide();
+  if (!ssPaused) startSSTimer();
+}
+
+function ssGoBack() {
+  clearTimeout(ssTimer);
+  if (ssSlotIdx > 0) { ssSlotIdx--; }
+  else if (ssLocIdx > 0) { ssLocIdx--; ssSlotIdx = 1; }
+  showSSSlide();
+  if (!ssPaused) startSSTimer();
+}
+
+function startSSTimer() {
+  clearTimeout(ssTimer);
+  ssTimer = setTimeout(ssAdvance, SS_DURATION);
+}
+
+document.getElementById('ssStartBtn').addEventListener('click', startSlideshow);
+document.getElementById('ssClose').addEventListener('click', stopSlideshow);
+document.getElementById('ssNext').addEventListener('click', () => { clearTimeout(ssTimer); ssAdvance(); });
+document.getElementById('ssPrev').addEventListener('click', ssGoBack);
+document.getElementById('ssPause').addEventListener('click', () => {
+  ssPaused = !ssPaused;
+  document.getElementById('ssPause').textContent = ssPaused ? '▶' : '⏸';
+  if (ssPaused) {
+    clearTimeout(ssTimer);
+    document.getElementById('ssProgressFill').style.transition = 'none';
+  } else {
+    startSSTimer();
+  }
+});
+
+// Swipe in slideshow
+(function() {
+  let sx=0;
+  const ss = document.getElementById('slideshow');
+  ss.addEventListener('touchstart', e => { sx=e.touches[0].clientX; }, { passive:true });
+  ss.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) { clearTimeout(ssTimer); ssAdvance(); }
+      else        { ssGoBack(); }
+    }
+  }, { passive:true });
+})();
+
+// ══ FILTER / SORT / SEARCH ════════════════════════════════
+document.getElementById('filterRow').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.type; render();
+});
+const stateSelect = document.getElementById('stateSelect');
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSort = btn.dataset.sort;
+    const isByState = activeSort === 'state';
+    stateSelect.classList.toggle('show', isByState);
+    if (!isByState) { activeState = ''; stateSelect.value = ''; }
+    render();
+  });
+});
+stateSelect.addEventListener('change', () => {
+  activeState = stateSelect.value;
+  render();
+});
+const searchInput = document.getElementById('search');
+const searchClear = document.getElementById('searchClear');
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.trim();
+  searchClear.style.display = searchQuery ? 'block' : 'none';
+  render();
+});
+searchClear.addEventListener('click', () => {
+  searchInput.value=''; searchQuery=''; searchClear.style.display='none'; render();
+});
+
+// ══ SCROLL TOP ════════════════════════════════════════════
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => { scrollBtn.classList.toggle('show', window.scrollY > 500); }, { passive:true });
+scrollBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+// ══ TEAM MODAL ════════════════════════════════════════════
+function openTeam(num) {
+  const baseLoc = locations.find(l => l.num === num);
+  if (!baseLoc) return;
+  const info = getLocInfo(num);
+  const loc  = { ...baseLoc, ...info };
+  const displayNum = loc.numOverride || loc.num;
+  const m = MGMT[num] || {};
+
+  function singleRow(role, name) {
+    const isEmpty = !name;
+    const display = isEmpty ? 'Not Assigned' : name;
+    return `<div class="team-row"><div class="team-role">${role}</div><div class="team-name${isEmpty ? ' open' : ''}">${display}</div></div>`;
+  }
+  function multiRow(role, names) {
+    if (!names || names.length === 0) return '';
+    const html = names.map(n => `<div class="team-name${n === 'Open' ? ' open' : ''}">${n === 'Open' ? 'Open Position' : n}</div>`).join('');
+    return `<div class="team-row"><div class="team-role">${role}</div>${html}</div>`;
+  }
+
+  const amLabel  = (m.am  && m.am.length  > 1) ? 'Assistant Managers' : 'Assistant Manager';
+  const supLabel = (m.sup && m.sup.length > 1)  ? 'Supervisors' : 'Supervisor';
+
+  document.getElementById('teamPanelTitle').textContent    = `#${pad(displayNum)} ${loc.name}`;
+  document.getElementById('teamPanelSubtitle').textContent = `${loc.city}, ${loc.state}  ·  ${TYPE_FULL[loc.type]}`;
+  document.getElementById('teamPanelBody').innerHTML =
+    singleRow('Managing Partner', m.mp || null) +
+    singleRow('District Manager', m.dm || null) +
+    singleRow('Location Manager', m.lm || null) +
+    (m.am && m.am.length > 0 ? multiRow(amLabel, m.am) : singleRow('Assistant Manager', null)) +
+    (m.sup && m.sup.length > 0 ? multiRow(supLabel, m.sup) : '');
+
+  document.getElementById('teamOverlay').classList.add('open');
+  document.getElementById('teamPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTeam() {
+  document.getElementById('teamOverlay').classList.remove('open');
+  document.getElementById('teamPanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('teamOverlay').addEventListener('click', closeTeam);
+document.getElementById('teamClose').addEventListener('click', closeTeam);
+
+// ══ INIT ══════════════════════════════════════════════════
+// Load all photos from IndexedDB into memory cache, then render
+dbGetAll().then(all => { photoCache = all; render(); }).catch(() => render());
+</script>
+</body>
+</html>
