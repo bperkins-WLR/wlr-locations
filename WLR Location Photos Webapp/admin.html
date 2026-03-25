@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>WLR Admin — Photo & Info Manager</title>
+  <style>
+    :root {
+      --blue:   #1a55a2;
+      --deep:   #0d3268;
+      --mid:    #0f3d82;
+      --yellow: #f5c800;
+      --green:  #22c55e;
+      --red:    #ef4444;
+      --bord:   rgba(255,255,255,0.15);
+      --text:   #ffffff;
+      --muted:  rgba(255,255,255,0.55);
+      --tlc-c:  #f5c800;
+      --tas-c:  #7dd3fc;
+      --tar-c:  #fca044;
+      --tase-c: #5af0f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: var(--deep); color: var(--text); min-height: 100vh; }
+
+    /* ── PASSWORD GATE ──────────────────────────────────── */
+    #gate {
+      position: fixed; inset: 0; background: var(--deep);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; padding: 24px;
+    }
+    .gate-box {
+      background: linear-gradient(145deg,#1c5cb0,#1248a0);
+      border: 1px solid var(--bord); border-radius: 20px;
+      padding: 36px 28px; width: 100%; max-width: 340px; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .gate-logo { width: 72px; height: 72px; background: var(--yellow); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: var(--deep); margin: 0 auto 18px; }
+    .gate-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .gate-sub   { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .gate-input { width: 100%; padding: 13px 16px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); border-radius: 12px; color: #fff; font-size: 18px; text-align: center; letter-spacing: 4px; outline: none; -webkit-appearance: none; }
+    .gate-input:focus { border-color: var(--yellow); }
+    .gate-input::placeholder { letter-spacing: 1px; font-size: 14px; color: var(--muted); }
+    .gate-btn   { width: 100%; margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--yellow); border: none; color: var(--deep); font-size: 16px; font-weight: 800; cursor: pointer; }
+    .gate-btn:active { opacity: 0.8; }
+    .gate-error { margin-top: 12px; font-size: 13px; color: #f87171; display: none; }
+    .gate-error.show { display: block; }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      background: linear-gradient(160deg,#0a2755,#1248a0);
+      padding: max(env(safe-area-inset-top),12px) 14px 10px;
+      border-bottom: 3px solid var(--yellow);
+      display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 3px 18px rgba(0,0,0,.4);
+    }
+    .h-logo { width: 42px; height: 42px; background: var(--yellow); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--deep); flex-shrink: 0; }
+    .h-text .h-title { font-size: 16px; font-weight: 800; }
+    .h-text .h-sub   { font-size: 10px; color: var(--muted); }
+    .h-actions { margin-left: auto; display: flex; gap: 8px; }
+    .h-btn { padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .h-btn.yellow { background: var(--yellow); color: var(--deep); border-color: var(--yellow); }
+
+    /* ── STATS BAR ──────────────────────────────────────── */
+    .stats-bar {
+      background: rgba(255,255,255,0.05); padding: 8px 14px;
+      display: flex; gap: 14px; flex-wrap: wrap;
+      font-size: 11px; color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item { display: flex; align-items: center; gap: 4px; }
+    .stat-dot  { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── FILTER BAR ─────────────────────────────────────── */
+    .filter-bar {
+      background: var(--mid); padding: 8px 14px;
+      display: flex; gap: 6px; overflow-x: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .f-btn {
+      flex-shrink: 0; padding: 5px 12px; border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,0.2); background: transparent;
+      color: var(--muted); font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; -webkit-appearance: none;
+    }
+    .f-btn.active { background: var(--yellow); border-color: var(--yellow); color: var(--deep); }
+
+    /* ── GRID ───────────────────────────────────────────── */
+    #adminGrid { padding: 12px 12px 100px; display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 640px; margin: 0 auto; }
+    @media(min-width:600px) { #adminGrid { grid-template-columns: 1fr 1fr; } }
+
+    /* ── LOCATION CARD ──────────────────────────────────── */
+    .a-card { background: linear-gradient(145deg,#1c5cb0,#1650a0); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 18px rgba(0,0,0,.35); }
+    .a-card.hidden { display: none; }
+
+    .a-stripe { height: 3px; }
+    .s-TLC  { background: var(--tlc-c); }
+    .s-TAS  { background: var(--tas-c); }
+    .s-TAR  { background: var(--tar-c); }
+    .s-TASE { background: var(--tase-c); }
+
+    .a-head { padding: 11px 13px; display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .a-num-box { min-width: 46px; background: rgba(0,0,0,0.2); border-radius: 9px; padding: 5px 4px; text-align: center; flex-shrink: 0; }
+    .a-num-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .a-num-val   { font-size: 26px; font-weight: 900; line-height: 1; }
+    .a-info      { flex: 1; min-width: 0; }
+    .a-name      { font-size: 14px; font-weight: 700; }
+    .a-city      { font-size: 11px; color: var(--muted); }
+    .a-addr      { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 1px; font-style: italic; }
+    .a-badge     { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; color: var(--deep); flex-shrink: 0; }
+    .b-TLC  { background: var(--tlc-c); }
+    .b-TAS  { background: var(--tas-c); }
+    .b-TAR  { background: var(--tar-c); }
+    .b-TASE { background: var(--tase-c); }
+
+    /* Complete indicator */
+    .a-status { font-size: 16px; text-align: center; margin-top: 3px; }
+
+    /* ── PHOTO SLOTS ────────────────────────────────────── */
+    .a-photos { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .photo-slot {
+      border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; position: relative;
+      background: rgba(0,0,0,0.25); border: 2px dashed rgba(255,255,255,0.2); cursor: pointer;
+    }
+    .photo-slot:hover { border-color: var(--yellow); }
+    .photo-slot.has-photo { border: 2px solid var(--green); }
+    .photo-slot img { width:100%; height:100%; object-fit:cover; display:block; }
+    .slot-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+    .slot-icon    { font-size: 20px; opacity: 0.3; }
+    .slot-label   { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .slot-tap     { font-size: 9px; color: rgba(255,255,255,0.25); }
+    .photo-actions { position: absolute; bottom: 0; left: 0; right: 0; display: none; background: linear-gradient(transparent,rgba(0,0,0,.8)); padding: 16px 5px 5px; gap: 4px; }
+    .photo-slot.has-photo .photo-actions { display: flex; }
+    .pa-btn { flex:1; padding: 5px 4px; border-radius: 6px; border: none; font-size: 10px; font-weight: 700; cursor: pointer; }
+    .pa-change { background: rgba(255,255,255,0.2); color:#fff; }
+    .pa-delete { background: rgba(239,68,68,0.7); color:#fff; }
+    .photo-check { position: absolute; top: 5px; right: 5px; width: 18px; height: 18px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    .file-input { display: none; }
+
+    /* ── EDIT INFO SECTION ──────────────────────────────── */
+    .edit-toggle {
+      width: 100%; padding: 9px 13px;
+      background: rgba(255,255,255,0.06); border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.65); font-size: 12px; font-weight: 700;
+      cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;
+      -webkit-appearance: none;
+    }
+    .edit-toggle .edit-arrow { margin-left: auto; transition: transform 0.2s; font-size: 11px; }
+    .edit-toggle.open .edit-arrow { transform: rotate(180deg); }
+    .edit-toggle.has-edits { color: var(--yellow); }
+
+    .edit-form {
+      display: none; padding: 12px 13px 14px;
+      background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .edit-form.open { display: block; }
+
+    .field-row { margin-bottom: 10px; }
+    .field-row:last-of-type { margin-bottom: 14px; }
+    .field-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; display: block; }
+    .field-input {
+      width: 100%; padding: 9px 12px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 9px; color: #fff; font-size: 13px; outline: none; -webkit-appearance: none;
+    }
+    .field-input:focus { border-color: var(--yellow); background: rgba(255,255,255,0.15); }
+    .field-input::placeholder { color: rgba(255,255,255,0.3); font-size: 12px; }
+    .field-row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+    /* Status select */
+    .status-select {
+      width: 100%; padding: 9px 12px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 9px; color: #fff; font-size: 13px; outline: none;
+      -webkit-appearance: none; appearance: none;
+    }
+    .status-select:focus { border-color: var(--yellow); }
+    .status-select option { background: #1248a0; color: #fff; }
+
+    .field-textarea {
+      width: 100%; padding: 9px 12px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 9px; color: #fff; font-size: 13px; outline: none;
+      resize: none; height: 64px; -webkit-appearance: none;
+    }
+    .field-textarea:focus { border-color: var(--yellow); }
+    .field-textarea::placeholder { color: rgba(255,255,255,0.3); font-size: 12px; }
+
+    .edit-actions { display: flex; gap: 8px; }
+    .save-btn   { flex: 1; padding: 10px; border-radius: 10px; background: var(--yellow); border: none; color: var(--deep); font-size: 13px; font-weight: 800; cursor: pointer; }
+    .save-btn:active { opacity: 0.8; }
+    .reset-btn  { padding: 10px 14px; border-radius: 10px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+    /* ── NEW LOCATION MODAL ─────────────────────────────── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 800;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-bg.open { display: flex; }
+    .modal-box {
+      background: linear-gradient(145deg,#1c5cb0,#1248a0);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px; padding: 24px 20px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; text-align: center; }
+    .modal-title span { color: var(--yellow); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-save { flex:1; padding: 12px; border-radius: 10px; background: var(--yellow); border: none; color: var(--deep); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .modal-cancel { padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .custom-badge { font-size: 9px; background: rgba(90,240,240,0.25); color: var(--tase-c); border: 1px solid rgba(90,240,240,0.3); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+    .delete-loc-btn { width: 100%; padding: 8px; border-radius: 8px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); color: #f87171; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+    .golive-btn { width: 100%; padding: 10px; border-radius: 8px; background: rgba(90,240,240,0.15); border: 1px solid rgba(90,240,240,0.35); color: var(--tase-c); font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 6px; letter-spacing: 0.5px; }
+    .golive-btn:active { background: rgba(90,240,240,0.3); }
+    .unpublish-btn { width: 100%; padding: 10px; border-radius: 8px; background: rgba(245,200,0,0.12); border: 1px solid rgba(245,200,0,0.3); color: var(--yellow); font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 6px; letter-spacing: 0.5px; }
+    .unpublish-btn:active { background: rgba(245,200,0,0.25); }
+    .hidden-badge { font-size: 9px; background: rgba(90,240,240,0.12); color: var(--tase-c); border: 1px solid rgba(90,240,240,0.25); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+
+    /* ── TOAST ───────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #1e3a6e; border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 10px 20px;
+      font-size: 13px; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4); z-index: 500;
+      opacity: 0; transition: opacity 0.25s; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(10,27,75,0.97); backdrop-filter: blur(12px);
+      padding: 8px 14px max(env(safe-area-inset-bottom),8px);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .back-btn { padding: 8px 14px; border-radius: 9px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .danger-btn { padding: 8px 14px; border-radius: 9px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .footer-count { font-size: 11px; color: var(--muted); text-align: center; flex: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ── PASSWORD GATE ─────────────────────────────────────── -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">WLR</div>
+    <div class="gate-title">Admin Panel</div>
+    <div class="gate-sub">Photos &amp; Location Info Manager</div>
+    <input class="gate-input" type="password" id="pwInput" placeholder="Enter password" maxlength="20">
+    <button class="gate-btn" id="pwBtn">Unlock ›</button>
+    <div class="gate-error" id="pwError">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- ── MAIN ADMIN ─────────────────────────────────────────── -->
+<div id="adminMain" style="display:none">
+
+  <header>
+    <div class="h-logo">WLR</div>
+    <div class="h-text">
+      <div class="h-title">Admin Panel</div>
+      <div class="h-sub">Photos &amp; Location Info</div>
+    </div>
+    <div class="h-actions">
+      <button class="h-btn yellow" id="addLocBtn">＋ New Location</button>
+      <a href="index.html" class="h-btn">← Gallery</a>
+      <button class="h-btn" id="logoutBtn">Lock 🔒</button>
+    </div>
+  </header>
+
+  <div class="stats-bar" id="statsBar">Loading…</div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="f-btn active" data-type="ALL">All</button>
+    <button class="f-btn" data-type="TLC">TLC</button>
+    <button class="f-btn" data-type="TAS">TAS</button>
+    <button class="f-btn" data-type="TAR">TAR</button>
+    <button class="f-btn" data-type="TASE">TASe</button>
+    <button class="f-btn" data-type="MISSING">📷 Missing</button>
+    <button class="f-btn" data-type="EDITED">✏️ Edited</button>
+  </div>
+
+  <div id="adminGrid"></div>
+
+  <footer>
+    <a href="index.html" class="back-btn">← View Gallery</a>
+    <div class="footer-count" id="footerCount"></div>
+    <button class="danger-btn" id="clearAllBtn">Clear All</button>
+  </footer>
+
+</div>
+
+<!-- ── NEW LOCATION MODAL ─────────────────────────────────── -->
+<div class="modal-bg" id="newLocModal">
+  <div class="modal-box">
+    <div class="modal-title">➕ Add <span>New Location</span></div>
+
+    <div class="field-row">
+      <label class="field-label">Location Number</label>
+      <input class="field-input" id="nl-num" type="number" placeholder="e.g. 36" min="1" max="999">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Location Name</label>
+      <input class="field-input" id="nl-name" type="text" placeholder="e.g. Rockville">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Brand Type</label>
+      <select class="status-select" id="nl-type">
+        <option value="TASE">TASe — The Auto Spa Express</option>
+        <option value="TAS">TAS — The Auto Spa</option>
+        <option value="TLC">TLC — The Lube Center</option>
+        <option value="TAR">TAR — The Auto Repair</option>
+      </select>
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">City</label>
+        <input class="field-input" id="nl-city" type="text" placeholder="City">
+      </div>
+      <div>
+        <label class="field-label">State</label>
+        <input class="field-input" id="nl-state" type="text" placeholder="MD" maxlength="3">
+      </div>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Opening Date</label>
+      <input class="field-input" id="nl-opened" type="text" placeholder="e.g. March 2025">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Street Address (optional)</label>
+      <input class="field-input" id="nl-addr" type="text" placeholder="e.g. 123 Main St">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Status</label>
+      <select class="status-select" id="nl-status">
+        <option value="Coming Soon">🔜 Coming Soon</option>
+        <option value="Open">✅ Open</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-save" id="nlSaveBtn">➕ Add Location</button>
+      <button class="modal-cancel" id="nlCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const PASSWORD      = 'WLR2025';
+const PHOTO_PFX     = 'wlr_photo_';
+const INFO_PFX      = 'wlr_info_';
+const CUSTOM_LOCS_KEY = 'wlr_custom_locs';
+
+// ── AUTH ─────────────────────────────────────────────────────
+function tryUnlock() {
+  if (document.getElementById('pwInput').value === PASSWORD) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('adminMain').style.display = 'block';
+    sessionStorage.setItem('wlr_auth','1');
+    renderAdmin();
+  } else {
+    document.getElementById('pwError').classList.add('show');
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+document.getElementById('pwBtn').addEventListener('click', tryUnlock);
+document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+document.getElementById('logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('wlr_auth'); location.reload(); });
+if (sessionStorage.getItem('wlr_auth') === '1') {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('adminMain').style.display = 'block';
+}
+
+// ── BASE DATA ────────────────────────────────────────────────
+const BASE_LOCS = [
+  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987"      },
+  { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000"    },
+  { num:  3, name:"Columbia",               type:"TLC",  city:"Columbia",        state:"MD", opened:"June 1990"         },
+  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995"          },
+  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998"         },
+  { num:  6, name:"Frederick Auto Spa",     type:"TAS",  city:"Frederick",       state:"MD", opened:"December 2003"     },
+  { num:  7, name:"Anne Arundel",           type:"TLC",  city:"Arundel Mills",   state:"MD", opened:"July 2020"         },
+  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004"     },
+  { num:  9, name:"Germantown",             type:"TLC",  city:"Germantown",      state:"MD", opened:"March 2005"        },
+  { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009"      },
+  { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009"      },
+  { num: 12, name:"Jefferson Street",       type:"TLC",  city:"Frederick",       state:"MD", opened:"July 2006"         },
+  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007"      },
+  { num: 14, name:"Gambrills",              type:"TAS",  city:"Gambrills",       state:"MD", opened:"October 2009"      },
+  { num: 15, name:"Laurel",                 type:"TLC",  city:"Laurel",          state:"MD", opened:"January 2008"      },
+  { num: 16, name:"Shrewsbury",             type:"TLC",  city:"Shrewsbury",      state:"PA", opened:"August 2007"       },
+  { num: 17, name:"West York",              type:"TLC",  city:"York",            state:"PA", opened:"December 2007"     },
+  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013"    },
+  { num: 19, name:"North Bel Air",           type:"TASE", city:"Bel Air",         state:"MD", opened:"December 2016"     },
+  { num: 21, name:"Route 85",               type:"TASE", city:"Frederick",       state:"MD", opened:"July 2019"         },
+  { num: 22, name:"Lanham",                 type:"TLC",  city:"Lanham",          state:"MD", opened:"December 2018"     },
+  { num: 23, name:"Route 26",               type:"TASE", city:"Frederick",       state:"MD", opened:"January 2021"      },
+  { num: 24, name:"West York",              type:"TASE", city:"West York",       state:"PA", opened:"September 2021"    },
+  { num: 25, name:"Ritchie Station",        type:"TASE", city:"Capitol Heights", state:"MD", opened:"December 2021"     },
+  { num: 26, name:"Halethorpe",             type:"TASE", city:"Halethorpe",      state:"MD", opened:"January 2024"      },
+  { num: 27, name:"Odenton",                type:"TASE", city:"Odenton",         state:"MD", opened:"June 2022"         },
+  { num: 28, name:"Martinsburg",            type:"TASE", city:"Martinsburg",     state:"WV", opened:"October 2023"      },
+  { num: 31, name:"Arundel Mills",          type:"TASE", city:"Hanover",         state:"MD", opened:"May 2023"          },
+  { num: 32, name:"West Hagerstown",        type:"TASE", city:"Hagerstown",      state:"MD", opened:"October 2022"      },
+  { num: 35, name:"Dundalk",                type:"TASE", city:"Dundalk",         state:"MD", opened:"November 17, 2025" },
+  { num: 20, name:"East York",              type:"TASE", city:"York",             state:"PA", opened:"", addr:"1715 Whiteford Rd, York, PA 17402" },
+  { num: 29, name:"Aviation Station",      type:"TASE", city:"Linthicum",        state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 30, name:"South Laurel",          type:"TASE", city:"Laurel",           state:"MD", opened:"", addr:"13401 Mid Atlantic Blvd, Laurel, MD 20708",               hidden:true },
+  { num: 33, name:"Ellicott City",         type:"TASE", city:"Ellicott City",    state:"MD", opened:"", addr:"8532 Baltimore National Pike, Ellicott City, MD 21043" },
+  { num: 34, name:"Cockeysville",          type:"TASE", city:"Cockeysville",     state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 36, name:"Fields Road",           type:"TASE", city:"Gaithersburg",     state:"MD", opened:"", addr:"10009 Fields Rd, Gaithersburg, MD 20878",                 hidden:true },
+  { num: 37, name:"Elkridge",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 38, name:"East Bel Air",          type:"TASE", city:"Bel Air",          state:"MD", opened:"", addr:"710 Baltimore Pike, Bel Air, MD 21014",                   hidden:true },
+  { num: 39, name:"Reisterstown Rd Plaza", type:"TASE", city:"Reisterstown",     state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 40, name:"Columbia",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", addr:"8181 Lark Brown Rd, Elkridge, MD 21075",                  hidden:true },
+  { num: 41, name:"Bel Air Village",       type:"TASE", city:"Bel Air",          state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 42, name:"Capitol Heights",       type:"TASE", city:"Capitol Heights",  state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 43, name:"Beltway Plaza",         type:"TASE", city:"Greenbelt",        state:"MD", opened:"", addr:"",                                                        hidden:true },
+  { num: 44, name:"Charles Town",          type:"TASE", city:"Charles Town",     state:"WV", opened:"", addr:"60 Patrick Henry Way, Charles Town, WV 25414",            hidden:true },
+  { num: 45, name:"East Hagerstown",       type:"TASE", city:"Hagerstown",       state:"MD", opened:"", addr:"",                                                        hidden:true },
+];
+const TYPE_FULL = { TLC:"The Lube Center", TAS:"The Auto Spa", TAR:"The Auto Repair", TASE:"The Auto Spa Express" };
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ── KEY HELPERS ───────────────────────────────────────────────
+function photoKey(num, slot) { return `${PHOTO_PFX}loc${pad(num)}_${slot}`; }
+function infoKey(num)        { return `${INFO_PFX}loc${pad(num)}`; }
+
+// ── INDEXEDDB FOR PHOTOS (no size limit) ──────────────────────
+const DB_NAME = 'wlr_photos', DB_VER = 1, DB_STORE = 'photos';
+let photoCache = {};   // in-memory mirror populated on init
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(DB_STORE);
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = () => rej(req.error);
+  });
+}
+function dbSet(key, val) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const r = db.transaction(DB_STORE,'readwrite').objectStore(DB_STORE).put(val, key);
+    r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+  }));
+}
+function dbDel(key) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const r = db.transaction(DB_STORE,'readwrite').objectStore(DB_STORE).delete(key);
+    r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+  }));
+}
+function dbClear() {
+  return openDB().then(db => new Promise((res, rej) => {
+    const r = db.transaction(DB_STORE,'readwrite').objectStore(DB_STORE).clear();
+    r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+  }));
+}
+function dbGetAll() {
+  return openDB().then(db => new Promise((res, rej) => {
+    const result = {};
+    const req = db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).openCursor();
+    req.onsuccess = e => {
+      const c = e.target.result;
+      if (c) { result[c.key] = c.value; c.continue(); } else res(result);
+    };
+    req.onerror = () => rej(req.error);
+  }));
+}
+
+// Sync read from in-memory cache
+function getPhoto(num, slot) { return photoCache[photoKey(num, slot)] || null; }
+
+// Async write — updates cache + IndexedDB
+async function setPhoto(num, slot, data) {
+  photoCache[photoKey(num, slot)] = data;
+  await dbSet(photoKey(num, slot), data);
+}
+async function delPhoto(num, slot) {
+  delete photoCache[photoKey(num, slot)];
+  await dbDel(photoKey(num, slot));
+}
+
+// ── LOCALSTORAGE FOR INFO EDITS (text only, tiny size) ────────
+function getInfo(num) {
+  const raw = localStorage.getItem(infoKey(num));
+  return raw ? JSON.parse(raw) : {};
+}
+function setInfo(num, obj) { localStorage.setItem(infoKey(num), JSON.stringify(obj)); }
+function clearInfo(num)    { localStorage.removeItem(infoKey(num)); }
+function hasInfo(num)      { return !!localStorage.getItem(infoKey(num)); }
+
+// Merge base data with any saved edits
+function getDisplayLoc(base) {
+  const edits = getInfo(base.num);
+  return { ...base, ...edits };
+}
+
+// ── IMAGE COMPRESSION ────────────────────────────────────────
+function compressImage(file, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const MAX = 1000;
+      if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+      if (h > MAX) { w = Math.round(w*MAX/h); h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', 0.75));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── CUSTOM LOCATIONS ─────────────────────────────────────────
+function getCustomLocs() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_LOCS_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveCustomLocs(arr) { localStorage.setItem(CUSTOM_LOCS_KEY, JSON.stringify(arr)); }
+function addCustomLoc(loc) {
+  const all = getCustomLocs();
+  if (all.find(l => l.num === loc.num) || BASE_LOCS.find(l => l.num === loc.num)) return false;
+  all.push(loc);
+  saveCustomLocs(all);
+  return true;
+}
+function deleteCustomLoc(num) {
+  saveCustomLocs(getCustomLocs().filter(l => l.num !== num));
+}
+function getAllLocs() {
+  return [...BASE_LOCS, ...getCustomLocs()].sort((a,b) => a.num - b.num);
+}
+
+// ── STATE ────────────────────────────────────────────────────
+let activeFilter = 'ALL';
+
+// ── RENDER ───────────────────────────────────────────────────
+function renderAdmin() {
+  if (document.getElementById('adminMain').style.display === 'none') return;
+
+  const allLocs = getAllLocs();
+  let totalPhotos = 0, totalMissing = 0, totalEdited = 0;
+  allLocs.forEach(b => {
+    if (getPhoto(b.num,'ext')) totalPhotos++; else totalMissing++;
+    if (getPhoto(b.num,'int')) totalPhotos++; else totalMissing++;
+    if (hasInfo(b.num)) totalEdited++;
+  });
+
+  const customCount = getCustomLocs().length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div>${totalPhotos} photos</div>
+    <div class="stat-item"><div class="stat-dot" style="background:rgba(255,255,255,0.2)"></div>${totalMissing} missing</div>
+    <div class="stat-item"><div class="stat-dot" style="background:var(--yellow)"></div>${totalEdited} edited</div>
+    <div class="stat-item">📍 ${allLocs.length} locations${customCount ? ` <span style="color:var(--tase-c)">(+${customCount} new)</span>` : ''}</div>
+  `;
+  document.getElementById('footerCount').textContent = `${totalPhotos}/${allLocs.length*2} photos`;
+
+  const filtered = allLocs.filter(b => {
+    if (activeFilter === 'ALL')     return true;
+    if (activeFilter === 'MISSING') return !getPhoto(b.num,'ext') || !getPhoto(b.num,'int');
+    if (activeFilter === 'EDITED')  return hasInfo(b.num);
+    return b.type === activeFilter;
+  });
+
+  const customNums = new Set(getCustomLocs().map(l => l.num));
+  const grid = document.getElementById('adminGrid');
+  grid.innerHTML = filtered.map(base => {
+    const loc     = getDisplayLoc(base);
+    const extDone = !!getPhoto(base.num,'ext');
+    const intDone = !!getPhoto(base.num,'int');
+    const allDone = extDone && intDone;
+    const edited  = hasInfo(base.num);
+    const tLabel  = base.type === 'TASE' ? 'TASe' : base.type;
+    const info    = getInfo(base.num);
+    const isCustom = customNums.has(base.num);
+    const isHidden = base.hidden === true;
+    const isPublished = info.published === true;
+    const displayNum = info.numOverride || base.num;
+
+    const slotHTML = ['ext','int'].map(s => {
+      const photo = getPhoto(base.num, s);
+      const label = s==='ext' ? 'Exterior' : 'Interior';
+      return `
+        <div class="photo-slot ${photo?'has-photo':''}" id="slot-${base.num}-${s}"
+             onclick="triggerUpload(${base.num},'${s}')">
+          ${photo ? `<img src="${photo}" alt="${label}">` : ''}
+          <div class="slot-overlay" ${photo?'style="display:none"':''}>
+            <div class="slot-icon">📷</div>
+            <div class="slot-label">${label}</div>
+            <div class="slot-tap">Tap to add</div>
+          </div>
+          ${photo?'<div class="photo-check">✓</div>':''}
+          <div class="photo-actions">
+            <button class="pa-btn pa-change" onclick="event.stopPropagation();triggerUpload(${base.num},'${s}')">Change</button>
+            <button class="pa-btn pa-delete" onclick="event.stopPropagation();deletePhoto(${base.num},'${s}')">Delete</button>
+          </div>
+          <input type="file" class="file-input" id="file-${base.num}-${s}" accept="image/*"
+                 onchange="handleFile(this,${base.num},'${s}')">
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="a-card" data-type="${base.type}">
+        <div class="a-stripe s-${base.type}"></div>
+        <div class="a-head">
+          <div class="a-num-box">
+            <div class="a-num-label">LOC</div>
+            <div class="a-num-val">${displayNum}</div>
+          </div>
+          <div class="a-info">
+            <div class="a-name">${loc.name}${edited ? ' <span style="color:var(--yellow);font-size:10px">✏️</span>' : ''}${isCustom ? '<span class="custom-badge">NEW</span>' : ''}${isHidden && !isPublished ? '<span class="hidden-badge">HIDDEN</span>' : ''}${isHidden && isPublished ? '<span class="custom-badge" style="background:rgba(90,240,240,0.2);color:var(--tase-c)">LIVE ✓</span>' : ''}</div>
+            <div class="a-city">${loc.city}, ${loc.state}</div>
+            ${loc.addr ? `<div class="a-addr">📍 ${loc.addr}</div>` : ''}
+            ${info.phone ? `<div class="a-addr">📞 ${info.phone}</div>` : ''}
+          </div>
+          <div style="text-align:center">
+            <div class="a-badge b-${base.type}">${tLabel}</div>
+            <div class="a-status">${allDone?'✅':extDone||intDone?'🟡':'⬜'}</div>
+          </div>
+        </div>
+
+        <div class="a-photos">${slotHTML}</div>
+
+        ${isCustom ? `<button class="delete-loc-btn" onclick="removeCustomLoc(${base.num})">🗑 Remove This Location</button>` : ''}
+        ${isHidden && !isPublished ? `<button class="golive-btn" onclick="publishLoc(${base.num})">🚀 Go Live — Publish to Gallery</button>` : ''}
+        ${isHidden && isPublished  ? `<button class="unpublish-btn" onclick="unpublishLoc(${base.num})">👁 Hide from Gallery Again</button>` : ''}
+
+        <button class="edit-toggle ${edited?'has-edits':''}" id="toggleBtn-${base.num}" onclick="toggleEdit(${base.num})">
+          ✏️ ${edited ? 'Edit Info (custom data saved)' : 'Edit Location Info'}
+          <span class="edit-arrow">▾</span>
+        </button>
+
+        <div class="edit-form" id="editForm-${base.num}">
+
+          ${isHidden ? `
+          <div class="field-row">
+            <label class="field-label">Location # <span style="font-size:9px;color:var(--tase-c);font-weight:400">(update when confirmed)</span></label>
+            <input class="field-input" id="f-numoverride-${base.num}" type="number"
+                   value="${info.numOverride || base.num}" min="1" max="999" style="font-size:20px;font-weight:900;color:#fff;">
+          </div>` : ''}
+
+          <div class="field-row">
+            <label class="field-label">Display Name</label>
+            <input class="field-input" id="f-name-${base.num}" type="text"
+                   value="${escHtml(info.name || base.name)}" placeholder="e.g. Route 40">
+          </div>
+
+          <div class="field-row-2">
+            <div>
+              <label class="field-label">City</label>
+              <input class="field-input" id="f-city-${base.num}" type="text"
+                     value="${escHtml(info.city || base.city)}" placeholder="City">
+            </div>
+            <div>
+              <label class="field-label">State</label>
+              <input class="field-input" id="f-state-${base.num}" type="text"
+                     value="${escHtml(info.state || base.state)}" placeholder="MD" maxlength="3">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Street Address</label>
+            <input class="field-input" id="f-addr-${base.num}" type="text"
+                   value="${escHtml(info.addr || '')}" placeholder="e.g. 5720 Buckeystown Pike">
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Phone Number</label>
+            <input class="field-input" id="f-phone-${base.num}" type="tel"
+                   value="${escHtml(info.phone || '')}" placeholder="e.g. (301) 555-1234">
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Opening Date</label>
+            <input class="field-input" id="f-opened-${base.num}" type="text"
+                   value="${escHtml(info.opened || base.opened)}" placeholder="e.g. October 1987">
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Status</label>
+            <select class="status-select" id="f-status-${base.num}">
+              <option value="Open"         ${(info.status||'Open')==='Open'        ? 'selected':''}>✅ Open</option>
+              <option value="Coming Soon"  ${(info.status||'')==='Coming Soon'     ? 'selected':''}>🔜 Coming Soon</option>
+              <option value="Temporarily Closed" ${(info.status||'')==='Temporarily Closed'?'selected':''}>🔶 Temporarily Closed</option>
+              <option value="Permanently Closed" ${(info.status||'')==='Permanently Closed'?'selected':''}>🔴 Permanently Closed</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label class="field-label">Notes (shown in gallery)</label>
+            <textarea class="field-textarea" id="f-notes-${base.num}"
+                      placeholder="e.g. Recently renovated, Oldest location in the group…">${escHtml(info.notes||'')}</textarea>
+          </div>
+
+          <div class="edit-actions">
+            <button class="save-btn" onclick="saveInfo(${base.num})">💾 Save Changes</button>
+            <button class="reset-btn" onclick="resetInfo(${base.num})">Reset</button>
+          </div>
+
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ── EDIT FORM TOGGLE ─────────────────────────────────────────
+function toggleEdit(num) {
+  const form = document.getElementById(`editForm-${num}`);
+  const btn  = document.getElementById(`toggleBtn-${num}`);
+  const open = form.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) form.querySelector('.field-input').focus();
+}
+
+// ── SAVE / RESET INFO ────────────────────────────────────────
+function saveInfo(num) {
+  const obj = {
+    name:   document.getElementById(`f-name-${num}`).value.trim(),
+    city:   document.getElementById(`f-city-${num}`).value.trim(),
+    state:  document.getElementById(`f-state-${num}`).value.trim().toUpperCase(),
+    addr:   document.getElementById(`f-addr-${num}`).value.trim(),
+    phone:  document.getElementById(`f-phone-${num}`).value.trim(),
+    opened: document.getElementById(`f-opened-${num}`).value.trim(),
+    status: document.getElementById(`f-status-${num}`).value,
+    notes:  document.getElementById(`f-notes-${num}`).value.trim(),
+  };
+  // Preserve published flag if already set
+  const existing = getInfo(num);
+  if (existing.published) obj.published = true;
+  // Handle location number override for hidden/coming-soon locations
+  const numOverrideEl = document.getElementById(`f-numoverride-${num}`);
+  if (numOverrideEl) {
+    const val = parseInt(numOverrideEl.value);
+    if (val && val !== num) obj.numOverride = val;
+  }
+  // Only save keys that differ from base or are filled in
+  const base = BASE_LOCS.find(b => b.num === num);
+  if (obj.name   === base.name)   delete obj.name;
+  if (obj.city   === base.city)   delete obj.city;
+  if (obj.state  === base.state)  delete obj.state;
+  if (obj.opened === base.opened) delete obj.opened;
+  if (!obj.addr)   delete obj.addr;
+  if (!obj.phone)  delete obj.phone;
+  if (!obj.notes)  delete obj.notes;
+  if (obj.status === 'Open') delete obj.status;
+
+  if (Object.keys(obj).length === 0) {
+    clearInfo(num);
+  } else {
+    setInfo(num, obj);
+  }
+  showToast(`✓ Location #${num} info saved!`);
+  renderAdmin();
+}
+
+function resetInfo(num) {
+  if (!confirm(`Reset all custom info for Location #${num} back to defaults?`)) return;
+  clearInfo(num);
+  showToast(`Location #${num} reset to defaults`);
+  renderAdmin();
+}
+
+// ── PHOTO UPLOAD ─────────────────────────────────────────────
+function triggerUpload(num, slot) {
+  document.getElementById(`file-${num}-${slot}`).click();
+}
+
+function handleFile(input, num, slot) {
+  const file = input.files[0];
+  if (!file) return;
+  compressImage(file, async data => {
+    try {
+      await setPhoto(num, slot, data);
+      showToast(`✓ ${slot==='ext'?'Exterior':'Interior'} photo saved for #${num}`);
+      renderAdmin();
+    } catch(e) {
+      showToast('⚠️ Error saving photo — try again');
+    }
+    input.value = '';
+  });
+}
+
+function deletePhoto(num, slot) {
+  if (!confirm(`Delete ${slot==='ext'?'Exterior':'Interior'} photo for Location #${num}?`)) return;
+  delPhoto(num, slot).then(() => {
+    showToast(`Deleted #${num} ${slot==='ext'?'Exterior':'Interior'}`);
+    renderAdmin();
+  });
+}
+
+// ── CLEAR ALL ────────────────────────────────────────────────
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  if (!confirm('This will delete ALL uploaded photos AND all saved info edits. Continue?')) return;
+  dbClear().then(() => {
+    photoCache = {};
+    BASE_LOCS.forEach(b => clearInfo(b.num));
+    showToast('All data cleared');
+    renderAdmin();
+  });
+});
+
+// ── FILTER ───────────────────────────────────────────────────
+document.getElementById('filterBar').addEventListener('click', e => {
+  const btn = e.target.closest('.f-btn');
+  if (!btn) return;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.type;
+  renderAdmin();
+});
+
+// ── TOAST ────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── NEW LOCATION MODAL ───────────────────────────────────────
+document.getElementById('addLocBtn').addEventListener('click', () => {
+  document.getElementById('newLocModal').classList.add('open');
+  document.getElementById('nl-num').focus();
+});
+document.getElementById('nlCancelBtn').addEventListener('click', () => {
+  document.getElementById('newLocModal').classList.remove('open');
+  clearNewLocForm();
+});
+document.getElementById('newLocModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('newLocModal')) {
+    document.getElementById('newLocModal').classList.remove('open');
+    clearNewLocForm();
+  }
+});
+
+function clearNewLocForm() {
+  ['nl-num','nl-name','nl-city','nl-state','nl-opened','nl-addr'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('nl-type').value   = 'TASE';
+  document.getElementById('nl-status').value = 'Coming Soon';
+}
+
+document.getElementById('nlSaveBtn').addEventListener('click', () => {
+  const num    = parseInt(document.getElementById('nl-num').value);
+  const name   = document.getElementById('nl-name').value.trim();
+  const type   = document.getElementById('nl-type').value;
+  const city   = document.getElementById('nl-city').value.trim();
+  const state  = document.getElementById('nl-state').value.trim().toUpperCase();
+  const opened = document.getElementById('nl-opened').value.trim();
+  const addr   = document.getElementById('nl-addr').value.trim();
+  const status = document.getElementById('nl-status').value;
+
+  if (!num || !name || !city || !state) {
+    showToast('⚠️ Please fill in Number, Name, City and State');
+    return;
+  }
+  const allNums = getAllLocs().map(l => l.num);
+  if (allNums.includes(num)) {
+    showToast(`⚠️ Location #${num} already exists`);
+    return;
+  }
+
+  // Build ts from opened date for sorting
+  const yr = parseInt((opened || '2025').match(/\d{4}/)?.[0] || '2025');
+  const newLoc = { num, name, type, city, state, opened: opened || '', ts: yr * 10000, addr: addr || '' };
+  if (status !== 'Open') {
+    setInfo(num, { status });
+  }
+  addCustomLoc(newLoc);
+  document.getElementById('newLocModal').classList.remove('open');
+  clearNewLocForm();
+  showToast(`✅ Location #${num} — ${name} added!`);
+  renderAdmin();
+});
+
+function publishLoc(num) {
+  const info = getInfo(num);
+  info.published = true;
+  setInfo(num, info);
+  showToast(`🚀 Location #${num} is now LIVE in the gallery!`);
+  renderAdmin();
+}
+function unpublishLoc(num) {
+  if (!confirm(`Hide Location #${num} from the gallery again?`)) return;
+  const info = getInfo(num);
+  delete info.published;
+  if (Object.keys(info).length === 0) clearInfo(num);
+  else setInfo(num, info);
+  showToast(`Location #${num} hidden from gallery`);
+  renderAdmin();
+}
+
+function removeCustomLoc(num) {
+  if (!confirm(`Remove Location #${num} from the gallery? Photos will also be deleted.`)) return;
+  deleteCustomLoc(num);
+  delPhoto(num,'ext'); delPhoto(num,'int');
+  clearInfo(num);
+  showToast(`Location #${num} removed`);
+  renderAdmin();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+// Pre-load all photos from IndexedDB into memory, then render
+dbGetAll().then(all => {
+  photoCache = all;
+  if (sessionStorage.getItem('wlr_auth') === '1') renderAdmin();
+});
+</script>
+</body>
+</html>

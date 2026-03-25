@@ -1,0 +1,61 @@
+═══════════════════════════════════════════════════════════════
+  WLR AUTOMOTIVE GROUP — PHOTO NAMING GUIDE
+  Each location has its own subfolder inside "images"
+═══════════════════════════════════════════════════════════════
+
+FORMAT:  images / loc-## / 01.jpg  →  Exterior photo
+         images / loc-## / 02.jpg  →  Interior photo
+
+  Drop exactly 2 photos into each loc-## folder:
+    01.jpg = Exterior (outside shot)
+    02.jpg = Interior (inside shot)
+
+─── FULL LIST (2 photos per location) ──────────────────────────
+
+  Folder     Files           Location
+  ─────────────────────────────────────────────────────────────
+  loc-01/    01.jpg 02.jpg   #01 TLC  Route 40 — Frederick, MD
+  loc-02/    01.jpg 02.jpg   #02 TLC  Route 85 — Frederick, MD
+  loc-03/    01.jpg 02.jpg   #03 TLC  Columbia — Columbia, MD
+  loc-04/    01.jpg 02.jpg   #04 TAR  Frederick Auto Repair — Frederick, MD
+  loc-05/    01.jpg 02.jpg   #05 TLC  Washingtonian — Gaithersburg, MD
+  loc-06/    01.jpg 02.jpg   #06 TAS  Frederick Auto Spa — Frederick, MD
+  loc-07/    01.jpg 02.jpg   #07 TLC  Anne Arundel — Arundel Mills, MD
+  loc-08/    01.jpg 02.jpg   #08 TAS  Germantown — Germantown, MD
+  loc-09/    01.jpg 02.jpg   #09 TLC  Germantown — Germantown, MD
+  loc-10/    01.jpg 02.jpg   #10 TAR  Mid-Atlantic Gambrills — Gambrills, MD
+  loc-11/    01.jpg 02.jpg   #11 TLC  Gambrills — Gambrills, MD
+  loc-12/    01.jpg 02.jpg   #12 TLC  Jefferson Street — Frederick, MD
+  loc-13/    01.jpg 02.jpg   #13 TLC  Route 355 — Germantown, MD
+  loc-14/    01.jpg 02.jpg   #14 TAS  Gambrills — Gambrills, MD
+  loc-15/    01.jpg 02.jpg   #15 TLC  Laurel — Laurel, MD
+  loc-16/    01.jpg 02.jpg   #16 TLC  Shrewsbury — Shrewsbury, PA
+  loc-17/    01.jpg 02.jpg   #17 TLC  West York — York, PA
+  loc-18/    01.jpg 02.jpg   #18 TAS  Huntingtown — Huntingtown, MD
+  loc-19/    01.jpg 02.jpg   #19 TASe Bel-Air — Bel Air, MD
+  loc-21/    01.jpg 02.jpg   #21 TASe Route 85 — Frederick, MD
+  loc-22/    01.jpg 02.jpg   #22 TLC  Lanham — Lanham, MD
+  loc-23/    01.jpg 02.jpg   #23 TASe Route 26 — Frederick, MD
+  loc-24/    01.jpg 02.jpg   #24 TASe West York — West York, PA
+  loc-25/    01.jpg 02.jpg   #25 TASe Ritchie Station — Capitol Heights, MD
+  loc-26/    01.jpg 02.jpg   #26 TASe Halethorpe — Halethorpe, MD
+  loc-27/    01.jpg 02.jpg   #27 TASe Odenton — Odenton, MD
+  loc-28/    01.jpg 02.jpg   #28 TASe Martinsburg — Martinsburg, WV
+  loc-31/    01.jpg 02.jpg   #31 TASe Arundel Mills — Hanover, MD
+  loc-32/    01.jpg 02.jpg   #32 TASe Hagerstown — Hagerstown, MD
+  loc-35/    01.jpg 02.jpg   #35 TASe Dundalk — Dundalk, MD
+
+─── TO ADD OR UPDATE A PHOTO ───────────────────────────────────
+  1. Find the right loc-## folder inside images/
+  2. Name your photo 01.jpg (exterior) or 02.jpg (interior)
+  3. Drop it into that folder
+  4. Re-deploy the WLR Location Photos Webapp folder to Netlify
+  5. It automatically updates on Randy's phone!
+
+─── TIPS ────────────────────────────────────────────────────────
+  • JPG format (smaller file size, fast loading on mobile)
+  • Recommended size: 800×600 pixels minimum
+  • Landscape orientation looks best
+  • Keep under 500KB per photo
+
+═══════════════════════════════════════════════════════════════
