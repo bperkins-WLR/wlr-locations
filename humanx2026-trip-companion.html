@@ -1,0 +1,4000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#070946" />
+<title>HumanX 2026 — Trip Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Touch optimization — fast taps, no callouts on long-press */
+  a, button, [role="button"] {
+    -webkit-tap-highlight-color: rgba(0,220,154,0.15);
+    touch-action: manipulation;
+  }
+
+  :root {
+    /* ── HumanX 2026 Brand Colors ── */
+    --navy-900: #03032a;              /* deepest background */
+    --navy-800: #070946;              /* HumanX exact page bg */
+    --navy-700: #0c1060;              /* surface base */
+    --navy-600: #111578;              /* card surface */
+    --navy-500: #1a1e94;              /* elevated surface */
+    --navy-400: #2429b0;              /* highlighted surface */
+    --gold-500: #00dc9a;              /* HumanX mint — primary accent */
+    --gold-400: #00eeaa;              /* mint lighter */
+    --gold-300: #33f5be;              /* mint lightest */
+    --gold-200: #80fad8;              /* mint near-white */
+    --gold-glow: rgba(0,220,154,0.15);
+    --purple-500: #4b1fcf;            /* HumanX theme purple */
+    --purple-400: #6b44e0;            /* purple lighter */
+    --purple-300: #8b6be9;            /* HumanX high-contrast purple */
+    --text-primary: #f0f0ff;
+    --text-secondary: #9aa0e8;
+    --text-muted: #5868c0;
+    --alert-red: #ff5e72;
+    --alert-amber: #ffb340;
+    --alert-green: #00dc9a;
+    --border: rgba(0,220,154,0.18);
+    --card-bg: rgba(7,9,70,0.80);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy-900);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(75,31,207,0.40) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,220,154,0.07) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(3,3,42,0.94);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    flex-wrap: wrap;
+  }
+
+  .header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .header-brand .event-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold-400);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  .header-brand .trip-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── COUNTDOWN ── */
+  .countdown-widget {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .countdown-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .countdown-units {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--navy-700);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-width: 44px;
+  }
+
+  .countdown-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--gold-400);
+    line-height: 1.1;
+  }
+
+  .countdown-unit-label {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .countdown-sep {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold-500);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  /* ── NAVIGATION ── */
+  .nav-bar {
+    background: var(--navy-800);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    position: sticky;
+    top: 73px;   /* desktop: single-row header */
+    z-index: 99;
+  }
+
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .nav-btn { display: flex; align-items: center; gap: 5px; }
+  .nav-icon { font-size: 0.9rem; }
+  .nav-btn:hover { color: var(--text-secondary); }
+
+  .nav-btn.active {
+    color: var(--gold-400);
+    border-bottom-color: var(--gold-500);
+  }
+
+  /* ── MAP BUTTON ── */
+  .map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+    color: #03032a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .map-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .map-btn:active { transform: translateY(0); }
+
+  .map-btn-large {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+    color: #03032a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 13px 26px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(0,220,154,0.25);
+  }
+  .map-btn-large:hover { opacity: 0.90; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,220,154,0.35); }
+  .map-btn-large:active { transform: translateY(0); }
+
+  /* ── MAIN LAYOUT ── */
+  .main-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.75rem;
+    color: var(--gold-400);
+    margin-bottom: 6px;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(8px);
+  }
+
+  .card + .card { margin-top: 16px; }
+  .card--red  { border-color: rgba(255,94,114,0.2);  background: rgba(255,94,114,0.04); }
+  .card--green { border-color: rgba(0,220,154,0.25); background: rgba(0,220,154,0.04); }
+  .card--green-light { border-color: rgba(0,220,154,0.2); }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold-300);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon {
+    font-size: 1rem;
+    opacity: 0.8;
+  }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── PILL / BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 99px;
+  }
+
+  .badge-gold { background: rgba(0,220,154,0.15); color: var(--gold-400); border: 1px solid rgba(0,220,154,0.30); }
+  .badge-red { background: rgba(255,94,114,0.15); color: var(--alert-red); border: 1px solid rgba(255,94,114,0.32); }
+  .badge-amber { background: rgba(255,179,64,0.15); color: var(--alert-amber); border: 1px solid rgba(255,179,64,0.32); }
+  .badge-green { background: rgba(0,220,154,0.15); color: var(--alert-green); border: 1px solid rgba(0,220,154,0.30); }
+  .badge-blue { background: rgba(107,68,224,0.20); color: #b09af0; border: 1px solid rgba(107,68,224,0.35); }
+
+  /* ── DATA ROW ── */
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(0,220,154,0.07);
+    font-size: 0.875rem;
+  }
+
+  .data-row:last-child { border-bottom: none; }
+
+  .data-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+    flex-shrink: 0;
+    max-width: 55%;
+  }
+
+  .data-row .value {
+    color: var(--text-primary);
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .mono { font-family: 'DM Mono', monospace; font-size: 0.85em; }
+
+  /* ══════════════════════════════
+     OVERVIEW TAB
+  ══════════════════════════════ */
+  .hero-card {
+    background: linear-gradient(135deg, var(--navy-700) 0%, var(--navy-600) 50%, rgba(0,220,154,0.06) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(0,220,154,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-event {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-500);
+    margin-bottom: 6px;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .hero-dates {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  .traveler-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .traveler-card {
+    background: rgba(7,9,70,0.60);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .traveler-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--navy-900);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .traveler-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .traveler-role {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ALERTS */
+  .alerts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 640px) { .alerts-grid { grid-template-columns: 1fr; } }
+
+  .alert-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    border-left: 3px solid;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .alert-item.red { border-left-color: var(--alert-red); background: rgba(255,94,114,0.06); }
+  .alert-item.amber { border-left-color: var(--alert-amber); background: rgba(255,179,64,0.05); }
+  .alert-item.green { border-left-color: var(--alert-green); background: rgba(0,220,154,0.05); }
+  .alert-item.blue { border-left-color: #6b44e0; background: rgba(107,68,224,0.07); }
+
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .alert-text strong { display: block; font-weight: 700; margin-bottom: 2px; }
+  .alert-text.red strong { color: var(--alert-red); }
+  .alert-text.amber strong { color: var(--alert-amber); }
+  .alert-text.green strong { color: var(--alert-green); }
+  .alert-text.blue strong { color: #b09af0; }
+  .alert-text { color: var(--text-secondary); }
+
+  /* QUICK REF */
+  .quickref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .quickref-item {
+    background: rgba(7,9,70,0.70);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .quickref-item--highlight {
+    border-color: rgba(0,220,154,0.30);
+    background: rgba(0,220,154,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .quickref-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .quickref-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.875rem;
+    color: var(--gold-300);
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  /* ══════════════════════════════
+     FLIGHTS TAB
+  ══════════════════════════════ */
+  .flight-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flight-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(0,220,154,0.06) 0%, transparent 70%);
+  }
+
+  .flight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .flight-direction {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--gold-400);
+  }
+
+  .flight-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .flight-route {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+
+  .airport {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+  }
+
+  .airport-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .airport-city {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .airport-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--gold-300);
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  .airport-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .route-line {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px;
+    margin-bottom: 18px;
+  }
+
+  .route-duration {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .route-track {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .route-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-500);
+    flex-shrink: 0;
+  }
+
+  .route-dash {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold-500), var(--gold-300), var(--gold-500));
+    opacity: 0.5;
+    position: relative;
+  }
+
+  .route-plane {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin: 0 -2px;
+    position: relative;
+    top: -1px;
+  }
+
+  .route-nonstop {
+    font-size: 0.65rem;
+    color: var(--alert-green);
+    margin-top: 6px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .flight-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 500px) { .flight-details-grid { grid-template-columns: 1fr; } }
+
+  .tracker-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255,94,50,0.15), rgba(255,94,50,0.08));
+    border: 1px solid rgba(255,94,50,0.35);
+    color: #ff8c6e;
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    margin-top: 14px;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .tracker-btn:hover { background: linear-gradient(135deg, rgba(255,94,50,0.25), rgba(255,94,50,0.15)); border-color: rgba(255,94,50,0.6); color: #ffb09e; transform: translateY(-1px); }
+  .tracker-btn:active { transform: scale(0.98); }
+
+  /* United check-in button */
+  .btn-checkin {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--purple-500), var(--purple-400));
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: opacity 0.18s;
+  }
+  .btn-checkin:hover { opacity: 0.88; }
+  .tracker-btn-pulse {
+    width: 8px; height: 8px;
+    background: #ff5e32;
+    border-radius: 50%;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .seats-row {
+    background: rgba(0,220,154,0.05);
+    border: 1px solid rgba(0,220,154,0.12);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .seat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .seat-box {
+    width: 38px; height: 38px;
+    background: var(--navy-600);
+    border: 1px solid var(--gold-500);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--gold-300);
+    font-weight: 500;
+  }
+
+  .seat-name { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+  .seat-class { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ══════════════════════════════
+     HOTEL TAB
+  ══════════════════════════════ */
+  .hotel-hero {
+    background: linear-gradient(135deg, var(--navy-700), var(--navy-600));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .hotel-logo {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #8b0000, #c0392b);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .hotel-info { flex: 1; min-width: 200px; }
+  .hotel-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .hotel-address { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; }
+
+  .hotel-walk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,220,154,0.12);
+    border: 1px solid rgba(0,220,154,0.25);
+    border-radius: 99px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--alert-green);
+  }
+
+  .cost-breakdown {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 20px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid rgba(0,220,154,0.06);
+  }
+
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row.total {
+    background: rgba(0,220,154,0.06);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .cost-row .cost-label { color: var(--text-secondary); }
+  .cost-row .cost-val { font-family: 'DM Mono', monospace; color: var(--gold-300); }
+  .cost-row.total .cost-val { color: var(--gold-400); }
+
+  .cancel-warning {
+    background: rgba(255,94,114,0.07);
+    border: 1px solid rgba(255,94,114,0.25);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .cancel-warning strong { color: var(--alert-red); }
+
+  /* ══════════════════════════════
+     CONFERENCE TAB
+  ══════════════════════════════ */
+  .day-block {
+    margin-bottom: 24px;
+  }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .day-badge {
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+    color: var(--navy-900);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .day-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .day-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .session-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .session-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+
+  .session-item.priority {
+    border-color: rgba(0,220,154,0.35);
+    background: rgba(0,220,154,0.04);
+  }
+
+  .session-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-width: 60px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .session-body { flex: 1; }
+
+  .session-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+
+  .session-item.priority .session-title { color: var(--gold-300); }
+
+  .session-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .session-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+
+  .do-not-miss {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0,220,154,0.12);
+    color: var(--gold-400);
+    border: 1px solid rgba(0,220,154,0.30);
+    border-radius: 99px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+  }
+
+  .networking-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 600px) { .networking-grid { grid-template-columns: 1fr; } }
+
+  .network-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+
+  .network-card-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--gold-300);
+    margin-bottom: 5px;
+  }
+
+  .network-card-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+
+  /* ══════════════════════════════
+     BUDGET TAB
+  ══════════════════════════════ */
+  .budget-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) { .budget-split { grid-template-columns: 1fr; } }
+
+  .budget-org {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+
+  .budget-org-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .budget-org-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .wlr-icon { background: rgba(0,220,154,0.15); }
+  .nasa-icon { background: rgba(107,68,224,0.18); }
+
+  .budget-org-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+
+  .budget-org-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+  .budget-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.825rem;
+    border-bottom: 1px solid rgba(0,220,154,0.06);
+    gap: 10px;
+  }
+
+  .budget-line:last-child { border-bottom: none; }
+  .budget-line .b-label { color: var(--text-secondary); }
+  .budget-line .b-val { font-family: 'DM Mono', monospace; color: var(--gold-300); text-align: right; }
+
+  .budget-total-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .budget-total-row .b-label { color: var(--text-primary); }
+  .budget-total-row .b-val { font-family: 'DM Mono', monospace; color: var(--gold-400); }
+
+  /* FOOD BAR CHART */
+  .food-chart {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .food-chart-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--gold-300);
+    margin-bottom: 4px;
+  }
+
+  .food-chart-sub { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 12px; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+
+  .bar-day-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(0,220,154,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    transition: width 0.8s ease;
+  }
+
+  .bar-fill.covered {
+    background: linear-gradient(90deg, rgba(0,220,154,0.55), rgba(0,220,154,0.30));
+    color: var(--alert-green);
+  }
+
+  .bar-fill.not-covered {
+    background: linear-gradient(90deg, rgba(255,179,64,0.50), rgba(255,179,64,0.20));
+    color: var(--alert-amber);
+  }
+
+  .bar-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    min-width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .oop-banner {
+    background: linear-gradient(135deg, rgba(0,220,154,0.10), rgba(0,220,154,0.05));
+    border: 1px solid rgba(0,220,154,0.25);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .oop-icon { font-size: 2rem; }
+  .oop-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--alert-green);
+  }
+
+  .oop-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ══════════════════════════════
+     SPEAKERS TAB
+  ══════════════════════════════ */
+  .speakers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+
+  .speaker-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .speaker-card:hover {
+    border-color: rgba(0,220,154,0.35);
+    transform: translateY(-2px);
+  }
+
+  .speaker-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .speaker-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy-500), var(--navy-400));
+    border: 2px solid var(--gold-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold-300);
+    flex-shrink: 0;
+  }
+
+  .speaker-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .speaker-title {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+    line-height: 1.35;
+  }
+
+  .speaker-why {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    border-top: 1px solid rgba(0,220,154,0.10);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+
+  .speaker-why strong { color: var(--gold-300); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── UTILS ── */
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-20 { margin-top: 20px; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .text-gold { color: var(--gold-400); }
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 0.825rem; }
+  .fw-600 { font-weight: 600; }
+
+  /* ══════════════════════════════════════
+     MOBILE RESPONSIVE — FULL SYSTEM
+  ══════════════════════════════════════ */
+
+  /* ── Tablet (≤ 768px) ── */
+  @media (max-width: 768px) {
+    .section-title { font-size: 1.45rem; }
+    .hero-title { font-size: 1.6rem; }
+    .card { padding: 18px; }
+    .hero-card { padding: 22px; }
+    .speakers-grid { grid-template-columns: 1fr; }
+    .flight-card { padding: 20px; }
+    .hotel-hero { padding: 20px; }
+  }
+
+  /* ── Large Phone / Landscape (≤ 640px) ── */
+  @media (max-width: 640px) {
+    /* Header reflow: brand+mapbtn on top row, countdown full-width below */
+    .site-header { padding: 0 14px; }
+    .header-inner {
+      padding: 10px 0 0;
+      gap: 0;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .header-brand { flex: 1; order: 1; }
+    .header-brand .event-name { font-size: 1rem; }
+    .header-brand .trip-label { font-size: 0.62rem; }
+    .site-header .map-btn { order: 2; font-size: 0.72rem; padding: 7px 12px; }
+    .countdown-widget {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+      padding: 8px 0 10px;
+      border-top: 1px solid rgba(0,220,154,0.10);
+      margin-top: 8px;
+    }
+    .countdown-label { display: none; } /* save space — units self-explain */
+    .countdown-unit { min-width: 42px; padding: 4px 6px; }
+    .countdown-num { font-size: 1.05rem; }
+    .countdown-sep { font-size: 0.9rem; margin-bottom: 8px; }
+
+    /* Nav: taller tap targets, full-bleed */
+    .nav-bar { padding: 0 8px; }
+    .nav-btn { padding: 14px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
+
+    /* Main content */
+    .main-content { padding: 20px 12px 80px; }
+
+    /* Section headers */
+    .section-title { font-size: 1.3rem; }
+    .section-subtitle { font-size: 0.78rem; }
+
+    /* Cards */
+    .card { padding: 16px; }
+    .card + .card { margin-top: 12px; }
+    .hero-card { padding: 18px; }
+    .hero-card::before { display: none; }
+
+    /* Traveler cards stack */
+    .traveler-cards { flex-direction: column; }
+    .traveler-card { min-width: unset; }
+
+    /* Alerts: full single column */
+    .alerts-grid { grid-template-columns: 1fr; gap: 8px; }
+    .alert-item { font-size: 0.8rem; }
+
+    /* Quick ref: 2 cols */
+    .quickref-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Data rows */
+    .data-row { font-size: 0.82rem; }
+    .data-row .label { max-width: 52%; font-size: 0.78rem; }
+
+    /* Grids already handled above */
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .budget-split { grid-template-columns: 1fr; }
+    .networking-grid { grid-template-columns: 1fr; }
+    .flight-details-grid { grid-template-columns: 1fr; }
+
+    /* Flight route */
+    .airport { min-width: 72px; }
+    .airport-code { font-size: 1.7rem; }
+    .airport-time { font-size: 1rem; }
+    .flight-card { padding: 16px; }
+    .flight-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .seats-row { gap: 14px; }
+    .seats-row > div:last-child { width: 100%; text-align: left; margin-left: 0; }
+
+    /* Hotel */
+    .hotel-hero { flex-direction: column; gap: 14px; }
+    .hotel-hero > div:last-child { align-items: flex-start; flex-direction: row; }
+    .cost-row { font-size: 0.8rem; padding: 10px 14px; }
+
+    /* Conference sessions */
+    .session-item { padding: 10px 12px; }
+    .session-time { min-width: 52px; font-size: 0.7rem; }
+    .session-title { font-size: 0.82rem; }
+    .day-title { font-size: 1rem; }
+
+    /* Budget bar chart */
+    .bar-row { gap: 6px; }
+    .bar-day-label { min-width: 48px; font-size: 0.7rem; }
+    .bar-fill { font-size: 0.62rem; padding-left: 6px; }
+    .bar-amount { min-width: 44px; font-size: 0.7rem; }
+
+    /* OOP banner */
+    .oop-banner { flex-direction: column; text-align: center; padding: 18px; }
+    .oop-icon { font-size: 1.6rem; }
+
+    /* Budget org */
+    .budget-line { font-size: 0.78rem; }
+    .budget-total-row { font-size: 0.85rem; }
+
+    /* Expo map CTA */
+    .map-btn-large { font-size: 0.82rem; padding: 11px 18px; }
+
+    /* Speakers */
+    .speakers-grid { grid-template-columns: 1fr; gap: 10px; }
+    .speaker-card { padding: 16px; }
+    .speaker-why { font-size: 0.76rem; }
+  }
+
+  /* ── Standard Phone (≤ 480px) ── */
+  @media (max-width: 480px) {
+    .nav-btn { padding: 13px 10px; font-size: 0.68rem; }
+
+    .hero-title { font-size: 1.35rem; }
+    .traveler-name { font-size: 0.88rem; }
+    .traveler-role { font-size: 0.68rem; }
+
+    .airport-code { font-size: 1.45rem; }
+    .route-line { padding: 0 6px; }
+    .airport { min-width: 60px; }
+
+    .quickref-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quickref-item { padding: 10px 10px; }
+    .quickref-label { font-size: 0.58rem; }
+    .quickref-value { font-size: 0.78rem; }
+
+    .do-not-miss { font-size: 0.55rem; }
+    .badge { font-size: 0.6rem; padding: 2px 7px; }
+
+    .food-chart { padding: 16px; }
+    .bar-day-label { min-width: 42px; font-size: 0.65rem; }
+    .bar-fill { font-size: 0; } /* hide text, width shows coverage */
+    .bar-track { height: 24px; }
+
+    .session-time { min-width: 46px; font-size: 0.65rem; }
+    .network-card { padding: 12px; }
+    .network-card-title { font-size: 0.8rem; }
+    .network-card-desc { font-size: 0.73rem; }
+
+    .budget-line .b-val { font-size: 0.75rem; }
+
+    .speaker-top { gap: 10px; }
+    .speaker-avatar { width: 44px; height: 44px; font-size: 0.95rem; }
+    .speaker-name { font-size: 0.92rem; }
+
+    .section-subtitle { font-size: 0.74rem; }
+    .card-title { font-size: 1rem; }
+    .main-content { padding: 16px 10px 90px; }
+  }
+
+  /* ── Small Phone (≤ 375px, iPhone SE etc.) ── */
+  @media (max-width: 375px) {
+    .nav-btn { padding: 13px 9px; font-size: 0; letter-spacing: 0; gap: 0; } /* icons only */
+    .nav-label { display: none; }
+    .nav-icon { font-size: 1.1rem; }
+    .airport-code { font-size: 1.25rem; }
+    .hero-title { font-size: 1.2rem; }
+    .countdown-unit { min-width: 36px; padding: 3px 4px; }
+    .countdown-num { font-size: 0.9rem; }
+    .quickref-grid { grid-template-columns: 1fr 1fr; }
+    .card { padding: 12px; }
+    .nav-bar { padding: 0 4px; }
+  }
+
+  /* ── QUICK ACTION BUTTONS ── */
+  .quick-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 20px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .action-btn:active { transform: scale(0.97); }
+
+  .action-btn-directions {
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+    color: #03032a;
+    box-shadow: 0 4px 18px rgba(0,220,154,0.28);
+  }
+
+  .action-btn-directions:hover {
+    opacity: 0.90;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,220,154,0.38);
+  }
+
+  .action-btn-uber {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.40);
+  }
+
+  .action-btn-uber:hover {
+    opacity: 0.88;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.50);
+  }
+
+  .action-btn-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+  .action-btn-text { display: flex; flex-direction: column; align-items: flex-start; }
+  .action-btn-label { font-size: 0.88rem; font-weight: 700; line-height: 1.2; }
+  .action-btn-sub { font-size: 0.66rem; font-weight: 500; opacity: 0.75; margin-top: 2px; letter-spacing: 0.03em; }
+
+  @media (max-width: 480px) {
+    .action-btn { min-width: 140px; padding: 13px 14px; }
+    .action-btn-label { font-size: 0.82rem; }
+    .action-btn-sub { font-size: 0.62rem; }
+    .action-btn-icon { font-size: 1.1rem; }
+  }
+
+  /* ══════════════════════════════════════
+     BRICE'S PICKS TAB
+  ══════════════════════════════════════ */
+  .nav-btn-picks { color: var(--gold-400) !important; }
+  .nav-btn-picks.active { color: var(--gold-300) !important; border-bottom-color: var(--gold-400) !important; }
+
+  .nav-btn-sf { color: #7dd3fc !important; }
+  .nav-btn-sf.active { color: #bae6fd !important; border-bottom-color: #7dd3fc !important; }
+
+  .nav-btn-notes { color: #fbbf24 !important; }
+  .nav-btn-notes.active { color: #fde68a !important; border-bottom-color: #fbbf24 !important; }
+
+  /* ══════════════════════════════════════
+     NOTES TAB
+  ══════════════════════════════════════ */
+  .note-area {
+    width: 100%;
+    min-height: 80px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    padding: 10px 12px;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.18s;
+    outline: none;
+  }
+  .note-area::placeholder { color: var(--text-muted); }
+  .note-area:focus { border-color: rgba(251,191,36,0.4); background: rgba(255,255,255,0.06); }
+  .note-area-full { min-height: 220px; }
+
+  /* Notes quick-card labels */
+  .note-card-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  /* Destructive button (clear notes) */
+  .btn-danger {
+    background: rgba(255,94,114,0.10);
+    border: 1px solid rgba(255,94,114,0.25);
+    color: var(--alert-red);
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.16s;
+  }
+  .btn-danger:hover { background: rgba(255,94,114,0.20); }
+
+  /* Checklist progress bar */
+  .checklist-progress { margin-top: 12px; }
+  .checklist-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .checklist-progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .checklist-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-500), var(--gold-400));
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* ══════════════════════════════════════
+     SF GUIDE TAB
+  ══════════════════════════════════════ */
+  .sf-hero {
+    background: linear-gradient(135deg, rgba(12,16,96,0.9) 0%, rgba(14,60,110,0.6) 60%, rgba(0,100,180,0.15) 100%);
+    border: 1px solid rgba(125,211,252,0.25);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .sf-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: #bae6fd;
+    margin-bottom: 6px;
+  }
+  .sf-hero-sub {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .sf-day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 14px;
+  }
+  .sf-day-badge {
+    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .sf-day-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: #7dd3fc;
+  }
+  .sf-activity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  @media (max-width: 560px) { .sf-activity-grid { grid-template-columns: 1fr; } }
+  .sf-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(125,211,252,0.14);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: border-color 0.18s;
+  }
+  .sf-card:hover { border-color: rgba(125,211,252,0.35); }
+  .sf-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .sf-card-emoji { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
+  .sf-card-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sf-card-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+  .sf-card-tag-must { background: rgba(0,220,154,0.15); color: var(--gold-400); border: 1px solid rgba(0,220,154,0.3); }
+  .sf-card-tag-rec { background: rgba(125,211,252,0.12); color: #7dd3fc; border: 1px solid rgba(125,211,252,0.25); }
+  .sf-card-tag-food { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+  .sf-card-tag-brad { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
+  .sf-card-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+  .sf-card-meta {
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .sf-btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .sf-dir-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.16s ease;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .sf-dir-btn-map {
+    background: rgba(125,211,252,0.12);
+    border: 1px solid rgba(125,211,252,0.28);
+    color: #7dd3fc;
+  }
+  .sf-dir-btn-map:hover { background: rgba(125,211,252,0.24); color: #bae6fd; }
+  .sf-dir-btn-book {
+    background: rgba(0,220,154,0.12);
+    border: 1px solid rgba(0,220,154,0.30);
+    color: var(--gold-400);
+  }
+  .sf-dir-btn-book:hover { background: rgba(0,220,154,0.22); color: var(--gold-300); }
+
+  .sf-tip-box {
+    background: rgba(125,211,252,0.06);
+    border: 1px solid rgba(125,211,252,0.18);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .sf-tip-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #7dd3fc;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sf-tip-row {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(125,211,252,0.08);
+    line-height: 1.4;
+  }
+  .sf-tip-row:last-child { border-bottom: none; }
+  .sf-tip-icon { flex-shrink: 0; }
+  .sf-dinner-card {
+    background: rgba(251,146,60,0.07);
+    border: 1px solid rgba(251,146,60,0.18);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 8px;
+  }
+  .sf-dinner-name { font-weight: 700; font-size: 0.9rem; color: #fdba74; }
+  .sf-dinner-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; }
+
+  .picks-hero {
+    background: linear-gradient(135deg, var(--navy-700) 0%, rgba(75,31,207,0.25) 60%, rgba(0,220,154,0.08) 100%);
+    border: 1px solid rgba(0,220,154,0.25);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .picks-hero::before {
+    content: '🎬';
+    position: absolute;
+    right: 20px; top: 16px;
+    font-size: 3.5rem;
+    opacity: 0.12;
+  }
+
+  .picks-hero-eyebrow {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-500);
+    margin-bottom: 6px;
+  }
+
+  .picks-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .picks-hero-desc {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    max-width: 620px;
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+
+  .picks-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .picks-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .picks-stat-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--gold-400);
+    line-height: 1;
+  }
+
+  /* Golden Block callout */
+  .golden-block {
+    background: linear-gradient(135deg, rgba(0,220,154,0.08) 0%, rgba(75,31,207,0.10) 100%);
+    border: 1px solid rgba(0,220,154,0.28);
+    border-left: 4px solid var(--gold-500);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .golden-block-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+
+  .golden-block-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--gold-300);
+    margin-bottom: 4px;
+  }
+
+  .golden-block-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Pick cards */
+  .picks-day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 12px;
+  }
+
+  .picks-day-label {
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+    color: #03032a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .picks-day-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .pick-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+
+  .pick-card:hover { border-color: rgba(0,220,154,0.35); }
+
+  .pick-card.tier-1 {
+    border-left: 3px solid var(--gold-500);
+    background: rgba(0,220,154,0.03);
+  }
+
+  .pick-card.tier-2 {
+    border-left: 3px solid var(--purple-300);
+    background: rgba(107,68,224,0.03);
+  }
+
+  .pick-card.tier-3 {
+    border-left: 3px solid var(--text-muted);
+  }
+
+  .pick-tier-badge {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-top: 2px;
+  }
+
+  .pick-tier-badge.t1 { background: rgba(0,220,154,0.15); }
+  .pick-tier-badge.t2 { background: rgba(139,107,233,0.15); }
+  .pick-tier-badge.t3 { background: rgba(88,96,168,0.12); }
+
+  .pick-body { flex: 1; min-width: 0; }
+
+  .pick-time-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+  }
+
+  .pick-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold-400);
+    font-weight: 500;
+  }
+
+  .pick-track {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .pick-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    line-height: 1.3;
+  }
+
+  .pick-speakers {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .pick-speakers strong { color: var(--gold-300); font-weight: 600; }
+
+  .pick-why {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    background: rgba(0,220,154,0.04);
+    border-left: 2px solid rgba(0,220,154,0.25);
+    padding: 7px 10px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 6px;
+  }
+
+  .pick-why em { color: var(--gold-300); font-style: normal; font-weight: 600; }
+
+  .pick-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--gold-500);
+    text-decoration: none;
+    margin-top: 7px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .pick-map-link:hover { opacity: 1; }
+
+  .tier-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: rgba(7,9,70,0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .tier-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+  }
+
+  .tier-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .picks-hero { padding: 18px 16px; }
+    .picks-hero-title { font-size: 1.2rem; }
+    .picks-hero-desc { font-size: 0.78rem; }
+    .pick-card { padding: 14px 14px; gap: 10px; }
+    .pick-tier-badge { width: 28px; height: 28px; font-size: 0.85rem; }
+    .pick-title { font-size: 0.83rem; }
+    .pick-why { font-size: 0.72rem; }
+    .golden-block { flex-direction: column; gap: 8px; }
+    .golden-block-icon { font-size: 1.2rem; }
+    .picks-stats { gap: 12px; }
+  }
+
+  /* ── iPhone safe area (notch + home bar) ── */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .main-content { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+    .page-footer { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  }
+  @supports (padding-top: env(safe-area-inset-top)) {
+    .site-header { padding-top: env(safe-area-inset-top); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SITE HEADER + COUNTDOWN
+═══════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <span class="event-name">✦ HumanX 2026</span>
+      <span class="trip-label">Trip Companion · Brice &amp; Brad</span>
+    </div>
+    <div class="countdown-widget">
+      <span class="countdown-label">Departure in</span>
+      <div class="countdown-units">
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-days">--</span>
+          <span class="countdown-unit-label">Days</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-hours">--</span>
+          <span class="countdown-unit-label">Hrs</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-mins">--</span>
+          <span class="countdown-unit-label">Min</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-secs">--</span>
+          <span class="countdown-unit-label">Sec</span>
+        </div>
+      </div>
+    </div>
+    <a href="https://humanx2026.expofp.com" target="_blank" rel="noopener" class="map-btn">
+      🗺️ Expo Floor Map
+    </a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     TAB NAVIGATION
+═══════════════════════════════════════ -->
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="switchTab('overview', this)"><span class="nav-icon">🏠</span><span class="nav-label">Overview</span></button>
+    <button class="nav-btn" onclick="switchTab('flights', this)"><span class="nav-icon">✈</span><span class="nav-label">Flights</span></button>
+    <button class="nav-btn" onclick="switchTab('hotel', this)"><span class="nav-icon">🏨</span><span class="nav-label">Hotel</span></button>
+    <button class="nav-btn" onclick="switchTab('conference', this)"><span class="nav-icon">🎤</span><span class="nav-label">Conference</span></button>
+    <button class="nav-btn" onclick="switchTab('budget', this)"><span class="nav-icon">💰</span><span class="nav-label">Budget</span></button>
+    <button class="nav-btn" onclick="switchTab('speakers', this)"><span class="nav-icon">⭐</span><span class="nav-label">Speakers</span></button>
+    <button class="nav-btn nav-btn-picks" onclick="switchTab('mypicks', this)"><span class="nav-icon">🎬</span><span class="nav-label">Brice's Picks</span></button>
+    <button class="nav-btn nav-btn-sf" onclick="switchTab('sfguide', this)"><span class="nav-icon">🌉</span><span class="nav-label">SF Guide</span></button>
+    <button class="nav-btn nav-btn-notes" onclick="switchTab('notes', this)"><span class="nav-icon">📝</span><span class="nav-label">Notes</span></button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- ════════════════════════════
+       OVERVIEW TAB
+  ════════════════════════════ -->
+  <div id="tab-overview" class="tab-panel active">
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+      <div class="hero-event">April 6–9, 2026 · Moscone Center South, San Francisco, CA</div>
+      <div class="hero-title">HumanX 2026<br>AI Conference</div>
+      <div class="hero-dates">Full Trip: April 5–10, 2026 &nbsp;·&nbsp; United Airlines Conf: <span class="mono text-gold">I4WEPF</span></div>
+      <div class="traveler-cards">
+        <div class="traveler-card">
+          <div class="traveler-avatar">BP</div>
+          <div>
+            <div class="traveler-name">Josiah "Brice" Perkins</div>
+            <div class="traveler-role">Marketing / Sales / CX / Audiovisual Manager<br>WLR Automotive Group</div>
+          </div>
+        </div>
+        <div class="traveler-card">
+          <div class="traveler-avatar">BT</div>
+          <div>
+            <div class="traveler-name">Bradley William Thomas</div>
+            <div class="traveler-role">NASA · Co-traveler &amp; Conference Attendee</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Alerts -->
+    <div class="card-title mt-20" style="margin-bottom:12px;"><span style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--gold-300);">⚠ Key Alerts</span></div>
+    <div class="alerts-grid">
+      <div class="alert-item red">
+        <span class="alert-icon">🚨</span>
+        <div class="alert-text red">
+          <strong>Early Departure — BWI 6:05 AM</strong>
+          Arrive BWI by 5:00 AM. Bags must be dropped by 5:20 AM (45-min United cutoff). Set multiple alarms.
+        </div>
+      </div>
+      <div class="alert-item red">
+        <span class="alert-icon">🚨</span>
+        <div class="alert-text red">
+          <strong>Return Flight — SFO 8:39 AM</strong>
+          Leave Marriott Marquis by 6:45 AM on Friday, April 10 to make SFO in time.
+        </div>
+      </div>
+      <div class="alert-item amber">
+        <span class="alert-icon">⏳</span>
+        <div class="alert-text amber">
+          <strong>Hotel Confirmation Pending</strong>
+          Marriott confirmation # not yet received. Watch for a second email from Marriott. Acknowledgment: <span class="mono">LI5UF6B2</span>.
+        </div>
+      </div>
+      <div class="alert-item amber">
+        <span class="alert-icon">🅿️</span>
+        <div class="alert-text amber">
+          <strong>BWI Parking Cost</strong>
+          BWI Hourly Lot for 5 days may be significantly more expensive than Daily lots. Confirm cost with WLR before booking.
+        </div>
+      </div>
+      <div class="alert-item amber">
+        <span class="alert-icon">🍽️</span>
+        <div class="alert-text amber">
+          <strong>Food Allowance Dates Unclear</strong>
+          WLR confirmed $90/day food allowance for Apr 6–9 only. Apr 5 (travel day) and Apr 10 (return day) are NOT confirmed covered — verify with WLR.
+        </div>
+      </div>
+      <div class="alert-item red">
+        <span class="alert-icon">🔒</span>
+        <div class="alert-text red">
+          <strong>Hotel Non-Refundable</strong>
+          Past Jan 30 cancellation deadline. Cancelling now forfeits 1-night deposit + $40 non-refundable fee.
+        </div>
+      </div>
+      <div class="alert-item green">
+        <span class="alert-icon">🚶</span>
+        <div class="alert-text green">
+          <strong>Skip Ubers on Conference Days</strong>
+          The Marriott Marquis is only a 3-min walk to Moscone Center South. No Uber needed Apr 6–9.
+        </div>
+      </div>
+      <div class="alert-item blue">
+        <span class="alert-icon">💳</span>
+        <div class="alert-text blue">
+          <strong>Separate Expense Reporting</strong>
+          Keep WLR expenses and NASA expenses completely separate for reimbursement. Do not co-mingle receipts.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Reference Numbers -->
+    <div class="card-title mt-20" style="margin-bottom:12px;"><span style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--gold-300);">📋 Quick Reference</span></div>
+    <div class="quickref-grid">
+      <div class="quickref-item">
+        <div class="quickref-label">Flight Confirmation</div>
+        <div class="quickref-value">I4WEPF</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Hotel Acknowledgment</div>
+        <div class="quickref-value">LI5UF6B2</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brice Ticket #</div>
+        <div class="quickref-value">0162370043892</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brad Ticket #</div>
+        <div class="quickref-value">0162370043893</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brice MileagePlus</div>
+        <div class="quickref-value">XXXXX147</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brice TSA PreCheck</div>
+        <div class="quickref-value">TT11SZNF3</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brad TSA PreCheck</div>
+        <div class="quickref-value" style="color:var(--text-muted);">Not enrolled</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Hotel Address</div>
+        <div class="quickref-value" style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--gold-200);">780 Mission St, SF, CA 94103</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Outbound Seats</div>
+        <div class="quickref-value">08A (Brice) · 08B (Brad)</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Return Seats</div>
+        <div class="quickref-value">10A (Brice) · 10B (Brad)</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Conference Hotel Partner</div>
+        <div class="quickref-value" style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--gold-200);">housing@humanx.co</div>
+      </div>
+      <div class="quickref-item">
+        <div class="quickref-label">Brice PQP Accrual</div>
+        <div class="quickref-value">368 PQP · 2 PQF</div>
+      </div>
+      <div class="quickref-item quickref-item--highlight">
+        <div class="quickref-label" style="margin-bottom:8px;">Expo Floor Map</div>
+        <a href="https://humanx2026.expofp.com" target="_blank" rel="noopener" class="map-btn" style="font-size:0.7rem;">🗺️ Open Map</a>
+      </div>
+    </div>
+
+    <!-- ── EMERGENCY CONTACTS ── -->
+    <div class="card card--red mt-20">
+      <div class="card-title" style="margin-bottom:12px;"><span class="icon">🆘</span> Emergency &amp; Key Contacts</div>
+      <div class="data-row"><span class="label">SF Marriott Marquis (Front Desk)</span><span class="value mono"><a href="tel:+14158961600" style="color:var(--gold-400);text-decoration:none;">(415) 896-1600</a></span></div>
+      <div class="data-row"><span class="label">United Airlines (Customer Service)</span><span class="value mono"><a href="tel:+18008648331" style="color:var(--gold-400);text-decoration:none;">1-800-864-8331</a></span></div>
+      <div class="data-row"><span class="label">SFO Airport Info</span><span class="value mono"><a href="tel:+16508218211" style="color:var(--gold-400);text-decoration:none;">(650) 821-8211</a></span></div>
+      <div class="data-row"><span class="label">SF Police (Non-Emergency)</span><span class="value mono"><a href="tel:+14155530123" style="color:var(--gold-400);text-decoration:none;">(415) 553-0123</a></span></div>
+      <div class="data-row"><span class="label">Emergency (US)</span><span class="value mono"><a href="tel:911" style="color:var(--alert-red);text-decoration:none;">911</a></span></div>
+      <div class="data-row"><span class="label">Nearest Urgent Care to Moscone</span><span class="value" style="color:var(--text-secondary);">SF Urgent Care Center · 600 Market St · <a href="https://www.google.com/maps/dir/?api=1&destination=600+Market+St,+San+Francisco,+CA+94104&travelmode=walking" target="_blank" rel="noopener" style="color:var(--purple-300);text-decoration:none;">Directions</a></span></div>
+      <div class="data-row"><span class="label">HumanX Conference Support</span><span class="value"><a href="mailto:housing@humanx.co" style="color:var(--gold-400);text-decoration:none;">housing@humanx.co</a></span></div>
+    </div>
+
+    <!-- ── QUICK ACTIONS ── -->
+    <div class="quick-actions">
+
+      <!-- Directions to Hotel -->
+      <a href="https://www.google.com/maps/dir/?api=1&destination=780+Mission+St,+San+Francisco,+CA+94103&travelmode=driving"
+         target="_blank" rel="noopener"
+         class="action-btn action-btn-directions">
+        <span class="action-btn-icon">🗺️</span>
+        <span class="action-btn-text">
+          <span class="action-btn-label">Directions to Hotel</span>
+          <span class="action-btn-sub">780 Mission St · SF Marriott Marquis</span>
+        </span>
+      </a>
+
+      <!-- Uber to Hotel -->
+      <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=37.7847&dropoff[longitude]=-122.4011&dropoff[nickname]=SF%20Marriott%20Marquis&dropoff[formatted_address]=780%20Mission%20St%2C%20San%20Francisco%2C%20CA%2094103"
+         target="_blank" rel="noopener"
+         class="action-btn action-btn-uber">
+        <span class="action-btn-icon">🚗</span>
+        <span class="action-btn-text">
+          <span class="action-btn-label">Get Uber to Hotel</span>
+          <span class="action-btn-sub">Destination pre-set · SF Marriott Marquis</span>
+        </span>
+      </a>
+
+      <!-- Uber Hotel → SFO -->
+      <a href="https://m.uber.com/ul/?action=setPickup&pickup[latitude]=37.7847&pickup[longitude]=-122.4011&pickup[nickname]=SF%20Marriott%20Marquis&pickup[formatted_address]=780%20Mission%20St%2C%20San%20Francisco%2C%20CA%2094103&dropoff[latitude]=37.6213&dropoff[longitude]=-122.3790&dropoff[nickname]=SFO%20Airport&dropoff[formatted_address]=San%20Francisco%20International%20Airport%2C%20CA"
+         target="_blank" rel="noopener"
+         class="action-btn action-btn-uber">
+        <span class="action-btn-icon">✈️</span>
+        <span class="action-btn-text">
+          <span class="action-btn-label">Uber Hotel → SFO</span>
+          <span class="action-btn-sub">Pickup: Marriott Marquis · Drop-off: SFO</span>
+        </span>
+      </a>
+
+      <!-- Directions to Moscone -->
+      <a href="https://www.google.com/maps/dir/?api=1&destination=Moscone+Center,+747+Howard+St,+San+Francisco,+CA+94103&travelmode=walking"
+         target="_blank" rel="noopener"
+         class="action-btn action-btn-directions">
+        <span class="action-btn-icon">🏛️</span>
+        <span class="action-btn-text">
+          <span class="action-btn-label">Directions to Moscone</span>
+          <span class="action-btn-sub">747 Howard St · 3 min walk from hotel</span>
+        </span>
+      </a>
+
+      <!-- Uber to Moscone -->
+      <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=37.7841&dropoff[longitude]=-122.4000&dropoff[nickname]=Moscone%20Center&dropoff[formatted_address]=747%20Howard%20St%2C%20San%20Francisco%2C%20CA%2094103"
+         target="_blank" rel="noopener"
+         class="action-btn action-btn-uber">
+        <span class="action-btn-icon">🚗</span>
+        <span class="action-btn-text">
+          <span class="action-btn-label">Uber to Moscone</span>
+          <span class="action-btn-sub">Conference venue · 747 Howard St</span>
+        </span>
+      </a>
+
+    </div>
+
+  </div><!-- /overview -->
+
+  <!-- ════════════════════════════
+       FLIGHTS TAB
+  ════════════════════════════ -->
+  <div id="tab-flights" class="tab-panel">
+    <div class="section-title">Flights</div>
+    <div class="section-subtitle">United Airlines · Confirmation <span class="mono">I4WEPF</span> · Both travelers: Economy Plus with checked bags</div>
+
+    <!-- Outbound Flight -->
+    <div class="flight-card">
+      <div class="flight-header">
+        <div class="flight-direction">✈ Outbound — BWI → SFO</div>
+        <div class="flight-meta">
+          <span class="badge badge-gold">UA2192</span>
+          <span class="badge badge-green">Nonstop</span>
+          <span class="badge badge-blue">Economy Plus (XN)</span>
+        </div>
+      </div>
+
+      <div class="flight-route">
+        <div class="airport">
+          <div class="airport-code">BWI</div>
+          <div class="airport-city">Baltimore</div>
+          <div class="airport-time">6:05 AM</div>
+          <div class="airport-date">Sun, April 5</div>
+        </div>
+        <div class="route-line">
+          <div class="route-duration">5h 11m</div>
+          <div class="route-track">
+            <div class="route-dot"></div>
+            <div class="route-dash"></div>
+            <span class="route-plane">✈</span>
+            <div class="route-dash"></div>
+            <div class="route-dot"></div>
+          </div>
+          <div class="route-nonstop">● Nonstop</div>
+        </div>
+        <div class="airport" style="text-align:right;align-items:flex-end;">
+          <div class="airport-code">SFO</div>
+          <div class="airport-city">San Francisco</div>
+          <div class="airport-time">9:16 AM</div>
+          <div class="airport-date">Sun, April 5</div>
+        </div>
+      </div>
+
+      <div class="seats-row">
+        <div class="seat-item">
+          <div class="seat-box">08A</div>
+          <div>
+            <div class="seat-name">Brice</div>
+            <div class="seat-class">Window</div>
+          </div>
+        </div>
+        <div class="seat-item">
+          <div class="seat-box">08B</div>
+          <div>
+            <div class="seat-name">Brad</div>
+            <div class="seat-class">Middle</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;text-align:right;font-size:0.78rem;color:var(--text-muted);">
+          Checked bag included · Both travelers
+        </div>
+      </div>
+
+      <div class="flight-details-grid mt-12">
+        <div>
+          <div class="data-row"><span class="label">Brice Ticket #</span><span class="value mono">0162370043892</span></div>
+          <div class="data-row"><span class="label">Brad Ticket #</span><span class="value mono">0162370043893</span></div>
+        </div>
+        <div>
+          <div class="data-row"><span class="label">Brice MileagePlus</span><span class="value mono">XXXXX147</span></div>
+          <div class="data-row"><span class="label">Brice TSA PreCheck</span><span class="value mono">TT11SZNF3</span></div>
+          <div class="data-row"><span class="label">Brad TSA PreCheck</span><span class="value" style="color:var(--text-muted);">Not enrolled</span></div>
+          <div class="data-row"><span class="label">Checked Bags</span><span class="value">Included for both</span></div>
+          <div class="data-row"><span class="label">Aircraft</span><span class="value">Boeing 737 MAX 8</span></div>
+        </div>
+      </div>
+
+      <div class="alert-item red mt-12">
+        <span class="alert-icon">⏰</span>
+        <div class="alert-text red">
+          <strong>6:05 AM Departure — Arrive BWI by 5:00 AM</strong>
+          United requires bags dropped 45 min before departure (5:20 AM cutoff). Give yourself buffer for parking and security.
+        </div>
+      </div>
+
+      <a href="https://www.flightradar24.com/data/flights/ua2192" target="_blank" rel="noopener" class="tracker-btn">
+        <span class="tracker-btn-pulse"></span>
+        Live Track UA2192 · BWI → SFO on FlightRadar24
+      </a>
+    </div>
+
+    <!-- Return Flight -->
+    <div class="flight-card">
+      <div class="flight-header">
+        <div class="flight-direction">✈ Return — SFO → BWI</div>
+        <div class="flight-meta">
+          <span class="badge badge-gold">UA2664</span>
+          <span class="badge badge-green">Nonstop</span>
+          <span class="badge badge-blue">Economy Plus (YN)</span>
+        </div>
+      </div>
+
+      <div class="flight-route">
+        <div class="airport">
+          <div class="airport-code">SFO</div>
+          <div class="airport-city">San Francisco</div>
+          <div class="airport-time">8:39 AM</div>
+          <div class="airport-date">Fri, April 10</div>
+        </div>
+        <div class="route-line">
+          <div class="route-duration">5h 34m</div>
+          <div class="route-track">
+            <div class="route-dot"></div>
+            <div class="route-dash"></div>
+            <span class="route-plane">✈</span>
+            <div class="route-dash"></div>
+            <div class="route-dot"></div>
+          </div>
+          <div class="route-nonstop">● Nonstop</div>
+        </div>
+        <div class="airport" style="text-align:right;align-items:flex-end;">
+          <div class="airport-code">BWI</div>
+          <div class="airport-city">Baltimore</div>
+          <div class="airport-time">5:13 PM</div>
+          <div class="airport-date">Fri, April 10</div>
+        </div>
+      </div>
+
+      <div class="seats-row">
+        <div class="seat-item">
+          <div class="seat-box">10A</div>
+          <div>
+            <div class="seat-name">Brice</div>
+            <div class="seat-class">Window</div>
+          </div>
+        </div>
+        <div class="seat-item">
+          <div class="seat-box">10B</div>
+          <div>
+            <div class="seat-name">Brad</div>
+            <div class="seat-class">Middle</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;text-align:right;font-size:0.78rem;color:var(--text-muted);">
+          Checked bag included · Both travelers
+        </div>
+      </div>
+
+      <div class="flight-details-grid mt-12">
+        <div>
+          <div class="data-row"><span class="label">Aircraft</span><span class="value">Boeing 737 MAX 8</span></div>
+        </div>
+        <div>
+          <div class="data-row"><span class="label">Checked Bags</span><span class="value">Included for both</span></div>
+        </div>
+      </div>
+
+      <div class="alert-item amber mt-12">
+        <span class="alert-icon">⏰</span>
+        <div class="alert-text amber">
+          <strong>8:39 AM SFO Departure — Leave Marriott by 6:45 AM</strong>
+          Allow ~45 min to reach SFO from downtown SF, plus time for security and bag drop. Check out before leaving.
+        </div>
+      </div>
+
+      <a href="https://www.flightradar24.com/data/flights/ua2664" target="_blank" rel="noopener" class="tracker-btn">
+        <span class="tracker-btn-pulse"></span>
+        Live Track UA2664 · SFO → BWI on FlightRadar24
+      </a>
+    </div>
+
+    <!-- Check-In & Terminal Info -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📲</span> Online Check-In &amp; Terminal Info</div>
+      <div class="data-row"><span class="label">Check-In Opens — UA2192 (BWI→SFO)</span><span class="value" style="color:var(--alert-amber);">Sat Apr 4 · 6:05 AM EDT</span></div>
+      <div class="data-row"><span class="label">Check-In Opens — UA2664 (SFO→BWI)</span><span class="value" style="color:var(--alert-amber);">Thu Apr 9 · 8:39 AM PDT</span></div>
+      <div class="data-row"><span class="label">BWI Terminal</span><span class="value">Concourse C · United Airlines</span></div>
+      <div class="data-row"><span class="label">BWI TSA PreCheck Lane</span><span class="value">Concourse C Security (Brice eligible ✓)</span></div>
+      <div class="data-row"><span class="label">SFO Terminal</span><span class="value">Terminal 3 · United Airlines</span></div>
+      <div class="data-row"><span class="label">SFO TSA PreCheck Lane</span><span class="value">Terminal 3 Security (Brice eligible ✓)</span></div>
+      <div style="margin-top:14px;">
+        <a href="https://www.united.com/en/us/checkin" target="_blank" rel="noopener" class="btn-checkin">
+          ✈️ Check In on United.com
+        </a>
+      </div>
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="card">
+      <div class="card-title"><span class="icon">💸</span> Flight Cost Breakdown</div>
+      <div class="data-row"><span class="label">Base Airfare (both travelers)</span><span class="value mono">73,600 miles + $22.40</span></div>
+      <div class="data-row"><span class="label">Economy Plus Upgrades + Bags (both, both ways)</span><span class="value mono">$856.56 cash</span></div>
+      <div class="data-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:12px;font-weight:700;">
+        <span class="label" style="color:var(--text-primary);">Total Cash Outlay</span>
+        <span class="value mono" style="color:var(--gold-400);">$878.96 + 73,600 miles</span>
+      </div>
+      <div class="data-row"><span class="label">Paid By</span><span class="value">WLR Automotive Group</span></div>
+      <div class="data-row"><span class="label">MileagePlus Accrual (Brice)</span><span class="value mono">368 PQP · 2 PQF</span></div>
+    </div>
+  </div><!-- /flights -->
+
+  <!-- ════════════════════════════
+       HOTEL TAB
+  ════════════════════════════ -->
+  <div id="tab-hotel" class="tab-panel">
+    <div class="section-title">Hotel</div>
+    <div class="section-subtitle">5 nights in San Francisco · April 5–10, 2026</div>
+
+    <div class="hotel-hero">
+      <div class="hotel-logo">🏨</div>
+      <div class="hotel-info">
+        <div class="hotel-name">San Francisco Marriott Marquis</div>
+        <div class="hotel-address">780 Mission Street, San Francisco, CA 94103</div>
+        <div class="hotel-walk-badge">🚶 3-min walk to Moscone Center South</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
+        <span class="badge badge-gold">5 Nights</span>
+        <span class="badge badge-green">2 Double Beds</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">📅</span> Stay Details</div>
+        <div class="data-row"><span class="label">Check-In</span><span class="value">Sunday, April 5, 2026</span></div>
+        <div class="data-row"><span class="label">Checkout</span><span class="value">Friday, April 10, 2026</span></div>
+        <div class="data-row"><span class="label">Nights</span><span class="value mono">5</span></div>
+        <div class="data-row"><span class="label">Room Type</span><span class="value">Standard — 2 Double Beds</span></div>
+        <div class="data-row"><span class="label">Guests</span><span class="value">1 (registered)</span></div>
+        <div class="data-row"><span class="label">Booked Via</span><span class="value">Connections Housing (HumanX)</span></div>
+        <div class="data-row"><span class="label">Booking Contact</span><span class="value mono" style="font-size:0.78rem;">housing@humanx.co</span></div>
+        <div class="data-row"><span class="label">Booked On</span><span class="value">February 4, 2026</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🔑</span> Confirmation Numbers</div>
+        <div class="data-row"><span class="label">Acknowledgment #</span><span class="value mono">LI5UF6B2</span></div>
+        <div class="data-row">
+          <span class="label">Hotel Conf. #</span>
+          <span class="value" style="color:var(--alert-amber);">⏳ PENDING</span>
+        </div>
+        <div class="alert-item amber mt-12">
+          <span class="alert-icon">📧</span>
+          <div class="alert-text amber">
+            <strong>Second Email Expected from Marriott</strong>
+            The hotel confirmation number has not yet been received. Watch your inbox for an email directly from Marriott.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="cost-breakdown mt-16">
+      <div class="cost-row">
+        <span class="cost-label">Nightly Rate × 5 nights</span>
+        <span class="cost-val">$291.00 × 5 = $1,455.00</span>
+      </div>
+      <div class="cost-row">
+        <span class="cost-label">Room Tax (17.5%)</span>
+        <span class="cost-val">$254.63</span>
+      </div>
+      <div class="cost-row">
+        <span class="cost-label">CA Tourism Fee ($0.73/night × 5)</span>
+        <span class="cost-val">$3.65</span>
+      </div>
+      <div class="cost-row total">
+        <span class="cost-label">Total Charged</span>
+        <span class="cost-val">$1,713.28</span>
+      </div>
+    </div>
+
+    <!-- Cancellation Warning -->
+    <div class="cancel-warning mt-16">
+      <strong>🔒 Cancellation Policy — Non-Refundable</strong><br>
+      The January 30, 2026 cancellation deadline has passed. Cancelling the reservation at this point will forfeit the <strong>1-night deposit</strong> plus a <strong>$40 non-refundable fee</strong>. This booking is effectively locked in.
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-title"><span class="icon">💳</span> Payment Info</div>
+      <div class="data-row"><span class="label">Covered By</span><span class="value">WLR Automotive Group (all 5 nights + taxes)</span></div>
+      <div class="data-row"><span class="label">Brice Out-of-Pocket</span><span class="value text-gold mono">$0.00</span></div>
+    </div>
+
+    <!-- Friday Checkout Alert -->
+    <div class="alert-item red mt-16" style="border-color:rgba(255,94,114,0.5);background:rgba(255,94,114,0.08);">
+      <span class="alert-icon" style="font-size:1.4rem;">🚨</span>
+      <div class="alert-text red">
+        <strong style="font-size:0.95rem;">FRIDAY CHECKOUT — 6:45 AM Hard Deadline</strong><br>
+        <span style="font-size:0.82rem;line-height:1.6;display:block;margin-top:4px;">
+          Flight UA2664 departs SFO at <strong>8:39 AM</strong>. You must leave the hotel by <strong>6:45 AM</strong> at the latest to allow ~45 min to SFO plus bag drop and security.<br>
+          <strong>Set a 5:30 AM alarm.</strong> Request a late checkout or bag storage the night before if needed. Hotel front desk: <span style="font-family:'DM Mono',monospace;">(415) 896-1600</span>
+        </span>
+      </div>
+    </div>
+
+  </div><!-- /hotel -->
+
+  <!-- ════════════════════════════
+       CONFERENCE TAB
+  ════════════════════════════ -->
+  <div id="tab-conference" class="tab-panel">
+    <div class="section-title">Conference Itinerary</div>
+    <div class="section-subtitle">HumanX 2026 · April 6–9 · Moscone Center South, San Francisco</div>
+
+    <!-- Day 1: Apr 5 Travel -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 5</div>
+        <div>
+          <div class="day-title">Sunday — Travel Day</div>
+          <div class="day-note">Flight UA2192 · BWI 6:05 AM → SFO 9:16 AM · Check in to Marriott Marquis</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item">
+          <div class="session-time">6:05 AM</div>
+          <div class="session-body">
+            <div class="session-title">Depart BWI → Arrive SFO 9:16 AM</div>
+            <div class="session-meta">Flight UA2192 · Seats 08A (Brice) &amp; 08B (Brad)</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">~11 AM</div>
+          <div class="session-body">
+            <div class="session-title">Check In — San Francisco Marriott Marquis</div>
+            <div class="session-meta">780 Mission St · Standard Room, 2 Double Beds</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body">
+            <div class="session-title">Explore SF / Rest</div>
+            <div class="session-meta">Food allowance status for Apr 5 unconfirmed — verify with WLR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2: Apr 6 -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 6</div>
+        <div>
+          <div class="day-title">Monday — Arrival &amp; Setup Day</div>
+          <div class="day-note">Food allowance begins · $90/day</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item priority">
+          <div class="session-time">12–6 PM</div>
+          <div class="session-body">
+            <div class="session-title">Pre-Registration — Sponsored by DeepL</div>
+            <div class="session-meta">Do this today to skip lines on Tuesday. Pick up badge and materials.</div>
+            <div class="session-badges"><span class="badge badge-gold">High Priority</span></div>
+          </div>
+        </div>
+        <div class="session-item priority">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body">
+            <div class="session-title">Set Up HumanX Connect &amp; Peer [X]change Profiles</div>
+            <div class="session-meta">Download the HumanX Connect app. Complete both networking profiles thoroughly — the matching algorithm runs overnight and surfaces your best connections by morning.</div>
+            <div class="session-badges"><span class="badge badge-gold">Do Today</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Evening</div>
+          <div class="session-body">
+            <div class="session-title">Explore SF · Dinner</div>
+            <div class="session-meta">$90 food allowance active today. Explore the city — Marriott is walkable to Union Square, Yerba Buena, and the Embarcadero.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3: Apr 7 -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 7</div>
+        <div>
+          <div class="day-title">Tuesday — Power Day</div>
+          <div class="day-note">Heavy sessions · Opening Night · Network hard</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item priority">
+          <div class="session-time">Morning</div>
+          <div class="session-body">
+            <div class="session-title">Dr. Fei-Fei Li Keynote — Main Stage</div>
+            <div class="session-meta">Co-founder, World Labs &amp; Stanford HAI. The most important voice in human-centered AI. This is the marquee keynote of the conference.</div>
+            <div class="session-badges"><span class="do-not-miss">⭐ DO NOT MISS</span><span class="badge badge-gold">Main Stage</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">12:30 PM</div>
+          <div class="session-body">
+            <div class="session-title">AI, Identity, and the Future of Connection</div>
+            <div class="session-meta">Customer Engine Track · George Arison (Grindr CEO), Renate Nyborg (Meeno CEO), moderated by Hannah Murphy (Financial Times). Key CX + AI intersection.</div>
+            <div class="session-badges"><span class="badge badge-blue">Customer Engine</span></div>
+          </div>
+        </div>
+        <div class="session-item priority">
+          <div class="session-time">2:20 PM</div>
+          <div class="session-body">
+            <div class="session-title">The Next Human-AI Era Starts at Home — Ray Kurzweil &amp; Ethan Kurzweil</div>
+            <div class="session-meta">Main Stage · Moderated by Shirin Ghaffary (Bloomberg). Legendary AI futurist with his son. Cross-generational AI perspective, strong creative AI angle relevant to Brice's AV work.</div>
+            <div class="session-badges"><span class="do-not-miss">⭐ DO NOT MISS</span><span class="badge badge-gold">Main Stage</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Evening</div>
+          <div class="session-body">
+            <div class="session-title">Opening Ceremonies · Women at HumanX Reception · Networking</div>
+            <div class="session-meta">Use HumanX Connect to schedule meetings. This is the highest-energy networking window of the conference.</div>
+            <div class="session-badges"><span class="badge badge-blue">Networking</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4: Apr 8 -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 8</div>
+        <div>
+          <div class="day-title">Wednesday — Split &amp; Conquer Day</div>
+          <div class="day-note">Brice &amp; Brad cover different tracks simultaneously · Debrief over lunch</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item priority">
+          <div class="session-time">All Morning</div>
+          <div class="session-body">
+            <div class="session-title">Customer Engine Track — Brice</div>
+            <div class="session-meta">Full morning of AI marketing, CX, and sales automation sessions. Core content for Brice's WLR role. Stay in this track all morning.</div>
+            <div class="session-badges"><span class="badge badge-gold">Brice</span><span class="badge badge-blue">Customer Engine</span></div>
+          </div>
+        </div>
+        <div class="session-item priority">
+          <div class="session-time">Mid-Morning</div>
+          <div class="session-body">
+            <div class="session-title">Harvey Mason Jr. Session — AI in Creative &amp; Entertainment</div>
+            <div class="session-meta">Grammy-winning producer and Recording Academy CEO. Unique AI + creative arts angle — directly relevant to Brice's AV management background. High-priority for Brice.</div>
+            <div class="session-badges"><span class="badge badge-gold">Brice · Key Session</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Mid-Morning</div>
+          <div class="session-body">
+            <div class="session-title">How P&amp;G is Accelerating AI Adoption for Lasting Business Impact — Brad covers</div>
+            <div class="session-meta">Fortune 500 AI case study. Brad attends while Brice is in Customer Engine / Harvey Mason session. Debrief together at lunch.</div>
+            <div class="session-badges"><span class="badge badge-blue">Brad covers</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Midday</div>
+          <div class="session-body">
+            <div class="session-title">Lunch Debrief — Brice &amp; Brad</div>
+            <div class="session-meta">Sync on morning sessions. Share notes, identify afternoon priorities together.</div>
+            <div class="session-badges"><span class="badge badge-green">Debrief</span></div>
+          </div>
+        </div>
+        <div class="session-item priority">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body">
+            <div class="session-title">CX Peer [X]change — "AI Without Design Is Just Faster Dysfunction"</div>
+            <div class="session-meta">The CX and EX Conversation Nobody Is Having. Role-based roundtable, Brice in the room with CX/Marketing/Sales peers. High-value for WLR-relevant takeaways.</div>
+            <div class="session-badges"><span class="do-not-miss">⭐ Priority</span><span class="badge badge-gold">Peer [X]change</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5: Apr 9 -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 9</div>
+        <div>
+          <div class="day-title">Thursday — Lock In Takeaways</div>
+          <div class="day-note">Final day · Closing ceremony · Last contacts · $90 food allowance last full day</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item priority">
+          <div class="session-time">2:30 PM</div>
+          <div class="session-body">
+            <div class="session-title">Leading in the Age of AI: What Must Stay Human in the Future of Work?</div>
+            <div class="session-meta">Roundtable led by Sarah Franklin, CEO of Lattice. Directly addresses the human-AI leadership balance — key framing for Brice's management role at WLR.</div>
+            <div class="session-badges"><span class="badge badge-gold">Roundtable</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">2:40 PM</div>
+          <div class="session-body">
+            <div class="session-title">Scaling Through Complexity in the Age of AI</div>
+            <div class="session-meta">Olivier Pomel (Datadog CEO) &amp; Eléonore Crespo (Pigment co-CEO). Enterprise AI scaling strategies — relevant for organizational AI adoption context.</div>
+            <div class="session-badges"><span class="badge badge-blue">Main Stage</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Late PM</div>
+          <div class="session-body">
+            <div class="session-title">e[X]po Floor Final Walk</div>
+            <div class="session-meta">Last pass through exhibitors and startups. Collect cards, demo products, note vendors for WLR follow-up.</div>
+            <div class="session-badges"><span class="badge badge-blue">e[X]po</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">Evening</div>
+          <div class="session-body">
+            <div class="session-title">Closing Ceremony · Final Networking</div>
+            <div class="session-meta">Exchange final contacts. Schedule post-conference LinkedIn connections. Tonight is the last night in SF — dinner on $90 allowance.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 6: Apr 10 -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-badge">Apr 10</div>
+        <div>
+          <div class="day-title">Friday — Return Travel Day</div>
+          <div class="day-note">Check out by 6:45 AM · Flight UA2664 SFO 8:39 AM → BWI 5:13 PM</div>
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item priority">
+          <div class="session-time">6:45 AM</div>
+          <div class="session-body">
+            <div class="session-title">Leave Marriott Marquis for SFO</div>
+            <div class="session-meta">Depart hotel no later than 6:45 AM. Checkout the night before or at the desk on the way out.</div>
+            <div class="session-badges"><span class="badge badge-red" style="background:rgba(255,94,114,0.15);color:var(--alert-red);border-color:rgba(255,94,114,0.32);">Time-Critical</span></div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-time">8:39 AM</div>
+          <div class="session-body">
+            <div class="session-title">Depart SFO → Arrive BWI 5:13 PM</div>
+            <div class="session-meta">Flight UA2664 · Seats 10A (Brice) &amp; 10B (Brad) · 5h 34m nonstop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expo Floor Map CTA -->
+    <hr class="divider">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--gold-300);margin-bottom:3px;">🗺️ e[X]po Floor Map</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);">Interactive map of all exhibitors, stages &amp; session rooms · Moscone Center South</div>
+      </div>
+      <a href="https://humanx2026.expofp.com" target="_blank" rel="noopener" class="map-btn-large">
+        🗺️ Open Interactive Floor Map
+      </a>
+    </div>
+
+    <!-- Networking Programs -->
+    <div class="card-title mt-4" style="margin-bottom:12px;"><span style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--gold-300);">🤝 Networking Programs</span></div>
+    <div class="networking-grid">
+      <div class="network-card">
+        <div class="network-card-title">Peer [X]change</div>
+        <div class="network-card-desc">Role-based roundtables. Connects Brice with peers in Marketing, CX, and Sales. Small-group format — candid conversations about real problems. Set up profile on Apr 6 for best matching.</div>
+      </div>
+      <div class="network-card">
+        <div class="network-card-title">SolutionBridge</div>
+        <div class="network-card-desc">Double opt-in 1:1 meetings with AI vendors. 8 curated 15-minute sessions. Great for evaluating tools relevant to WLR's marketing and CX stack.</div>
+      </div>
+      <div class="network-card">
+        <div class="network-card-title">HumanX Connect (App)</div>
+        <div class="network-card-desc">App-based 15-minute 1:1 meeting scheduler with any attendee at the conference. Set up Apr 6 evening — algorithm works overnight to surface best connections.</div>
+      </div>
+      <div class="network-card" style="border-color:rgba(0,220,154,0.28);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;">
+          <div class="network-card-title" style="margin-bottom:0;">e[X]po Floor</div>
+          <a href="https://humanx2026.expofp.com" target="_blank" rel="noopener" class="map-btn" style="font-size:0.65rem;padding:5px 10px;">🗺️ Map</a>
+        </div>
+        <div class="network-card-desc">Startups, live product demos, and mini presentations. Walk the floor on Apr 8–9. Good source of emerging AI tools for marketing, content, CX, and AV production.</div>
+      </div>
+    </div>
+
+    <!-- Hashtags & Social -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📣</span> Conference Hashtags &amp; Social</div>
+      <div class="data-row"><span class="label">Official Hashtag</span><span class="value mono" style="color:var(--gold-400);">#HumanX2026</span></div>
+      <div class="data-row"><span class="label">Secondary Tags</span><span class="value mono">#HumanX #AIConference #GenAI</span></div>
+      <div class="data-row"><span class="label">LinkedIn Page</span><span class="value"><a href="https://www.linkedin.com/company/humanx-ai" target="_blank" rel="noopener" style="color:var(--purple-300);text-decoration:none;">linkedin.com/company/humanx-ai</a></span></div>
+      <div class="data-row"><span class="label">X / Twitter</span><span class="value"><a href="https://twitter.com/humanx_ai" target="_blank" rel="noopener" style="color:var(--purple-300);text-decoration:none;">@humanx_ai</a></span></div>
+      <div class="data-row"><span class="label">Conference App</span><span class="value"><a href="https://app.humanx.co/humanx2026/app/home" target="_blank" rel="noopener" style="color:var(--purple-300);text-decoration:none;">app.humanx.co</a></span></div>
+      <div class="data-row"><span class="label">WLR Social Tip</span><span class="value" style="color:var(--text-secondary);">Tag @WLRAutomotiveGroup + #HumanX2026 on every post for max reach</span></div>
+    </div>
+
+    <!-- Nearby Food & Coffee -->
+    <div class="card">
+      <div class="card-title"><span class="icon">☕</span> Near Moscone — Quick Eats &amp; Coffee</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">All within a 5–10 min walk of Moscone Center</div>
+      <div class="data-row"><span class="label">Sightglass Coffee</span><span class="value" style="color:var(--text-secondary);">7th &amp; Folsom · 4 min walk · SF's best third-wave coffee</span></div>
+      <div class="data-row"><span class="label">Blue Bottle Coffee</span><span class="value" style="color:var(--text-secondary);">Mint Plaza · 5 min walk · Quick espresso between sessions</span></div>
+      <div class="data-row"><span class="label">Mendocino Farms</span><span class="value" style="color:var(--text-secondary);">Near Embarcadero · 10 min walk · Best sandwiches in SoMa</span></div>
+      <div class="data-row"><span class="label">Mixt</span><span class="value" style="color:var(--text-secondary);">Mission St · 6 min walk · Fast salads &amp; grain bowls</span></div>
+      <div class="data-row"><span class="label">Super Duper Burgers</span><span class="value" style="color:var(--text-secondary);">Mission St · 5 min walk · Solid quick lunch</span></div>
+      <div class="data-row"><span class="label">Whole Foods</span><span class="value" style="color:var(--text-secondary);">8th &amp; Market · 8 min walk · Grab-and-go hot bar, snacks, drinks</span></div>
+      <div class="data-row"><span class="label">The Bird (fried chicken)</span><span class="value" style="color:var(--text-secondary);">Mission St · 5 min walk · Fast, cheap, great</span></div>
+    </div>
+
+  </div><!-- /conference -->
+
+  <!-- ════════════════════════════
+       BUDGET TAB
+  ════════════════════════════ -->
+  <div id="tab-budget" class="tab-panel">
+    <div class="section-title">Budget &amp; Expenses</div>
+    <div class="section-subtitle">All expenses separated by paying organization · Brice's total out-of-pocket: $0</div>
+
+    <!-- Out-of-pocket banner -->
+    <div class="oop-banner" style="margin-bottom:20px;">
+      <div class="oop-icon">✅</div>
+      <div>
+        <div class="oop-title">$0 Out-of-Pocket for Brice</div>
+        <div class="oop-sub">All conference, travel, hotel, and food expenses are covered between WLR Automotive Group and NASA. Keep receipts and expense reports meticulously separated.</div>
+      </div>
+    </div>
+
+    <div class="budget-split">
+      <!-- WLR Column -->
+      <div class="budget-org">
+        <div class="budget-org-header">
+          <div class="budget-org-icon wlr-icon">🏢</div>
+          <div>
+            <div class="budget-org-name">WLR Automotive Group</div>
+            <div class="budget-org-sub">Covers Brice's travel &amp; operations</div>
+          </div>
+        </div>
+        <div class="budget-line"><span class="b-label">Airfare — Miles</span><span class="b-val">73,600 mi + $22.40</span></div>
+        <div class="budget-line"><span class="b-label">Economy Plus Upgrades &amp; Bags (both travelers, both ways)</span><span class="b-val">$856.56</span></div>
+        <div class="budget-line"><span class="b-label">Hotel — 5 Nights (room subtotal)</span><span class="b-val">$1,455.00</span></div>
+        <div class="budget-line"><span class="b-label">Hotel — Tax (17.5%)</span><span class="b-val">$254.63</span></div>
+        <div class="budget-line"><span class="b-label">Hotel — CA Tourism Fee</span><span class="b-val">$3.65</span></div>
+        <div class="budget-line"><span class="b-label">Ubers (SF transport)</span><span class="b-val">Actual · Covered</span></div>
+        <div class="budget-line"><span class="b-label">BWI Airport Parking (~5 days)</span><span class="b-val">Actual · Covered ⚠</span></div>
+        <div class="budget-line"><span class="b-label">Food · Apr 6–9 (4 days × $90)</span><span class="b-val">$360.00</span></div>
+        <div class="budget-line" style="color:var(--alert-amber);"><span class="b-label" style="color:var(--alert-amber);">Food · Apr 5 &amp; Apr 10 travel days</span><span class="b-val" style="color:var(--alert-amber);">⚠ Unconfirmed</span></div>
+        <div class="budget-total-row">
+          <span class="b-label">Estimated Cash Total (WLR)</span>
+          <span class="b-val">~$2,952+ cash<br><span style="font-size:0.7rem;color:var(--text-muted);">+ 73,600 miles</span></span>
+        </div>
+      </div>
+
+      <!-- NASA Column -->
+      <div class="budget-org">
+        <div class="budget-org-header">
+          <div class="budget-org-icon nasa-icon">🚀</div>
+          <div>
+            <div class="budget-org-name">NASA</div>
+            <div class="budget-org-sub">Brad's employer · Covers conference passes</div>
+          </div>
+        </div>
+        <div class="budget-line"><span class="b-label">Brice's HumanX All-Access Pass</span><span class="b-val">~$3,395 (list)</span></div>
+        <div class="budget-line"><span class="b-label">Brad's HumanX All-Access Pass</span><span class="b-val">~$3,395 (list)</span></div>
+        <div class="budget-line" style="font-size:0.75rem;color:var(--text-muted);border:none;padding-top:4px;">
+          <span class="b-label">Actual price may vary after group/conference discount applied to both passes.</span><span class="b-val"></span>
+        </div>
+        <div class="budget-total-row">
+          <span class="b-label">Estimated Total (NASA)</span>
+          <span class="b-val">~$6,790+</span>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:rgba(107,68,224,0.08);border:1px solid rgba(107,68,224,0.20);border-radius:8px;font-size:0.78rem;color:var(--text-secondary);">
+          NASA pays for both All-Access Passes. These receipts must be submitted through Brad's NASA expense system, not WLR.
+        </div>
+      </div>
+    </div>
+
+    <!-- Food Allowance Chart -->
+    <div class="food-chart">
+      <div class="food-chart-title">Daily Food Allowance — $90/Day</div>
+      <div class="food-chart-sub">WLR confirmed coverage for conference days (Apr 6–9) · Travel days unconfirmed</div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 5 (Sun)</div>
+          <div class="bar-track">
+            <div class="bar-fill not-covered" style="width:75%;">⚠ Unconfirmed</div>
+          </div>
+          <div class="bar-amount">$90 max</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 6 (Mon)</div>
+          <div class="bar-track">
+            <div class="bar-fill covered" style="width:100%;">✓ Covered — $90</div>
+          </div>
+          <div class="bar-amount">$90.00</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 7 (Tue)</div>
+          <div class="bar-track">
+            <div class="bar-fill covered" style="width:100%;">✓ Covered — $90</div>
+          </div>
+          <div class="bar-amount">$90.00</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 8 (Wed)</div>
+          <div class="bar-track">
+            <div class="bar-fill covered" style="width:100%;">✓ Covered — $90</div>
+          </div>
+          <div class="bar-amount">$90.00</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 9 (Thu)</div>
+          <div class="bar-track">
+            <div class="bar-fill covered" style="width:100%;">✓ Covered — $90</div>
+          </div>
+          <div class="bar-amount">$90.00</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-day-label">Apr 10 (Fri)</div>
+          <div class="bar-track">
+            <div class="bar-fill not-covered" style="width:75%;">⚠ Unconfirmed</div>
+          </div>
+          <div class="bar-amount">$90 max</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parking note -->
+    <div class="alert-item amber">
+      <span class="alert-icon">🅿️</span>
+      <div class="alert-text amber">
+        <strong>BWI Hourly Lot — Verify Cost Before Booking</strong>
+        Parking in the BWI Hourly Lot for 5 days can be significantly more expensive ($30–40+/day) than the Daily Economy Lots ($8–12/day). Confirm with WLR what lot is approved and check rates before leaving the car. Total difference could be $100+.
+      </div>
+    </div>
+
+  </div><!-- /budget -->
+
+  <!-- ════════════════════════════
+       SPEAKERS TAB
+  ════════════════════════════ -->
+  <div id="tab-speakers" class="tab-panel">
+    <div class="section-title">Must-See Speakers</div>
+    <div class="section-subtitle">8 priority speakers · Curated for Brice's Marketing / CX / AV background</div>
+
+    <div class="speakers-grid">
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">FL</div>
+          <div>
+            <div class="speaker-name">Dr. Fei-Fei Li</div>
+            <div class="speaker-title">Co-founder, World Labs &amp; Stanford Human-Centered AI Institute</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="do-not-miss">⭐ DO NOT MISS</span>
+          <span class="badge badge-gold">Apr 7 Keynote</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see her:</strong> The "Godmother of Computer Vision" and the most important voice in human-centered AI. Her framing of AI as a tool that must serve humanity directly informs how WLR should approach AI adoption in customer experience and marketing.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">RK</div>
+          <div>
+            <div class="speaker-name">Ray Kurzweil</div>
+            <div class="speaker-title">Inventor, Author &amp; Futurist</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="do-not-miss">⭐ DO NOT MISS</span>
+          <span class="badge badge-gold">Apr 7 · 2:20 PM</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see him:</strong> Legendary AI futurist with a strong creative AI angle — his work on music, art, and invention overlaps directly with Brice's AV background. His predictions about the near-term creative AI explosion are practically relevant for AV production.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">EK</div>
+          <div>
+            <div class="speaker-name">Ethan Kurzweil</div>
+            <div class="speaker-title">Co-founder, Chemistry VC</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-gold">Apr 7 · 2:20 PM</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see him:</strong> Appearing alongside his father Ray Kurzweil, Ethan brings the investor/operator lens on which AI applications are actually being funded and deployed. Cross-generational perspective offers both visionary and practical views in a single session.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">BT</div>
+          <div>
+            <div class="speaker-name">Bret Taylor</div>
+            <div class="speaker-title">Co-founder, Sierra &amp; Chairman, OpenAI Board</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-blue">CX-Relevant</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see him:</strong> Sierra builds AI customer service agents for large enterprises. As OpenAI Board Chairman, Taylor is at the epicenter of agentic AI. His work is directly applicable to AI-powered customer experience strategies at WLR.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">AN</div>
+          <div>
+            <div class="speaker-name">Andrew Ng</div>
+            <div class="speaker-title">Founder &amp; CEO, DeepLearning.AI</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-green">Strategy</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see him:</strong> The best AI educator in the world at translating AI capability into business strategy. Brice can take Ng's frameworks directly back to WLR leadership to build a compelling case for AI investment across marketing, sales, and CX.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">HM</div>
+          <div>
+            <div class="speaker-name">Harvey Mason Jr.</div>
+            <div class="speaker-title">CEO, Recording Academy · Grammy-winning Producer</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-gold">Apr 8 · AV Angle</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see him:</strong> The only speaker at HumanX 2026 who bridges professional AV production and AI — from both the creative and the institutional perspective. His lens on AI in entertainment and creative production is uniquely valuable for Brice's AV management role.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">MH</div>
+          <div>
+            <div class="speaker-name">May Habib</div>
+            <div class="speaker-title">Co-founder &amp; CEO, Writer</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-blue">Marketing AI</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see her:</strong> Writer is the leading enterprise AI platform for marketing and content teams. May Habib's session is directly applicable to WLR's marketing workflows — understanding how to roll out AI tools for content creation, brand voice, and campaign production at scale.</div>
+      </div>
+
+      <div class="speaker-card">
+        <div class="speaker-top">
+          <div class="speaker-avatar">SF</div>
+          <div>
+            <div class="speaker-name">Sarah Franklin</div>
+            <div class="speaker-title">CEO, Lattice</div>
+          </div>
+        </div>
+        <div class="speaker-badges" style="margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge badge-gold">Apr 9 · 2:30 PM</span>
+          <span class="badge badge-blue">Roundtable</span>
+        </div>
+        <div class="speaker-why"><strong>Why Brice should see her:</strong> Leads the "What Must Stay Human" roundtable on the final day. As a manager of multiple functions at WLR, Brice is directly facing the question of where AI assists and where human judgment is irreplaceable. Franklin's framework will help Brice answer that for his team.</div>
+      </div>
+
+    </div>
+  </div><!-- /speakers -->
+
+  <!-- ════════════════════════════
+       BRICE'S PICKS TAB
+  ════════════════════════════ -->
+  <div id="tab-mypicks" class="tab-panel">
+
+    <!-- Hero -->
+    <div class="picks-hero">
+      <div class="picks-hero-eyebrow">Personalized for Brice · WLR Automotive Group</div>
+      <div class="picks-hero-title">Your AV &amp; Creative AI Agenda</div>
+      <div class="picks-hero-desc">Curated from the full HumanX 2026 agenda based on your work in photography, video production, animation, editing, and visual marketing at WLR Automotive Group. These sessions put you directly in front of the companies building the tools that will reshape how dealerships create and deploy visual content.</div>
+      <div class="picks-stats">
+        <div class="picks-stat"><span class="picks-stat-num">14</span>&nbsp;curated sessions</div>
+        <div class="picks-stat"><span class="picks-stat-num">6</span>&nbsp;must-not-miss</div>
+        <div class="picks-stat"><span class="picks-stat-num">90 min</span>&nbsp;golden block Apr 7</div>
+        <div class="picks-stat"><span class="picks-stat-num">1</span>&nbsp;masterclass Apr 9</div>
+      </div>
+    </div>
+
+    <!-- Tier Legend -->
+    <div class="tier-legend">
+      <div class="tier-legend-item"><div class="tier-dot" style="background:var(--gold-500);"></div> <strong style="color:var(--gold-400);">Tier 1</strong> — Must Attend: Directly about your AV &amp; creative work</div>
+      <div class="tier-legend-item"><div class="tier-dot" style="background:var(--purple-300);"></div> <strong style="color:var(--purple-300);">Tier 2</strong> — High Value: Strong WLR marketing relevance</div>
+      <div class="tier-legend-item"><div class="tier-dot" style="background:var(--text-muted);"></div> <strong style="color:var(--text-muted);">Tier 3</strong> — Worth Catching when schedule allows</div>
+    </div>
+
+    <!-- GOLDEN BLOCK CALLOUT -->
+    <div class="golden-block">
+      <div class="golden-block-icon">⚡</div>
+      <div>
+        <div class="golden-block-title">Golden Block — Apr 7, 10:00–11:45 AM · The Grove Theater (Customer Engine)</div>
+        <div class="golden-block-desc">Five back-to-back sessions in the same room covering AI media, creative tools, AI video, and brand strategy — four of them Tier 1 picks for your work. Plant yourself in The Grove Theater at 10:00 AM and don't leave until 11:45 AM. This is the single richest 105 minutes of the entire conference for your AV &amp; creative role.</div>
+      </div>
+    </div>
+
+    <!-- ── APRIL 7 ── -->
+    <div class="picks-day-header">
+      <div class="picks-day-label">Apr 7 — Tuesday</div>
+      <div class="picks-day-title">Power Day · Customer Engine + Main Stage</div>
+    </div>
+
+    <!-- 1 -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🎞️</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">10:00–10:20 AM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="badge badge-blue">⚡ Golden Block</span>
+        </div>
+        <div class="pick-title">Looking Back To Look Forward At AI's Impact On Media</div>
+        <div class="pick-speakers"><strong>Phil Wiser</strong> — CTO, Paramount</div>
+        <div class="pick-why">A broadcast media CTO explaining how AI is restructuring professional content production pipelines. <em>WLR angle:</em> Paramount-scale production challenges map to dealership-scale content creation. Understand how professional studios are approaching AI to benchmark WLR's own AV workflow modernization.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">✨</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">10:20–10:40 AM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="badge badge-blue">⚡ Golden Block</span>
+        </div>
+        <div class="pick-title">Building AI That Amplifies Imagination</div>
+        <div class="pick-speakers"><strong>Fatima Kardar</strong> — VP Product, Microsoft &nbsp;·&nbsp; <strong>Jon Snoddy</strong> — Creative Director, Operative Games · Martine Paris (Forbes, mod.)</div>
+        <div class="pick-why">Microsoft's AI creative tools — Designer, Copilot image generation, and AI video — are likely already in WLR's Microsoft 365 stack. <em>WLR angle:</em> Learn exactly how to unlock the AI creative features you may already be paying for, and understand what Microsoft's roadmap for creative AI looks like in 2026–2027.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🖼️</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">10:40–11:05 AM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="badge badge-blue">⚡ Golden Block</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">Creativity at AI Speed</div>
+        <div class="pick-speakers">
+          <strong>Abhay Parasnis</strong> — Founder &amp; CEO, Typeface (AI content creation) &nbsp;·&nbsp;
+          <strong>Jessica Powell</strong> — Co-founder &amp; CEO, AudioShake (AI audio separation) &nbsp;·&nbsp;
+          <strong>Mikayel Vardanyan</strong> — Co-founder, Picsart (AI photo &amp; video editing)
+        </div>
+        <div class="pick-why">Picsart is one of the most-used AI photo/video editing platforms in the world. Typeface automates marketing creative at scale. AudioShake separates stems for video soundtracks. <em>WLR angle:</em> These are the exact tools for automating vehicle photography enhancement, batch-editing inventory images, generating marketing creative, and producing video soundscapes — all at the pace WLR needs for high-volume content.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🎥</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">11:05–11:25 AM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="badge badge-blue">⚡ Golden Block</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">AI Video and the Distinction Between Viewing and Experiencing</div>
+        <div class="pick-speakers">
+          <strong>Dean Leitersdorf</strong> — Co-founder &amp; CEO, Decart (real-time AI video) &nbsp;·&nbsp;
+          <strong>Demi Guo</strong> — Co-founder &amp; CEO, Pika (AI video generation) · Rebecca Bellan (TechCrunch, mod.)
+        </div>
+        <div class="pick-why">Pika is the leading AI video generation tool — turn text descriptions or still images into cinematic video clips. Decart enables real-time interactive video. <em>WLR angle:</em> Imagine generating professional vehicle walkaround videos from a single inventory photo. Animated showroom reels, social media clips, and YouTube content — all from static shots — at a fraction of current production time and cost. This session tells you exactly how close that reality is.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🌐</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">11:25–11:45 AM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="badge badge-blue">⚡ Golden Block</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">Brand Strategy in a Post-Platform Era</div>
+        <div class="pick-speakers">
+          <strong>Caroline Ingeborn</strong> — COO, Luma AI (AI video &amp; 3D generation) &nbsp;·&nbsp;
+          <strong>Joe Kessler</strong> — Partner &amp; Global Head, UTA IQ (United Talent Agency) &nbsp;·&nbsp;
+          <strong>Sally Shin</strong> — EVP Growth &amp; Partnerships, CNBC · James Louderback (mod.)
+        </div>
+        <div class="pick-why">Luma AI builds Dream Machine — one of the most powerful AI video and 3D tools available. For automotive, this means photorealistic vehicle cinematics, animated 360° spins, and virtual showroom walk-throughs generated from CAD data or photos. <em>WLR angle:</em> Understand how to use Luma AI to produce dealership-quality visual content without a full production crew, and how to maintain brand consistency across TikTok, Instagram, YouTube, and the WLR website simultaneously.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 6 - Heritage Brands -->
+    <div class="pick-card tier-2">
+      <div class="pick-tier-badge t2">🏷️</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">12:10–12:30 PM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+        </div>
+        <div class="pick-title">Craft and Code: Reimagining Heritage Brands with AI</div>
+        <div class="pick-speakers"><strong>Cristina Diezhandino</strong> — Global CMO, Diageo (Johnnie Walker, Guinness, Tanqueray) · James Louderback (mod.)</div>
+        <div class="pick-why">How an established heritage brand uses AI to modernize its visual identity and content production without losing brand authenticity. <em>WLR angle:</em> WLR Automotive Group is an established regional brand. This session gives a direct playbook for how to bring AI-powered visual refresh to a legacy brand — exactly the challenge Brice manages in marketing and AV.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 7 - Fortune 500 CMO -->
+    <div class="pick-card tier-2">
+      <div class="pick-tier-badge t2">📣</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">12:55–1:15 PM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+        </div>
+        <div class="pick-title">Building Brands That Matter in the Age of AI</div>
+        <div class="pick-speakers"><strong>Marcel Marcondes</strong> — Global CMO, AB InBev (Budweiser, Corona, Stella Artois) · Nora Ali (mod.)</div>
+        <div class="pick-why">A Fortune 500 CMO who has invested heavily in AI-generated content — including AI-created Super Bowl ads — talks about maintaining brand equity while automating creative production. <em>WLR angle:</em> AB InBev's scale is different, but the core challenge — consistent brand voice across high-volume visual content — is identical to WLR's. Take the framework back to leadership to justify AI creative investment.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 8 - Snap -->
+    <div class="pick-card tier-2">
+      <div class="pick-tier-badge t2">📸</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">1:15–1:35 PM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+        </div>
+        <div class="pick-title">Startup Energy, Snap Scale: AI as a Force Multiplier</div>
+        <div class="pick-speakers"><strong>Saral Jain</strong> — VP &amp; GM, Snap Inc. · Harry McCracken (Fast Company, mod.)</div>
+        <div class="pick-why">Snap is the company behind Snapchat Lenses, AR face filters, and some of the most advanced AI visual effects used in social media. Their AI models power real-time visual transformation at billions-of-requests scale. <em>WLR angle:</em> Snap's AR tools and AI visual filters are exactly what WLR needs for next-gen social media content — vehicle AR try-ons, animated lot photos, and AI-enhanced social clips.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 9 - Harvey Mason Jr -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🎵</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">3:00–3:20 PM</span>
+          <span class="pick-track">Main Stage</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">How AI Will Rewrite the Creative Process</div>
+        <div class="pick-speakers">
+          <strong>Harvey Mason Jr.</strong> — CEO, Recording Academy &amp; Grammy-winning producer &nbsp;·&nbsp;
+          <strong>Ghazi Shami</strong> — Founder &amp; CEO, EMPIRE Records · Clare Duffy (CNN, mod.)
+        </div>
+        <div class="pick-why">Two of the most powerful figures in professional audio/visual production discuss how AI is transforming the creative process from the inside. Harvey Mason Jr. has produced Grammy-winning records and now leads the organization that sets standards for the entire music and AV industry. <em>WLR angle:</em> This is the most relevant session on the main stage for Brice's AV management work. The perspective on protecting creative quality while embracing AI tools directly applies to WLR's content production.</div>
+      </div>
+    </div>
+
+    <!-- 10 - Black Forest Labs / Flux -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🏗️</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">3:40–4:05 PM</span>
+          <span class="pick-track">Customer Engine · The Grove Theater</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">From Demos to Deployment: Building Visual Infrastructure</div>
+        <div class="pick-speakers">
+          <strong>Andreas Blattmann</strong> — Co-founder, Black Forest Labs (makers of Flux AI image model) &nbsp;·&nbsp;
+          <strong>Viet Le-Martin</strong> — Investor, General Catalyst · Maxwell Zeff (WIRED, mod.)
+        </div>
+        <div class="pick-why">Black Forest Labs built Flux — currently the most capable AI image generation model in the world, used by Adobe, Canva, and enterprise creative platforms. This session covers how to move from demo to production-scale visual AI. <em>WLR angle:</em> Flux can generate photorealistic vehicle images for ads, listings, and social content — backgrounds, lighting, angles — without a photo shoot. Understanding the infrastructure behind it tells Brice exactly how to evaluate deploying it at WLR.</div>
+        <a href="https://humanx2026.expofp.com/?theatre-2-or-824" target="_blank" rel="noopener" class="pick-map-link">🗺️ View on Floor Map</a>
+      </div>
+    </div>
+
+    <!-- 11 - Roblox / 3D -->
+    <div class="pick-card tier-3">
+      <div class="pick-tier-badge t3">🌍</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">4:20–4:40 PM</span>
+          <span class="pick-track">Main Stage</span>
+        </div>
+        <div class="pick-title">AI-Driven World Building with Roblox</div>
+        <div class="pick-speakers"><strong>David Baszucki</strong> — Founder &amp; CEO, Roblox · Alex Heath (Sources, mod.)</div>
+        <div class="pick-why">Roblox's AI generates complex interactive 3D environments at scale — entire virtual worlds from prompts. <em>WLR angle:</em> The near-term future of automotive marketing includes AI-generated virtual showrooms and 3D vehicle configurators. This session shows where the technology is heading, giving Brice a 2–3 year planning horizon for WLR's visual digital presence.</div>
+      </div>
+    </div>
+
+    <!-- ── APRIL 9 ── -->
+    <div class="picks-day-header">
+      <div class="picks-day-label">Apr 9 — Thursday</div>
+      <div class="picks-day-title">Final Day · Don't Miss This Masterclass</div>
+    </div>
+
+    <!-- 12 - LTX Masterclass -->
+    <div class="pick-card tier-1">
+      <div class="pick-tier-badge t1">🎓</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">12:00–12:45 PM</span>
+          <span class="pick-track">Builders · Masterclass · Hall D 10 (Exhibit Level)</span>
+          <span class="do-not-miss">⭐ Must See</span>
+        </div>
+        <div class="pick-title">Your Creative Stack, Your Way: Multimodal AI for Every Team</div>
+        <div class="pick-speakers">
+          <strong>Michael Roemer</strong> — Enterprise Account Executive, LTX Scaler &nbsp;·&nbsp;
+          <strong>Adam Palmer</strong> — Creative Lead, LTX Scaler
+        </div>
+        <div class="pick-why">LTX Scaler is an enterprise AI video generation platform built specifically for creative teams. This 45-minute Masterclass is structured as a hands-on walkthrough of building an AI creative production stack. <em>WLR angle:</em> Walk out of this session with a concrete, actionable playbook you can present to WLR leadership for implementing AI video and image production tools — covering open source, API, and all-in-one studio options. Targeted explicitly at Marketing and Technology leaders. Best For: Marketing teams building scalable AI creative workflows.</div>
+        <a href="https://humanx2026.expofp.com" target="_blank" rel="noopener" class="pick-map-link">🗺️ Expo Floor Map</a>
+      </div>
+    </div>
+
+    <!-- ── ADDITIONAL WORTHWHILE ── -->
+    <div class="picks-day-header">
+      <div class="picks-day-label">Apr 7 — Parallel</div>
+      <div class="picks-day-title">If You Split with Brad or Catch on Repeat</div>
+    </div>
+
+    <!-- 13 - Roundtable Creativity -->
+    <div class="pick-card tier-3">
+      <div class="pick-tier-badge t3">🤝</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">11:00–11:40 AM</span>
+          <span class="pick-track">Customer Engine · Roundtable</span>
+          <span class="badge badge-blue">Parallel to Golden Block</span>
+        </div>
+        <div class="pick-title">Roundtable: Maintaining Creativity in the Age of AI</div>
+        <div class="pick-speakers"><strong>Fatima Kardar</strong> — VP Product, Microsoft &nbsp;·&nbsp; <strong>Jon Snoddy</strong> — Creative Director, Operative Games</div>
+        <div class="pick-why">A small-group roundtable on preserving human creative voice while adopting AI tools. <em>Note:</em> This runs parallel to the Golden Block 11:05–11:45 AM sessions — have Brad cover this and debrief with you at lunch if possible.</div>
+      </div>
+    </div>
+
+    <!-- 14 - Marketing Peer XChange -->
+    <div class="pick-card tier-3">
+      <div class="pick-tier-badge t3">💬</div>
+      <div class="pick-body">
+        <div class="pick-time-row">
+          <span class="pick-time">1:00–1:30 PM</span>
+          <span class="pick-track">Customer Engine · Peer [X]Change · Sponsored by G2</span>
+        </div>
+        <div class="pick-title">Marketing Peer [X]Change: Designing Content for AI-First Discoverability</div>
+        <div class="pick-speakers">Facilitated session — role-based roundtable for Marketing professionals</div>
+        <div class="pick-why">How to design photos, videos, and content so they surface correctly in AI-powered search (Google AI Overviews, ChatGPT search, Perplexity). <em>WLR angle:</em> Vehicle listings, inventory photos, and marketing content increasingly need to be structured for AI discovery. This roundtable lets Brice share challenges and get peer input from other marketing professionals doing the same work.</div>
+      </div>
+    </div>
+
+    <!-- Summary box -->
+    <div class="card card--green mt-20">
+      <div class="card-title" style="margin-bottom:14px;">📋 Brice's Pick Summary</div>
+      <div class="data-row"><span class="label">Tier 1 Must-See Sessions</span><span class="value" style="color:var(--gold-400);">6 sessions — Creativity at AI Speed · AI Video · Brand Strategy · Visual Infrastructure · Harvey Mason Jr. · LTX Masterclass</span></div>
+      <div class="data-row"><span class="label">Core Companies to Meet on e[X]po Floor</span><span class="value" style="color:var(--text-primary);">Pika · Luma AI · Black Forest Labs · Picsart · Typeface · LTX Scaler</span></div>
+      <div class="data-row"><span class="label">Key AI Tools to Evaluate for WLR</span><span class="value" style="color:var(--text-primary);">AI video gen (Pika/Luma) · Image gen (Flux) · Photo editing (Picsart) · Brand content (Typeface/Writer)</span></div>
+      <div class="data-row"><span class="label">Golden Block (plant yourself here)</span><span class="value" style="color:var(--gold-400);">Apr 7 · 10:00–11:45 AM · The Grove Theater · Customer Engine</span></div>
+      <div class="data-row"><span class="label">Don't Leave Without Seeing</span><span class="value" style="color:var(--text-primary);">LTX Masterclass (Apr 9, 12 PM) — bring a notepad</span></div>
+    </div>
+
+    <!-- Content Capture Checklist -->
+    <div class="card card--green-light mt-20">
+      <div class="card-title" style="margin-bottom:6px;">🎬 Content Capture Checklist — WLR</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">Tap to check off as you capture. Resets each visit.</div>
+      <div id="checklist-wrap" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+  </div><!-- /mypicks -->
+
+  <!-- ════════════════════════════
+       SF GUIDE TAB
+  ════════════════════════════ -->
+  <div id="tab-sfguide" class="tab-panel">
+
+    <!-- Hero -->
+    <div class="sf-hero">
+      <div class="sf-hero-title">🌉 San Francisco Guide</div>
+      <div class="sf-hero-sub">You've got Sunday afternoon + all of Monday before HumanX kicks off Tuesday.<br>Here's the best of SF for you and Brad — curated for your interests.</div>
+    </div>
+
+    <!-- ── Practical Tips ── -->
+    <div class="sf-tip-box">
+      <div class="sf-tip-title">⚡ Arrive-Day Essentials</div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🚇</span><span>Take <strong>BART from SFO</strong> → Montgomery St station — ~30 min, ~$10/person. Fastest way downtown. Then a short Uber to the hotel.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🧳</span><span>Check-in is typically <strong>4:00 PM</strong> at the Marriott Marquis. Drop bags at the bell desk and head out — don't wait around.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🕐</span><span>You land <strong>9:16 AM SF time</strong> — but your body thinks it's 12:16 PM EDT. You'll feel wide awake. Use it.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🌡️</span><span>April SF weather: <strong>55–65°F</strong>, often foggy in the morning, clearer by afternoon. Bring a layer — always.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🚗</span><span>Uber/Lyft work great everywhere. Parking is a headache. Don't rent a car unless you're heading out of the city.</span></div>
+    </div>
+
+    <!-- ══════════════════════════
+         SUNDAY APRIL 5
+    ══════════════════════════ -->
+    <div class="sf-day-header">
+      <span class="sf-day-badge">SUN · APR 5</span>
+      <span class="sf-day-title">Arrival Day — Hit the Ground Running</span>
+    </div>
+
+    <div class="sf-activity-grid">
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🏛️</span>
+          <div>
+            <div class="sf-card-name">Ferry Building Marketplace</div>
+            <span class="sf-card-tag sf-card-tag-must">First Stop</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">SF's iconic food hall right on the waterfront. Grab lunch from the best local vendors — Hog Island Oysters, Acme Bread, Blue Bottle Coffee. The Sunday Farmer's Market runs until 2 PM so you might catch the tail end.</div>
+        <div class="sf-card-meta">📍 1 Ferry Building · ~10 min Uber from hotel · Free to enter</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=1+Ferry+Building,+San+Francisco,+CA+94105&travelmode=walking" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🌊</span>
+          <div>
+            <div class="sf-card-name">Embarcadero Waterfront Walk</div>
+            <span class="sf-card-tag sf-card-tag-rec">Recommended</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Walk from the Ferry Building north along the waterfront. Bay Bridge views, street performers, the piers. Stretch your legs after 6 hours on a plane — this is perfect. Connects naturally to Fisherman's Wharf.</div>
+        <div class="sf-card-meta">🚶 ~2 mile walk north along the water · Free</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=The+Embarcadero,+San+Francisco,+CA+94105&travelmode=walking" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🦭</span>
+          <div>
+            <div class="sf-card-name">Fisherman's Wharf &amp; Pier 39</div>
+            <span class="sf-card-tag sf-card-tag-rec">Classic SF</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Touristy? Yes. Worth it? Also yes. The sea lions at Pier 39 are genuinely wild. Grab clam chowder in a sourdough bread bowl from Boudin Bakery — it's the iconic SF meal. Don't skip it.</div>
+        <div class="sf-card-meta">📍 Pier 39 · 20 min Uber from hotel · Free (food extra)</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Pier+39,+San+Francisco,+CA+94133&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🏝️</span>
+          <div>
+            <div class="sf-card-name">Alcatraz Island</div>
+            <span class="sf-card-tag sf-card-tag-must">Book Ahead!</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">One of the most unique experiences in America. The audio tour narrated by former guards and inmates is genuinely fascinating. Day tours often sell out weeks in advance — book at alcatrazcruises.com NOW if you want to go.</div>
+        <div class="sf-card-meta">⚠️ Book online ASAP · Departs Pier 33 · ~$45/person · 2.5 hrs</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Pier+33+Embarcadero,+San+Francisco,+CA+94105&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions to Pier 33</a>
+          <a href="https://www.alcatrazcruises.com/tickets/" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🎟️ Book Alcatraz Tickets</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🌁</span>
+          <div>
+            <div class="sf-card-name">Golden Gate Bridge</div>
+            <span class="sf-card-tag sf-card-tag-must">Bucket List</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Walk across the bridge — it's completely free and unforgettable. Or Uber to the Marin Headlands side for the iconic photo looking back at the bridge with the city behind it. Best photos: late afternoon golden hour.</div>
+        <div class="sf-card-meta">📍 ~25 min Uber from hotel · Free to walk · 1.7 miles each way</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Gate+Bridge,+San+Francisco,+CA+94129&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🚎</span>
+          <div>
+            <div class="sf-card-name">Cable Car Ride</div>
+            <span class="sf-card-tag sf-card-tag-rec">SF Icon</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">The Powell-Hyde line is the most scenic — ride it up over Nob Hill, past Lombard Street, all the way to Ghirardelli Square near the waterfront. Standing on the outside rail with the city dropping away is a genuine thrill.</div>
+        <div class="sf-card-meta">📍 Powell & Market St · $8/ride each way · Lines can be long on weekends</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Powell+St+%26+Market+St,+San+Francisco,+CA+94102&travelmode=walking" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions to Boarding Stop</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🪄</span>
+          <div>
+            <div class="sf-card-name">Lombard Street</div>
+            <span class="sf-card-tag sf-card-tag-rec">Worth Seeing</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">The famously "crookedest street in the world" — 8 hairpin turns down a steep one-block section of Lombard. Walk down it (not up). Great photo spot from the bottom looking up. Easy to combine with Fisherman's Wharf.</div>
+        <div class="sf-card-meta">📍 Lombard St at Hyde St · Free · 5 min Uber from Wharf</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Lombard+St+%26+Hyde+St,+San+Francisco,+CA+94109&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🍜</span>
+          <div>
+            <div class="sf-card-name">Chinatown + North Beach</div>
+            <span class="sf-card-tag sf-card-tag-food">Dinner Zone</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Two great neighborhoods back-to-back. SF's Chinatown is the oldest in North America — walk through Grant Ave, grab dim sum or pork buns. Then head uphill into North Beach (Little Italy) for dinner. City Lights Bookstore is a legendary Beat Generation landmark worth a quick stop.</div>
+        <div class="sf-card-meta">📍 15 min Uber from hotel · Free to explore</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Chinatown,+San+Francisco,+CA+94108&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions to Chinatown</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sunday Dinner -->
+    <div class="sf-tip-title" style="margin:20px 0 10px;color:#fb923c;">🍽️ Sunday Dinner Picks</div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">Cotogna</div>
+      <div class="sf-dinner-meta">North Beach · Rustic Italian wood-fired cooking. One of SF's best. Make a reservation. ~$60/person</div>
+    </div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">Hog Island Oyster Co.</div>
+      <div class="sf-dinner-meta">Ferry Building · Outstanding fresh oysters and seafood in a waterfront setting. ~$50/person</div>
+    </div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">Foreign Cinema</div>
+      <div class="sf-dinner-meta">Mission District · Dinner served in an outdoor courtyard while old films project on the wall. Unique SF experience. ~$65/person</div>
+    </div>
+
+    <!-- ══════════════════════════
+         MONDAY APRIL 6
+    ══════════════════════════ -->
+    <div class="sf-day-header" style="margin-top:30px;">
+      <span class="sf-day-badge">MON · APR 6</span>
+      <span class="sf-day-title">Full Free Day — Go Deep</span>
+    </div>
+
+    <div class="sf-activity-grid">
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🔬</span>
+          <div>
+            <div class="sf-card-name">California Academy of Sciences</div>
+            <span class="sf-card-tag sf-card-tag-brad">🚀 Brad's Pick</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">World-class natural history museum with a living rainforest, coral reef aquarium, and the Morrison Planetarium. A NASA guy in a state-of-the-art planetarium — this one writes itself. Allow 3+ hours.</div>
+        <div class="sf-card-meta">📍 Golden Gate Park · $45/person · Open Mon–Sun · Book tickets online</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=California+Academy+of+Sciences,+55+Music+Concourse+Dr,+San+Francisco,+CA+94118&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+          <a href="https://www.calacademy.org/visit" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🎟️ Buy Tickets</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🎨</span>
+          <div>
+            <div class="sf-card-name">de Young Museum</div>
+            <span class="sf-card-tag sf-card-tag-must">Brice's Pick</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">SF's premier art museum right in Golden Gate Park — American art, textiles, and major rotating exhibitions. The tower observation deck is free and has stunning 360° views of the city and bay. This is right next door to the Academy of Sciences, so hit both in one morning.</div>
+        <div class="sf-card-meta">📍 Golden Gate Park · $30/person · Closed Mon — plan for afternoon</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=de+Young+Museum,+50+Hagiwara+Tea+Garden+Dr,+San+Francisco,+CA+94118&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+          <a href="https://www.famsf.org/visit/de-young" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🎟️ Buy Tickets</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">⛵</span>
+          <div>
+            <div class="sf-card-name">Ferry to Sausalito</div>
+            <span class="sf-card-tag sf-card-tag-must">Top Pick</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">30-minute Golden Gate Ferry ride from the Ferry Building with stunning views of Alcatraz and the bridge. Sausalito is a charming waterfront village with great galleries, restaurants, and views back at SF. Walk around, grab lunch, ferry back. This is legitimately one of the best things you can do in SF.</div>
+        <div class="sf-card-meta">📍 Departs Ferry Building · ~$15 each way · Ferries run hourly</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=1+Ferry+Building,+San+Francisco,+CA+94105&travelmode=walking" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions to Ferry</a>
+          <a href="https://goldengateferry.org/schedules/" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🚢 Ferry Schedule</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🌲</span>
+          <div>
+            <div class="sf-card-name">Muir Woods National Monument</div>
+            <span class="sf-card-tag sf-card-tag-must">Don't Miss</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Ancient coastal redwoods — some over 1,000 years old — just 30 minutes north of the city. Walking among trees that were saplings when the Magna Carta was signed is a genuinely humbling experience. Must book a parking reservation or take a shuttle in advance at recreation.gov.</div>
+        <div class="sf-card-meta">📍 Mill Valley · $16/person entry · 45 min drive · Book parking ahead</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Muir+Woods+National+Monument,+Mill+Valley,+CA+94941&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+          <a href="https://www.recreation.gov/timed-entry/10086745" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🌲 Book Parking</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🏛️</span>
+          <div>
+            <div class="sf-card-name">SFMOMA</div>
+            <span class="sf-card-tag sf-card-tag-rec">For Brice</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">SF Museum of Modern Art — one of the largest modern art museums in the US, and it's literally a 7-minute walk from your hotel. World-class photography, design, and media art collections. If you have a couple free hours, this is effortless.</div>
+        <div class="sf-card-meta">📍 151 3rd St · 7 min walk from hotel · $30/person · Closed Tues</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=SFMOMA,+151+3rd+St,+San+Francisco,+CA+94103&travelmode=walking" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+          <a href="https://www.sfmoma.org/visit/" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-book">🎟️ Buy Tickets</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🌅</span>
+          <div>
+            <div class="sf-card-name">Lands End + Sutro Baths</div>
+            <span class="sf-card-tag sf-card-tag-rec">Hidden Gem</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">The ruins of a massive Victorian public bathhouse right on the Pacific coast — dramatic, photogenic, and totally free. The coastal trail at Lands End gives you arguably the best views of the Golden Gate Bridge from land. Eerily beautiful at any time of day.</div>
+        <div class="sf-card-meta">📍 Outer Richmond · 25 min Uber · Free · Ocean Beach nearby</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Sutro+Baths,+1004+Point+Lobos+Ave,+San+Francisco,+CA+94121&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🏡</span>
+          <div>
+            <div class="sf-card-name">Painted Ladies + Alamo Square</div>
+            <span class="sf-card-tag sf-card-tag-rec">Iconic Photo</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">The famous row of colorful Victorian homes with the SF skyline behind them. If you've seen any movie or TV show set in SF, you've seen this shot. Easy stop, great photo, worth the Uber. Combine with a walk through Hayes Valley for coffee and boutique shopping.</div>
+        <div class="sf-card-meta">📍 Alamo Square Park · 15 min Uber · Free</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Alamo+Square+Park,+San+Francisco,+CA+94117&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+      <div class="sf-card">
+        <div class="sf-card-top">
+          <span class="sf-card-emoji">🌆</span>
+          <div>
+            <div class="sf-card-name">Twin Peaks at Sunset</div>
+            <span class="sf-card-tag sf-card-tag-rec">Night Cap</span>
+          </div>
+        </div>
+        <div class="sf-card-desc">Drive or Uber to the top of Twin Peaks for a 360° panoramic view of the entire city, bay, and both bridges. It's stunning during the day but transcendent at sunset and after dark when the city lights up. Perfect way to end your last free evening before the conference.</div>
+        <div class="sf-card-meta">📍 Twin Peaks Blvd · 20 min Uber · Free · Go at sunset</div>
+        <div class="sf-btn-row">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Twin+Peaks+Blvd,+San+Francisco,+CA+94131&travelmode=driving" target="_blank" rel="noopener" class="sf-dir-btn sf-dir-btn-map">🗺️ Directions</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Monday Dinner -->
+    <div class="sf-tip-title" style="margin:20px 0 10px;color:#fb923c;">🍽️ Monday Pre-Conference Dinner</div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">State Bird Provisions</div>
+      <div class="sf-dinner-meta">Divisadero · Dim sum–style small plates, one of SF's most celebrated restaurants. Reserve well in advance. ~$80/person</div>
+    </div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">Tartine Manufactory</div>
+      <div class="sf-dinner-meta">Mission District · The legendary Tartine bakery's full restaurant. Stunning breads, pastas, wood-fired dishes. ~$55/person</div>
+    </div>
+    <div class="sf-dinner-card">
+      <div class="sf-dinner-name">Zuni Café</div>
+      <div class="sf-dinner-meta">Hayes Valley · SF institution since 1979. The roasted chicken for two (45 min wait) is legendary. Perfect pre-conference splurge. ~$70/person</div>
+    </div>
+
+    <!-- Pro Tips -->
+    <div class="sf-tip-box" style="margin-top:24px;">
+      <div class="sf-tip-title">💡 Pro Tips for Your Trip</div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🎟️</span><span><strong>Book Alcatraz now</strong> at alcatrazcruises.com — tickets sell out weeks ahead, especially on weekends.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🌲</span><span><strong>Muir Woods parking</strong> must be reserved at recreation.gov — you cannot just show up. Shuttle from Sausalito is an easier option.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🍽️</span><span><strong>Make dinner reservations now</strong> — SF's best spots (Cotogna, State Bird, Zuni) book up fast, especially on weekends.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🎨</span><span><strong>de Young Museum is closed Mondays</strong> — go Sunday afternoon if you want to catch it.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🚇</span><span><strong>BART tip:</strong> Buy a Clipper card at the SFO station (add $20–30). Works on BART, Muni buses, and cable cars.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">📸</span><span><strong>Best photo spots:</strong> Marin Headlands (GG Bridge), Lands End trail, Coit Tower, and the Ferry Building at dusk.</span></div>
+      <div class="sf-tip-row"><span class="sf-tip-icon">🏨</span><span>The <strong>Moscone Center</strong> (conference venue) is a 3-minute walk from your hotel. Scout it out Monday evening so you're not rushing Tuesday.</span></div>
+    </div>
+
+  </div><!-- /sfguide -->
+
+  <!-- ════════════════════════════
+       NOTES TAB
+  ════════════════════════════ -->
+  <div id="tab-notes" class="tab-panel">
+
+    <div class="section-title">Notes</div>
+    <div class="section-subtitle">Jot down leads, contacts, session takeaways — saved automatically to this device</div>
+
+    <!-- Quick note cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div class="card" style="padding:14px 16px;">
+        <div class="note-card-label">💡 Session Takeaway</div>
+        <textarea class="note-area" id="note-session" placeholder="Key insight from a session..."></textarea>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="note-card-label">🤝 Contact Made</div>
+        <textarea class="note-area" id="note-contact" placeholder="Name, company, follow-up..."></textarea>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="note-card-label">🛠️ Tool / Product to Explore</div>
+        <textarea class="note-area" id="note-tool" placeholder="AI tool seen on expo floor..."></textarea>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="note-card-label">📌 Action Item for WLR</div>
+        <textarea class="note-area" id="note-action" placeholder="Something to bring back / implement..."></textarea>
+      </div>
+    </div>
+
+    <!-- Full freeform notes -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;"><span class="icon">📝</span> Full Notes</div>
+      <textarea id="conference-notes" class="note-area note-area-full" placeholder="Start typing — your notes save automatically to this device and will be here when you come back…"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span id="notes-saved-indicator" style="font-size:0.72rem;color:var(--text-muted);"></span>
+        <button onclick="clearNotes()" class="btn-danger">Clear All Notes</button>
+      </div>
+    </div>
+
+    <div class="alert-item amber mt-16">
+      <span class="alert-icon">💾</span>
+      <div class="alert-text amber">Notes are saved to <strong>this device's browser storage</strong> only. To back them up, copy and paste them somewhere safe before clearing your browser data.</div>
+    </div>
+
+  </div><!-- /notes -->
+
+</main>
+
+<footer class="page-footer">
+  HumanX 2026 Trip Companion · Brice Perkins &amp; Brad Thomas · April 5–10, 2026 · San Francisco, CA
+</footer>
+
+<script>
+  // ── TAB SWITCHING ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── COUNTDOWN TIMER ──
+  // Target: April 5, 2026 at 6:05 AM Eastern Time (UTC-4 during EDT)
+  // Eastern Daylight Time (EDT) = UTC - 4
+  // April 5 at 06:05 EDT = April 5 at 10:05 UTC
+  const DEPARTURE = new Date('2026-04-05T10:05:00Z');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = DEPARTURE - now;
+
+    if (diff <= 0) {
+      document.getElementById('cd-days').textContent = '00';
+      document.getElementById('cd-hours').textContent = '00';
+      document.getElementById('cd-mins').textContent = '00';
+      document.getElementById('cd-secs').textContent = '00';
+      return;
+    }
+
+    const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs  = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById('cd-days').textContent  = pad(days);
+    document.getElementById('cd-hours').textContent = pad(hours);
+    document.getElementById('cd-mins').textContent  = pad(mins);
+    document.getElementById('cd-secs').textContent  = pad(secs);
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ── DYNAMIC NAV OFFSET ──
+  // Keeps the sticky nav bar flush under the header regardless of header height
+  function updateNavTop() {
+    const header = document.querySelector('.site-header');
+    const nav = document.querySelector('.nav-bar');
+    if (header && nav) {
+      nav.style.top = header.offsetHeight + 'px';
+    }
+  }
+  updateNavTop();
+  window.addEventListener('resize', updateNavTop);
+  // Re-run after fonts/images settle
+  window.addEventListener('load', updateNavTop);
+
+  // ── CONTENT CAPTURE CHECKLIST ──
+  const CHECKLIST_ITEMS = [
+    { id: 'c1',  label: 'Wide establishing shot of Moscone Center exterior' },
+    { id: 'c2',  label: 'Conference registration / badge pickup moment' },
+    { id: 'c3',  label: 'Expo floor overview — wide walkthrough video' },
+    { id: 'c4',  label: 'AI video tool demos (Pika, Luma AI) — screen capture or filming screen' },
+    { id: 'c5',  label: 'Image generation demos (Black Forest Labs / Flux)' },
+    { id: 'c6',  label: 'Speaker soundbite: Harvey Mason Jr. session clip' },
+    { id: 'c7',  label: 'Speaker soundbite: Brand Strategy / Post-Platform Era' },
+    { id: 'c8',  label: 'Face-to-camera recap after Creativity at AI Speed session' },
+    { id: 'c9',  label: 'Product demo video — Picsart AI photo editing' },
+    { id: 'c10', label: 'Product demo video — Typeface brand content generation' },
+    { id: 'c11', label: 'LTX Masterclass (Apr 9) — key takeaways clip' },
+    { id: 'c12', label: 'Booth conversations — candid networking moments' },
+    { id: 'c13', label: 'Portrait / headshot of Brice at HumanX branding' },
+    { id: 'c14', label: 'Photos with speakers or notable contacts' },
+    { id: 'c15', label: 'End-of-day wrap recap video for WLR social' },
+    { id: 'c16', label: 'Golden Gate Bridge / SF establishing shots (Sunday)' },
+  ];
+  function buildChecklist() {
+    const wrap = document.getElementById('checklist-wrap');
+    if (!wrap) return;
+    const saved = JSON.parse(localStorage.getItem('wlr_checklist') || '{}');
+    wrap.innerHTML = '';
+    CHECKLIST_ITEMS.forEach(item => {
+      const checked = !!saved[item.id];
+      const row = document.createElement('label');
+      row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background 0.15s;border:1px solid transparent;';
+      row.style.background = checked ? 'rgba(0,220,154,0.08)' : 'rgba(255,255,255,0.03)';
+      row.style.borderColor = checked ? 'rgba(0,220,154,0.2)' : 'rgba(255,255,255,0.06)';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = checked;
+      cb.style.cssText = 'width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#00dc9a;cursor:pointer;';
+      cb.addEventListener('change', () => {
+        const s = JSON.parse(localStorage.getItem('wlr_checklist') || '{}');
+        s[item.id] = cb.checked;
+        localStorage.setItem('wlr_checklist', JSON.stringify(s));
+        buildChecklist();
+      });
+      const txt = document.createElement('span');
+      txt.textContent = item.label;
+      txt.style.cssText = 'font-size:0.82rem;line-height:1.4;color:' + (checked ? 'var(--text-muted)' : 'var(--text-secondary)') + ';' + (checked ? 'text-decoration:line-through;' : '');
+      row.appendChild(cb);
+      row.appendChild(txt);
+      wrap.appendChild(row);
+    });
+    // Progress bar
+    const total = CHECKLIST_ITEMS.length;
+    const done = Object.values(JSON.parse(localStorage.getItem('wlr_checklist') || '{}')).filter(Boolean).length;
+    const pct = Math.round((done / total) * 100);
+    const existing = document.getElementById('checklist-progress');
+    if (existing) existing.remove();
+    const prog = document.createElement('div');
+    prog.id = 'checklist-progress';
+    prog.className = 'checklist-progress';
+    prog.innerHTML =
+      '<div class="checklist-progress-header"><span>Progress</span><span>' + done + ' / ' + total + ' captured</span></div>' +
+      '<div class="checklist-progress-track"><div class="checklist-progress-fill" style="width:' + pct + '%"></div></div>';
+    wrap.parentElement.appendChild(prog);
+  }
+  buildChecklist();
+
+  // ── NOTES: localStorage persistence ──
+  const NOTE_FIELDS = ['conference-notes','note-session','note-contact','note-tool','note-action'];
+  NOTE_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = localStorage.getItem('wlr_' + id) || '';
+    el.addEventListener('input', () => {
+      localStorage.setItem('wlr_' + id, el.value);
+      const ind = document.getElementById('notes-saved-indicator');
+      if (ind) { ind.textContent = 'Saved ✓'; setTimeout(() => { ind.textContent = ''; }, 2000); }
+    });
+  });
+  function clearNotes() {
+    if (!confirm('Clear all notes? This cannot be undone.')) return;
+    NOTE_FIELDS.forEach(id => {
+      localStorage.removeItem('wlr_' + id);
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
+</script>
+</body>
+</html>
