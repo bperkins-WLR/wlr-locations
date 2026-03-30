@@ -12,14 +12,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
-  <title>WLR Automotive Group — Locations</title>
+  <title>WLR Automotive Group â Locations</title>
   <style>
     :root {
-      --blue:   #1a55a2;
       --deep:   #0d3268;
       --mid:    #0f3d82;
       --yellow: #FADC00;
-      --green:  #22c55e;
       --bord:   rgba(255,255,255,0.14);
       --text:   #ffffff;
       --muted:  rgba(255,255,255,0.55);
@@ -37,7 +35,7 @@
       overscroll-behavior: none;
     }
 
-    /* ══ HEADER ══════════════════════════════════════════ */
+    /* ââ HEADER ââââââââââââââââââââââââââââââââââââââââââ */
     header {
       background: linear-gradient(160deg, #0a2755 0%, #1248a0 100%);
       padding: max(env(safe-area-inset-top), 10px) 14px 8px;
@@ -58,7 +56,7 @@
     }
     .slideshow-btn:active { opacity: 0.8; }
 
-    /* ══ HERO SECTION ════════════════════════════════════ */
+    /* ââ HERO SECTION ââââââââââââââââââââââââââââââââââââ */
     .hero {
       background: linear-gradient(170deg, #0a2755 0%, #1248a0 60%, #0d3268 100%);
       padding: 28px 20px 24px;
@@ -107,7 +105,7 @@
     }
     .hero-note a { color: rgba(255,255,255,0.45); text-decoration: underline; cursor: pointer; }
 
-    /* ══ CONTROLS ════════════════════════════════════════ */
+    /* ââ CONTROLS ââââââââââââââââââââââââââââââââââââââââ */
     .controls {
       background: var(--mid);
       padding: 10px 14px 8px;
@@ -151,11 +149,11 @@
 
     .stats-bar { padding: 6px 14px; background: rgba(255,255,255,0.05); font-size: 11px; color: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(255,255,255,0.07); }
 
-    /* ══ GRID ════════════════════════════════════════════ */
+    /* ââ GRID ââââââââââââââââââââââââââââââââââââââââââââ */
     .grid { padding: 12px 12px 90px; display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 560px; margin: 0 auto; }
     @media(min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
 
-    /* ══ CARD ════════════════════════════════════════════ */
+    /* ââ CARD ââââââââââââââââââââââââââââââââââââââââââââ */
     .card {
       background: linear-gradient(145deg, #0d0d0d 0%, #050505 100%);
       border-radius: 16px; overflow: hidden;
@@ -170,7 +168,7 @@
 
     .card-header { display: flex; align-items: stretch; padding: 0; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
 
-    /* ── LOGO COLUMN (left side, brand color bg) ── */
+    /* ââ LOGO COLUMN (left side, brand color bg) ââ */
     .logo-col {
       width: 76px; flex-shrink: 0;
       display: flex; flex-direction: column;
@@ -182,10 +180,6 @@
 
     .brand-logo { height: 40px; width: auto; max-width: 60px; object-fit: contain; display: block; }
     .type-badge { padding: 4px 9px; border-radius: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; color: #ffffff; }
-    .type-TLC  { background: var(--tlc-c); }
-    .type-TAS  { background: var(--tas-c); }
-    .type-TAR  { background: var(--tar-c); }
-    .type-TASE { background: var(--tase-c); }
 
     .years-badge {
       font-size: 9px; font-weight: 800;
@@ -223,7 +217,7 @@
     .loc-cam:active { background: rgba(34,197,94,0.3); }
     .type-full { font-size: 9px; color: rgba(255,255,255,0.45); text-align: right; max-width: 80px; line-height: 1.2; }
 
-    /* ══ PHOTOS ══════════════════════════════════════════ */
+    /* ââ PHOTOS ââââââââââââââââââââââââââââââââââââââââââ */
     .photos { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     .photo-slot {
       position: relative; border-radius: 9px; overflow: hidden;
@@ -234,13 +228,12 @@
     .photo-slot:active { opacity: 0.85; }
     .photo-slot.has-photo { border-style: solid; border-color: rgba(255,255,255,0.1); }
     .photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-num { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.68); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 5px; pointer-events: none; }
     .photo-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 6px 5px; background: linear-gradient(transparent, rgba(0,0,0,.75)); font-size: 9px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
     .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5px; position: absolute; inset: 0; }
     .ph-icon { font-size: 24px; opacity: .2; }
     .ph-text { font-size: 9px; color: rgba(255,255,255,0.35); text-align: center; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
 
-    /* ══ LIGHTBOX ════════════════════════════════════════ */
+    /* ââ LIGHTBOX ââââââââââââââââââââââââââââââââââââââââ */
     .lightbox {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.97); z-index: 1000;
@@ -295,7 +288,7 @@
       display: flex; align-items: center; justify-content: center; z-index: 10;
     }
 
-    /* ══ SLIDESHOW ════════════════════════════════════════ */
+    /* ââ SLIDESHOW ââââââââââââââââââââââââââââââââââââââââ */
     .slideshow {
       display: none; position: fixed; inset: 0;
       background: #000; z-index: 900;
@@ -356,7 +349,7 @@
     .no-results-icon { font-size: 38px; margin-bottom: 10px; }
     .no-results p { font-size: 14px; }
 
-    /* ══ FOOTER ══════════════════════════════════════════ */
+    /* ââ FOOTER ââââââââââââââââââââââââââââââââââââââââââ */
     footer {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(10,27,75,0.97); backdrop-filter: blur(12px);
@@ -378,11 +371,11 @@
     }
     .scroll-top.show { display: flex; }
 
-    /* ══ TEAM BUTTON ══════════════════════════════════════ */
+    /* ââ TEAM BUTTON ââââââââââââââââââââââââââââââââââââââ */
     .loc-team { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; -webkit-appearance: none; }
     .loc-team:active { background: rgba(255,255,255,0.22); }
 
-    /* ══ TEAM MODAL ════════════════════════════════════════ */
+    /* ââ TEAM MODAL ââââââââââââââââââââââââââââââââââââââââ */
     .team-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.55); z-index: 800;
@@ -416,7 +409,7 @@
 </head>
 <body>
 
-<!-- ══ HEADER ══════════════════════════════════════════ -->
+<!-- ââ HEADER ââââââââââââââââââââââââââââââââââââââââââ -->
 <header>
   <img class="h-logo-img" src="images/logo-wlr.PNG" alt="WLR"
        onerror="this.style.display='none'; document.getElementById('hFB').style.display='flex';">
@@ -425,10 +418,10 @@
     <div class="h-title"><span>WLR</span> Automotive Group</div>
     <div class="h-sub">Location Gallery</div>
   </div>
-  <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
+  <button class="slideshow-btn" id="ssStartBtn">â¶ Slideshow</button>
 </header>
 
-<!-- ══ HERO SECTION ════════════════════════════════════ -->
+<!-- ââ HERO SECTION ââââââââââââââââââââââââââââââââââââ -->
 <div class="hero">
   <img class="hero-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
        onerror="this.style.display='none'; document.getElementById('heroFB').style.display='flex';">
@@ -455,27 +448,27 @@
     </div>
   </div>
 
-  <div class="hero-states">Maryland &nbsp;·&nbsp; Pennsylvania &nbsp;·&nbsp; West Virginia</div>
+  <div class="hero-states">Maryland &nbsp;Â·&nbsp; Pennsylvania &nbsp;Â·&nbsp; West Virginia</div>
 
   <div class="hero-note">
-    Location numbers reflect WLR's history — some numbers represent locations that have been converted or closed over the years.
-    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations ↓</a>
+    Location numbers reflect WLR's history â some numbers represent locations that have been converted or closed over the years.
+    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations â</a>
   </div>
 </div>
 
-<!-- ══ CONTROLS ════════════════════════════════════════ -->
+<!-- ââ CONTROLS ââââââââââââââââââââââââââââââââââââââââ -->
 <div class="controls">
   <div class="search-wrap">
-    <span class="icon">🔍</span>
-    <input type="search" id="search" placeholder="Search by name, city, or number…" autocomplete="off" autocorrect="off">
-    <button class="search-clear" id="searchClear" title="Clear">✕</button>
+    <span class="icon">ð</span>
+    <input type="search" id="search" placeholder="Search by name, city, or numberâ¦" autocomplete="off" autocorrect="off">
+    <button class="search-clear" id="searchClear" title="Clear">â</button>
   </div>
   <div class="filter-row" id="filterRow">
     <button class="filter-btn active" data-type="ALL">All</button>
-    <button class="filter-btn" data-type="TLC">TLC — Lube Centers</button>
-    <button class="filter-btn" data-type="TAS">TAS — Auto Spas</button>
-    <button class="filter-btn" data-type="TAR">TAR — Auto Repair</button>
-    <button class="filter-btn" data-type="TASE">TASe — Expresses</button>
+    <button class="filter-btn" data-type="TLC">TLC â Lube Centers</button>
+    <button class="filter-btn" data-type="TAS">TAS â Auto Spas</button>
+    <button class="filter-btn" data-type="TAR">TAR â Auto Repair</button>
+    <button class="filter-btn" data-type="TASE">TASe â Expresses</button>
   </div>
   <div class="sort-row">
     <span class="sort-label">Sort:</span>
@@ -494,41 +487,41 @@
 <div class="stats-bar" id="statsBar"></div>
 <div class="grid" id="grid"></div>
 <div class="no-results" id="noResults">
-  <div class="no-results-icon">🔍</div>
+  <div class="no-results-icon">ð</div>
   <p>No locations found.</p>
 </div>
 
-<!-- ══ LIGHTBOX ════════════════════════════════════════ -->
+<!-- ââ LIGHTBOX ââââââââââââââââââââââââââââââââââââââââ -->
 <div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightboxClose">✕</button>
-  <button class="lb-arrow" id="lbPrev">‹</button>
+  <button class="lightbox-close" id="lightboxClose">â</button>
+  <button class="lb-arrow" id="lbPrev">â¹</button>
   <img id="lightboxImg" src="" alt="">
   <div class="lb-dots" id="lbDots"></div>
-  <button class="lb-arrow" id="lbNext">›</button>
+  <button class="lb-arrow" id="lbNext">âº</button>
   <div class="lightbox-caption" id="lightboxCaption"></div>
 </div>
 
-<!-- ══ SLIDESHOW ═══════════════════════════════════════ -->
+<!-- ââ SLIDESHOW âââââââââââââââââââââââââââââââââââââââ -->
 <div class="slideshow" id="slideshow">
   <div class="ss-progress"><div class="ss-progress-fill" id="ssProgressFill"></div></div>
   <div class="ss-photo-wrap" id="ssPhotoWrap">
     <img id="ssPhoto" src="" alt="">
     <div class="ss-info" id="ssInfo"></div>
   </div>
-  <button class="ss-close-btn" id="ssClose">✕</button>
+  <button class="ss-close-btn" id="ssClose">â</button>
   <div class="ss-controls">
-    <button class="ss-btn" id="ssPrev">‹</button>
+    <button class="ss-btn" id="ssPrev">â¹</button>
     <div style="flex:1;text-align:center">
       <div class="ss-counter" id="ssCounter"></div>
       <div class="ss-photo-label" id="ssPhotoLabel"></div>
     </div>
-    <button class="ss-btn" id="ssPause">⏸</button>
+    <button class="ss-btn" id="ssPause">â¸</button>
     <div style="width:10px"></div>
-    <button class="ss-btn" id="ssNext">›</button>
+    <button class="ss-btn" id="ssNext">âº</button>
   </div>
 </div>
 
-<!-- ══ TEAM MODAL ══════════════════════════════════════════ -->
+<!-- ââ TEAM MODAL ââââââââââââââââââââââââââââââââââââââââââ -->
 <div class="team-overlay" id="teamOverlay"></div>
 <div class="team-panel" id="teamPanel">
   <div class="team-handle"></div>
@@ -537,13 +530,13 @@
       <div class="team-title" id="teamPanelTitle"></div>
       <div class="team-subtitle" id="teamPanelSubtitle"></div>
     </div>
-    <button class="team-close" id="teamClose">✕</button>
+    <button class="team-close" id="teamClose">â</button>
   </div>
   <div class="team-body" id="teamPanelBody"></div>
 </div>
 
-<!-- ══ SCROLL TOP / FOOTER ══════════════════════════════ -->
-<button class="scroll-top" id="scrollTop">↑</button>
+<!-- ââ SCROLL TOP / FOOTER ââââââââââââââââââââââââââââââ -->
+<button class="scroll-top" id="scrollTop">â</button>
 
 <footer>
   <div class="legend">
@@ -552,13 +545,13 @@
     <div class="legend-item"><div class="legend-dot" style="background:var(--tar-c)"></div>TAR</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--tase-c)"></div>TASe</div>
     <div class="legend-item" style="margin-left:8px">
-      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none">⚙️</a>
+      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none">âï¸</a>
     </div>
   </div>
 </footer>
 
 <script>
-// ══ DATA ══════════════════════════════════════════════════
+// ââ DATA ââââââââââââââââââââââââââââââââââââââââââââââââââ
 const locations = [
   { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP" },
   { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000",    ts:20000901, addr:"", render3d:"https://my.matterport.com/show/?m=MLW9rLGqcbs" },
@@ -620,10 +613,10 @@ const locations = [
 
 const TYPE_FULL = { TLC:"The Lube Center", TAS:"The Auto Spa", TAR:"The Auto Repair", TASE:"The Auto Spa Express" };
 const TYPE_LOGO = { TLC:"images/logo-tlc.png", TAS:"images/logo-tas.png", TAR:"images/logo-tar.png", TASE:"images/logo-tase.png" };
-// Per-location logo overrides (loc number → image path)
+// Per-location logo overrides (loc number â image path)
 const LOC_LOGO  = { 6:"images/logo-tas-06.png" };
 
-// ── MANAGEMENT TEAM DATA ──────────────────────────────────
+// ââ MANAGEMENT TEAM DATA ââââââââââââââââââââââââââââââââââ
 // mp=Managing Partner, dm=District Manager, lm=Location Manager
 // am[]=Asst Manager(s), sup[]=Supervisor(s)
 const MGMT = {
@@ -635,7 +628,7 @@ const MGMT = {
   6:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Erik Borkman',                         am:['Willian Reyes','Open'],                           sup:['Aaron Bravo'] },
   7:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Shane Seales',                         am:['Shelton Willett'],                                sup:['Mekhi Anderson'] },
   8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                   sup:['DeAnna King'] },
-  9:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'José "JR" Diosdado-Quintana',          am:['Enrique Alfaro'],                                 sup:['Open'] },
+  9:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'JosÃ© "JR" Diosdado-Quintana',          am:['Enrique Alfaro'],                                 sup:['Open'] },
   10: { mp:'Michael Allen',   dm:null,                    lm:'Michael Clark',                        am:['Clyde McGee','Aaron Gotthardt'],                  sup:[] },
   11: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Ismaila "Ismail" Bangura',             am:['Sean Smith','Dustardi Davis'],                    sup:[] },
   12: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Alec Shackett',                        am:['Marriah Gunder'],                                 sup:['Wendi Molina'] },
@@ -665,7 +658,7 @@ const NOW_YEAR = new Date().getFullYear();
 
 function pad(n) { return String(n).padStart(2,'0'); }
 
-// ── INDEXEDDB PHOTO CACHE ──────────────────────────────────
+// ââ INDEXEDDB PHOTO CACHE ââââââââââââââââââââââââââââââââââ
 const DB_NAME = 'wlr_photos', DB_VER = 1, DB_STORE = 'photos';
 let photoCache = {};
 
@@ -718,7 +711,7 @@ function mapsUrl(loc) {
   return `https://maps.google.com/?q=${encodeURIComponent(q)}`;
 }
 
-// ══ HERO COUNTER ANIMATION ═════════════════════════════════
+// ââ HERO COUNTER ANIMATION âââââââââââââââââââââââââââââââââ
 function animateNum(el, target, dur) {
   let s = 0; const step = target / (dur / 16);
   const t = setInterval(() => {
@@ -735,7 +728,7 @@ window.addEventListener('load', () => {
   animateNum(document.getElementById('statStates'), 3, 600);
 });
 
-// ══ CARD BUILDER ══════════════════════════════════════════
+// ââ CARD BUILDER ââââââââââââââââââââââââââââââââââââââââââ
 function buildCard(baseLoc) {
   const overrides = getLocInfo(baseLoc.num);
   const loc = { ...baseLoc, ...overrides };
@@ -748,9 +741,9 @@ function buildCard(baseLoc) {
       : `<span class="years-badge yb-old">${yrs} yrs</span>`;
 
   const statusMap = {
-    'Coming Soon':         { icon:'🔜', color:'var(--tase-c)' },
-    'Temporarily Closed':  { icon:'🚧', color:'#fca044' },
-    'Permanently Closed':  { icon:'🚫', color:'rgba(255,80,80,0.85)' },
+    'Coming Soon':         { icon:'ð', color:'var(--tase-c)' },
+    'Temporarily Closed':  { icon:'ð§', color:'#fca044' },
+    'Permanently Closed':  { icon:'ð«', color:'rgba(255,80,80,0.85)' },
   };
   const statusInfo = statusMap[loc.status] || null;
   const statusBadge = statusInfo
@@ -785,15 +778,15 @@ function buildCard(baseLoc) {
              ${(!isLocal && !useStatic) ? `onerror="this.style.display='none'; this.parentElement.querySelector('.ph').style.display='flex';"` : ''}
              onload="this.parentElement.querySelector('.ph').style.display='none';">
         <div class="ph" style="display:none">
-          <div class="ph-icon">📷</div>
+          <div class="ph-icon">ð·</div>
           <div class="ph-text">${s.label}</div>
         </div>
         <div class="photo-label">${s.label}</div>
       </div>`;
   }).join('');
 
-  const addrLine  = loc.addr  ? `<div class="loc-addr">📍 ${loc.addr}</div>` : '';
-  const phoneLine = loc.phone ? `<div class="loc-phone">📞 ${loc.phone}</div>` : '';
+  const addrLine  = loc.addr  ? `<div class="loc-addr">ð ${loc.addr}</div>` : '';
+  const phoneLine = loc.phone ? `<div class="loc-phone">ð ${loc.phone}</div>` : '';
   const notesLine = loc.notes ? `<div class="loc-notes">${loc.notes}</div>` : '';
 
   return `
@@ -820,7 +813,7 @@ function buildCard(baseLoc) {
     </div>`;
 }
 
-// ══ STATE ══════════════════════════════════════════════════
+// ââ STATE ââââââââââââââââââââââââââââââââââââââââââââââââââ
 let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
 
 function getSorted() {
@@ -840,7 +833,7 @@ function matches(baseLoc) {
   return true;
 }
 
-// ══ RENDER ══════════════════════════════════════════════════
+// ââ RENDER ââââââââââââââââââââââââââââââââââââââââââââââââââ
 function render() {
   const grid    = document.getElementById('grid');
   const noR     = document.getElementById('noResults');
@@ -849,7 +842,7 @@ function render() {
 
   grid.innerHTML = visible.map(buildCard).join('');
 
-  // Attach photo-slot click → lightbox
+  // Attach photo-slot click â lightbox
   grid.querySelectorAll('.photo-slot').forEach(slot => {
     slot.addEventListener('click', () => {
       const img = slot.querySelector('img');
@@ -868,14 +861,14 @@ function render() {
   locations.forEach(l => { counts[l.type] = (counts[l.type]||0)+1; });
   document.querySelectorAll('.filter-btn').forEach(btn => {
     const t = btn.dataset.type, s = { TLC:'Lube Centers', TAS:'Auto Spas', TAR:'Auto Repair', TASE:'Expresses' };
-    btn.textContent = t === 'ALL' ? `All (${locations.length})` : `${t==='TASE'?'TASe':t} — ${s[t]} (${counts[t]||0})`;
+    btn.textContent = t === 'ALL' ? `All (${locations.length})` : `${t==='TASE'?'TASe':t} â ${s[t]} (${counts[t]||0})`;
   });
 
   statBar.textContent = activeFilter === 'ALL'
     ? `Showing all ${locations.length} locations`
-    : `Showing ${visible.length} of ${locations.length} — ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
+    : `Showing ${visible.length} of ${locations.length} â ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
 
-  // Detect overflowing names — measure inner text span vs container for accuracy
+  // Detect overflowing names â measure inner text span vs container for accuracy
   const measureOverflow = () => {
     grid.querySelectorAll('.loc-name').forEach(el => {
       const inner = el.querySelector('.loc-name-text');
@@ -895,7 +888,7 @@ function render() {
   document.fonts.ready.then(measureOverflow);
 }
 
-// ══ LIGHTBOX ══════════════════════════════════════════════
+// ââ LIGHTBOX ââââââââââââââââââââââââââââââââââââââââââââââ
 let lbPhotos = [], lbIdx = 0;
 
 function openLightboxForLoc(num, startSlot) {
@@ -910,7 +903,7 @@ function openLightboxForLoc(num, startSlot) {
     const local = getPhotoSrc(num, s);
     const file  = `images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`;
     const src   = local || (locComingSoon ? 'images/tase-coming-soon.jpg' : file);
-    photos.push({ src, label: s === 'ext' ? 'Exterior' : 'Interior', caption: `#${pad(dn)} ${loc.name} — ${s==='ext'?'Exterior':'Interior'}` });
+    photos.push({ src, label: s === 'ext' ? 'Exterior' : 'Interior', caption: `#${pad(dn)} ${loc.name} â ${s==='ext'?'Exterior':'Interior'}` });
   });
 
   // Filter to only photos that are actually loaded (either local or file that might exist)
@@ -977,7 +970,7 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowLeft'  && lbIdx > 0)                  { lbIdx--; showLightboxSlide(); }
 });
 
-// ══ SLIDESHOW ══════════════════════════════════════════════
+// ââ SLIDESHOW ââââââââââââââââââââââââââââââââââââââââââââââ
 let ssLocs=[], ssLocIdx=0, ssSlotIdx=0, ssTimer=null, ssPaused=false;
 const SS_DURATION = 4000; // ms per photo
 
@@ -995,7 +988,7 @@ function startSlideshow() {
   if (ssLocs.length === 0) return;
   ssLocIdx  = 0; ssSlotIdx = 0; ssPaused = false;
   document.getElementById('slideshow').classList.add('open');
-  document.getElementById('ssPause').textContent = '⏸';
+  document.getElementById('ssPause').textContent = 'â¸';
   document.body.style.overflow = 'hidden';
   showSSSlide();
   startSSTimer();
@@ -1022,11 +1015,11 @@ function showSSSlide() {
   // Info overlay
   const tc = { TLC:' background:#FADC00;color:#0d3268', TAS:' background:#0C4D8F;color:#ffffff', TAR:' background:#fca044;color:#0d3268', TASE:' background:#0C4D8F;color:#ffffff' };
   document.getElementById('ssInfo').innerHTML = `
-    <div class="ss-type-badge" style="${tc[loc.type]}">${loc.type==='TASE'?'TASe':loc.type} — ${TYPE_FULL[loc.type]}</div>
+    <div class="ss-type-badge" style="${tc[loc.type]}">${loc.type==='TASE'?'TASe':loc.type} â ${TYPE_FULL[loc.type]}</div>
     <div class="ss-loc-num">Location #${pad(loc.numOverride || loc.num)}</div>
     <div class="ss-loc-name">${loc.name}</div>
     <div class="ss-loc-city">${loc.city}, ${loc.state}</div>
-    <div class="ss-opened">${loc.opened ? `Opened ${loc.opened}` : ''}${yrs ? ` · ${yrs} years` : ''}</div>
+    <div class="ss-opened">${loc.opened ? `Opened ${loc.opened}` : ''}${yrs ? ` Â· ${yrs} years` : ''}</div>
   `;
 
   // Counter & label
@@ -1078,7 +1071,7 @@ document.getElementById('ssNext').addEventListener('click', () => { clearTimeout
 document.getElementById('ssPrev').addEventListener('click', ssGoBack);
 document.getElementById('ssPause').addEventListener('click', () => {
   ssPaused = !ssPaused;
-  document.getElementById('ssPause').textContent = ssPaused ? '▶' : '⏸';
+  document.getElementById('ssPause').textContent = ssPaused ? 'â¶' : 'â¸';
   if (ssPaused) {
     clearTimeout(ssTimer);
     document.getElementById('ssProgressFill').style.transition = 'none';
@@ -1101,7 +1094,7 @@ document.getElementById('ssPause').addEventListener('click', () => {
   }, { passive:true });
 })();
 
-// ══ FILTER / SORT / SEARCH ════════════════════════════════
+// ââ FILTER / SORT / SEARCH ââââââââââââââââââââââââââââââââ
 document.getElementById('filterRow').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
@@ -1136,12 +1129,12 @@ searchClear.addEventListener('click', () => {
   searchInput.value=''; searchQuery=''; searchClear.style.display='none'; render();
 });
 
-// ══ SCROLL TOP ════════════════════════════════════════════
+// ââ SCROLL TOP ââââââââââââââââââââââââââââââââââââââââââââ
 const scrollBtn = document.getElementById('scrollTop');
 window.addEventListener('scroll', () => { scrollBtn.classList.toggle('show', window.scrollY > 500); }, { passive:true });
 scrollBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
 
-// ══ TEAM MODAL ════════════════════════════════════════════
+// ââ TEAM MODAL ââââââââââââââââââââââââââââââââââââââââââââ
 function openTeam(num) {
   const baseLoc = locations.find(l => l.num === num);
   if (!baseLoc) return;
@@ -1165,7 +1158,7 @@ function openTeam(num) {
   const supLabel = (m.sup && m.sup.length > 1)  ? 'Supervisors' : 'Supervisor';
 
   document.getElementById('teamPanelTitle').textContent    = `#${pad(displayNum)} ${loc.name}`;
-  document.getElementById('teamPanelSubtitle').textContent = `${loc.city}, ${loc.state}  ·  ${TYPE_FULL[loc.type]}`;
+  document.getElementById('teamPanelSubtitle').textContent = `${loc.city}, ${loc.state}  Â·  ${TYPE_FULL[loc.type]}`;
   document.getElementById('teamPanelBody').innerHTML =
     singleRow('Managing Partner', m.mp || null) +
     singleRow('District Manager', m.dm || null) +
@@ -1185,7 +1178,7 @@ function closeTeam() {
 document.getElementById('teamOverlay').addEventListener('click', closeTeam);
 document.getElementById('teamClose').addEventListener('click', closeTeam);
 
-// ══ INIT ══════════════════════════════════════════════════
+// ââ INIT ââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Load all photos from IndexedDB into memory cache, then render
 dbGetAll().then(all => { photoCache = all; render(); }).catch(() => render());
 </script>
