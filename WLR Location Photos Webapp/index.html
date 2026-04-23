@@ -203,7 +203,7 @@
     .loc-name .loc-num-prefix { color: rgba(255,255,255,0.55); font-weight: 600; }
     .loc-name .loc-pipe       { color: rgba(255,255,255,0.3);  font-weight: 400; margin: 0 4px; }
     .loc-city  { display: none; }
-    .loc-addr  { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .loc-addr  { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; white-space: nowraw; overflow: hidden; text-overflow: ellipsis; }
     .loc-phone { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
     .loc-notes { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; font-style: italic; line-height: 1.4; }
     .loc-status { font-size: 10px; font-weight: 700; }
@@ -405,6 +405,120 @@
     .team-role { font-size: 9px; font-weight: 800; color: var(--yellow); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
     .team-name { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.5; }
     .team-name.open { color: rgba(255,255,255,0.35); font-style: italic; font-size: 13px; }
+
+    /* ══ POLISHED ANIMATIONS ══════════════════════════════ */
+
+    /* — Card scroll entrance — */
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+    .card-anim { opacity: 0; }
+    .card-anim.card-in {
+      animation: cardEnter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--card-delay, 0ms);
+    }
+
+    /* — Card hover lift (pointer devices only) — */
+    @media (hover: hover) {
+      .card {
+        transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 0.22s ease;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 52px rgba(0,0,0,.72), 0 0 0 1px rgba(250,220,0,0.1);
+      }
+      .card:active { transform: translateY(-2px) scale(0.99); }
+    }
+
+    /* — Photo slot image zoom on hover — */
+    .photo-slot img {
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @media (hover: hover) {
+      .photo-slot:hover img { transform: scale(1.07); }
+    }
+
+    /* — Photo shimmer while loading — */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .photo-shimmer {
+      background: linear-gradient(90deg,
+        rgba(255,255,255,0.03) 0%,
+        rgba(255,255,255,0.10) 45%,
+        rgba(255,255,255,0.03) 90%);
+      background-size: 600px 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+    }
+
+    /* — Hero: slow drifting gradient — */
+    @keyframes heroShift {
+      0%   { background-position: 0%   50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+    .hero {
+      background: linear-gradient(160deg, #060e24, #1248a0, #0a2960, #0d1f4a, #1a4fa8) !important;
+      background-size: 400% 400% !important;
+      animation: heroShift 13s ease infinite;
+    }
+
+    /* — Hero element entrances — */
+    @keyframes heroFadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-logo, .hero-logo-fb {
+      animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hero-tagline {
+      animation: heroFadeUp 0.8s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hero-stats {
+      animation: heroFadeUp 0.8s 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hero-states, .hero-note {
+      animation: heroFadeUp 0.8s 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* — Filter button tap pop — */
+    @keyframes filterPop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(0.86); }
+      68%  { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .filter-btn.pop { animation: filterPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    /* — Grid fade during filter / sort / search switch — */
+    #grid { transition: opacity 0.13s ease, transform 0.13s ease; }
+    #grid.fading { opacity: 0.18; transform: scale(0.983); pointer-events: none; }
+
+    /* — Search input focus glow — */
+    .search-wrap input {
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-wrap input:focus {
+      box-shadow: 0 0 0 3px rgba(250,220,0,0.14);
+    }
+
+    /* — Lightbox open: improved slide-up — */
+    @keyframes lbIn {
+      from { opacity: 0; transform: scale(0.92) translateY(24px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
+
+    /* — Lightbox photo cross-fade on slide change — */
+    @keyframes photoSlideIn {
+      from { opacity: 0.1; transform: scale(0.96); }
+      to   { opacity: 1;   transform: scale(1); }
+    }
+    #lightboxImg.slide-in {
+      animation: photoSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
   </style>
 </head>
 <body>
@@ -625,11 +739,11 @@ const MGMT = {
   3:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Brian Haire',                          am:['Cesar Quinteros'],                                sup:['Lorraine Eiland'] },
   4:  { mp:'Michael Allen',   dm:null,                    lm:'Jorge Urizar',                         am:['Douglas "DJ" Allen'],                             sup:[] },
   5:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Cristian Botero',                      am:['Jorge Lacayo'],                                   sup:['Open'] },
-  6:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Erik Borkman',                         am:['Willian Reyes','Open'],                            sup:['Aaron Bravo'] },
+  6:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Erik Borkman',                         am:['Willian Reyes','Open'],                           sup:['Aaron Bravo'] },
   7:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Shane Seales',                         am:['Shelton Willett'],                                sup:['Mekhi Anderson'] },
-  8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                    sup:['Open'] },
+  8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                   sup:['Open'] },
   9:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'José "JR" Diosdado-Quintana',          am:['Enrique Alfaro'],                                 sup:['Open'] },
-  10: { mp:'Michael Allen',   dm:null,                    lm:'Michael Clark',                        am:['Clyde McGee','Aaron Gotthardt'],                   sup:[] },
+  10: { mp:'Michael Allen',   dm:null,                    lm:'Michael Clark',                        am:['Clyde McGee','Aaron Gotthardt'],                  sup:[] },
   11: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Ismaila "Ismail" Bangura',             am:['Sean Smith','Dustardi Davis'],                    sup:[] },
   12: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Alec Shackett',                        am:['Marriah Gunder'],                                 sup:['Wendi Molina'] },
   13: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'William Simms',                        am:['Jackson Krasche'],                                sup:['Open'] },
@@ -657,6 +771,36 @@ const INFO_PREFIX  = 'wlr_info_';
 const NOW_YEAR = new Date().getFullYear();
 
 function pad(n) { return String(n).padStart(2,'0'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── ANIMATION HELPERS ──────────────────────────────────────
+function setupCardAnimations() {
+  const cards = [...document.querySelectorAll('.card')];
+  if (!cards.length) return;
+  cards.forEach(c => c.classList.add('card-anim'));
+  if (!('IntersectionObserver' in window)) {
+    cards.forEach(c => c.classList.add('card-in'));
+    return;
+  }
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('card-in'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -10px 0px' });
+  cards.forEach((card, i) => {
+    card.style.setProperty('--card-delay', `${Math.min(i % 7, 5) * 58}ms`);
+    obs.observe(card);
+  });
+}
+
+function renderWithTransition() {
+  const grid = document.getElementById('grid');
+  grid.classList.add('fading');
+  setTimeout(() => {
+    render();
+    requestAnimationFrame(() => grid.classList.remove('fading'));
+  }, 130);
+}
 
 // ── INDEXEDDB PHOTO CACHE ──────────────────────────────────
 const DB_NAME = 'wlr_photos', DB_VER = 1, DB_STORE = 'photos';
@@ -741,7 +885,7 @@ function buildCard(baseLoc) {
       : `<span class="years-badge yb-old">${yrs} yrs</span>`;
 
   const statusMap = {
-    'Coming Soon':         { icon:'p���', color:'var(--tase-c)' },
+    'Coming Soon':         { icon:'🔜', color:'var(--tase-c)' },
     'Temporarily Closed':  { icon:'🚧', color:'#fca044' },
     'Permanently Closed':  { icon:'🚫', color:'rgba(255,80,80,0.85)' },
   };
@@ -785,9 +929,9 @@ function buildCard(baseLoc) {
       </div>`;
   }).join('');
 
-  const addrLine  = loc.addr  ? `<div class="loc-addr">📍 ${loc.addr}</div>` : '';
-  const phoneLine = loc.phone ? `<div class="loc-phone">📞 ${loc.phone}</div>` : '';
-  const notesLine = loc.notes ? `<div class="loc-notes">${loc.notes}</div>` : '';
+  const addrLine  = loc.addr  ? `<div class="loc-addr">📍 ${esc(loc.addr)}</div>` : '';
+  const phoneLine = loc.phone ? `<div class="loc-phone">📞 ${esc(loc.phone)}</div>` : '';
+  const notesLine = loc.notes ? `<div class="loc-notes">${esc(loc.notes)}</div>` : '';
 
   return `
     <div class="card" data-type="${loc.type}" data-num="${loc.num}" data-ts="${loc.ts}" data-state="${loc.state}">
@@ -799,8 +943,8 @@ function buildCard(baseLoc) {
           ${yrsBadge}
         </div>
         <div class="loc-info">
-          <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${loc.name}</span></div>
-          <div class="loc-city">${loc.city}, ${loc.state}</div>
+          <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${esc(loc.name)}</span></div>
+          <div class="loc-city">${esc(loc.city)}, ${esc(loc.state)}</div>
           ${addrLine}
           ${phoneLine}
           ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
@@ -841,6 +985,20 @@ function render() {
   const visible = getSorted().filter(l => isLocVisible(l) && matches(l));
 
   grid.innerHTML = visible.map(buildCard).join('');
+
+  // Photo shimmer while images load
+  grid.querySelectorAll('.photo-slot').forEach(slot => {
+    const img = slot.querySelector('img');
+    if (img && !img.complete) {
+      slot.classList.add('photo-shimmer');
+      const done = () => slot.classList.remove('photo-shimmer');
+      img.addEventListener('load',  done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    }
+  });
+
+  // Staggered card entrance animations
+  setupCardAnimations();
 
   // Attach photo-slot click → lightbox
   grid.querySelectorAll('.photo-slot').forEach(slot => {
@@ -918,9 +1076,11 @@ function openLightboxForLoc(num, startSlot) {
 function showLightboxSlide() {
   const p   = lbPhotos[lbIdx];
   const img = document.getElementById('lightboxImg');
-  img.style.opacity = '0.4';
+  img.classList.remove('slide-in');
+  void img.offsetWidth; // restart animation
   img.src = p.src;
-  img.onload = () => { img.style.opacity = '1'; };
+  img.classList.add('slide-in');
+  img.onload  = () => { img.style.opacity = '1'; };
   img.onerror = () => { img.style.opacity = '0.3'; };
   document.getElementById('lightboxCaption').textContent = p.caption;
 
@@ -1016,9 +1176,9 @@ function showSSSlide() {
   document.getElementById('ssInfo').innerHTML = `
     <div class="ss-type-badge" style="${tc[loc.type]}">${loc.type==='TASE'?'TASe':loc.type} — ${TYPE_FULL[loc.type]}</div>
     <div class="ss-loc-num">Location #${pad(loc.numOverride || loc.num)}</div>
-    <div class="ss-loc-name">${loc.name}</div>
-    <div class="ss-loc-city">${loc.city}, ${loc.state}</div>
-    <div class="ss-opened">${loc.opened ? `Opened ${loc.opened}` : ''}${yrs ? ` · ${yrs} years` : ''}</div>
+    <div class="ss-loc-name">${esc(loc.name)}</div>
+    <div class="ss-loc-city">${esc(loc.city)}, ${esc(loc.state)}</div>
+    <div class="ss-opened">${loc.opened ? `Opened ${esc(loc.opened)}` : ''}${yrs ? ` · ${yrs} years` : ''}</div>
   `;
 
   // Counter & label
@@ -1070,7 +1230,7 @@ document.getElementById('ssNext').addEventListener('click', () => { clearTimeout
 document.getElementById('ssPrev').addEventListener('click', ssGoBack);
 document.getElementById('ssPause').addEventListener('click', () => {
   ssPaused = !ssPaused;
-  document.getElementById('ssPause').textContent = ssPaused ? '▶' : '⏸';
+  document.getElementById('ssPause').textContent = ssPaused ? '▞' : '⏸';
   if (ssPaused) {
     clearTimeout(ssTimer);
     document.getElementById('ssProgressFill').style.transition = 'none';
@@ -1097,9 +1257,14 @@ document.getElementById('ssPause').addEventListener('click', () => {
 document.getElementById('filterRow').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'pop'));
   btn.classList.add('active');
-  activeFilter = btn.dataset.type; render();
+  // Pop animation restart trick
+  void btn.offsetWidth;
+  btn.classList.add('pop');
+  btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
+  activeFilter = btn.dataset.type;
+  renderWithTransition();
 });
 const stateSelect = document.getElementById('stateSelect');
 document.querySelectorAll('.sort-btn').forEach(btn => {
@@ -1110,22 +1275,22 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
     const isByState = activeSort === 'state';
     stateSelect.classList.toggle('show', isByState);
     if (!isByState) { activeState = ''; stateSelect.value = ''; }
-    render();
+    renderWithTransition();
   });
 });
 stateSelect.addEventListener('change', () => {
   activeState = stateSelect.value;
-  render();
+  renderWithTransition();
 });
 const searchInput = document.getElementById('search');
 const searchClear = document.getElementById('searchClear');
 searchInput.addEventListener('input', () => {
   searchQuery = searchInput.value.trim();
   searchClear.style.display = searchQuery ? 'block' : 'none';
-  render();
+  render(); // search: no fade (instant feedback feels better)
 });
 searchClear.addEventListener('click', () => {
-  searchInput.value=''; searchQuery=''; searchClear.style.display='none'; render();
+  searchInput.value=''; searchQuery=''; searchClear.style.display='none'; renderWithTransition();
 });
 
 // ══ SCROLL TOP ════════════════════════════════════════════
@@ -1144,13 +1309,13 @@ function openTeam(num) {
 
   function singleRow(role, name) {
     const isEmpty = !name;
-    const display = isEmpty ? 'Not Assigned' : name;
-    return `<div class="team-row"><div class="team-role">${role}</div><div class="team-name${isEmpty ? ' open' : ''}">${display}</div></div>`;
+    const display = isEmpty ? 'Not Assigned' : esc(name);
+    return `<div class="team-row"><div class="team-role">${esc(role)}</div><div class="team-name${isEmpty ? ' open' : ''}">${display}</div></div>`;
   }
   function multiRow(role, names) {
     if (!names || names.length === 0) return '';
-    const html = names.map(n => `<div class="team-name${n === 'Open' ? ' open' : ''}">${n === 'Open' ? 'Open Position' : n}</div>`).join('');
-    return `<div class="team-row"><div class="team-role">${role}</div>${html}</div>`;
+    const html = names.map(n => `<div class="team-name${n === 'Open' ? ' open' : ''}">${n === 'Open' ? 'Open Position' : esc(n)}</div>`).join('');
+    return `<div class="team-row"><div class="team-role">${esc(role)}</div>${html}</div>`;
   }
 
   const amLabel  = (m.am  && m.am.length  > 1) ? 'Assistant Managers' : 'Assistant Manager';
