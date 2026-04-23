@@ -360,17 +360,22 @@
 <div id="toast"></div>
 
 <script>
-const PASSWORD      = 'WLR2025';
+const PW_HASH       = '213df38968aa805e75bf712ef8e41e5ef382597c1d8e7f06dee5561a449051fd';
+const SESSION_TOKEN = PW_HASH.slice(0, 24);
 const PHOTO_PFX     = 'wlr_photo_';
 const INFO_PFX      = 'wlr_info_';
 const CUSTOM_LOCS_KEY = 'wlr_custom_locs';
 
 // ── AUTH ─────────────────────────────────────────────────────
-function tryUnlock() {
-  if (document.getElementById('pwInput').value === PASSWORD) {
+async function tryUnlock() {
+  const input = document.getElementById('pwInput').value;
+  const encoded = new TextEncoder().encode(input);
+  const hashBuf = await crypto.subtle.digest('SHA-256', encoded);
+  const hashHex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  if (hashHex === PW_HASH) {
     document.getElementById('gate').style.display = 'none';
     document.getElementById('adminMain').style.display = 'block';
-    sessionStorage.setItem('wlr_auth','1');
+    sessionStorage.setItem('wlr_auth', SESSION_TOKEN);
     renderAdmin();
   } else {
     document.getElementById('pwError').classList.add('show');
@@ -381,7 +386,7 @@ function tryUnlock() {
 document.getElementById('pwBtn').addEventListener('click', tryUnlock);
 document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
 document.getElementById('logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('wlr_auth'); location.reload(); });
-if (sessionStorage.getItem('wlr_auth') === '1') {
+if (sessionStorage.getItem('wlr_auth') === SESSION_TOKEN) {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('adminMain').style.display = 'block';
 }
@@ -628,10 +633,10 @@ function renderAdmin() {
             <div class="a-num-val">${displayNum}</div>
           </div>
           <div class="a-info">
-            <div class="a-name">${loc.name}${edited ? ' <span style="color:var(--yellow);font-size:10px">✏️</span>' : ''}${isCustom ? '<span class="custom-badge">NEW</span>' : ''}${isHidden && !isPublished ? '<span class="hidden-badge">HIDDEN</span>' : ''}${isHidden && isPublished ? '<span class="custom-badge" style="background:rgba(90,240,240,0.2);color:var(--tase-c)">LIVE ✓</span>' : ''}</div>
-            <div class="a-city">${loc.city}, ${loc.state}</div>
-            ${loc.addr ? `<div class="a-addr">📍 ${loc.addr}</div>` : ''}
-            ${info.phone ? `<div class="a-addr">📞 ${info.phone}</div>` : ''}
+            <div class="a-name">${escHtml(loc.name)}${edited ? ' <span style="color:var(--yellow);font-size:10px">✏️</span>' : ''}${isCustom ? '<span class="custom-badge">NEW</span>' : ''}${isHidden && !isPublished ? '<span class="hidden-badge">HIDDEN</span>' : ''}${isHidden && isPublished ? '<span class="custom-badge" style="background:rgba(90,240,240,0.2);color:var(--tase-c)">LIVE ✓</span>' : ''}</div>
+            <div class="a-city">${escHtml(loc.city)}, ${escHtml(loc.state)}</div>
+            ${loc.addr ? `<div class="a-addr">📍 ${escHtml(loc.addr)}</div>` : ''}
+            ${info.phone ? `<div class="a-addr">📞 ${escHtml(info.phone)}</div>` : ''}
           </div>
           <div style="text-align:center">
             <div class="a-badge b-${base.type}">${tLabel}</div>
@@ -926,7 +931,7 @@ function removeCustomLoc(num) {
 // Pre-load all photos from IndexedDB into memory, then render
 dbGetAll().then(all => {
   photoCache = all;
-  if (sessionStorage.getItem('wlr_auth') === '1') renderAdmin();
+  if (sessionStorage.getItem('wlr_auth') === SESSION_TOKEN) renderAdmin();
 });
 </script>
 </body>
