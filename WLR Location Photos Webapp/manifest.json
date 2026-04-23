@@ -1,7 +1,7 @@
 {
   "name": "WLR Automotive Group — Locations",
   "short_name": "WLR Locations",
-  "description": "WLR Automotive Group location gallery for Randy Simpson",
+  "description": "WLR Automotive Group location gallery",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1b2a",
