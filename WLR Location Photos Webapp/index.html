@@ -151,7 +151,23 @@
 
     /* ══ GRID ════════════════════════════════════════════ */
     .grid { padding: 12px 12px 90px; display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 560px; margin: 0 auto; }
-    @media(min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media(min-width: 560px)  { .grid { grid-template-columns: 1fr 1fr; } }
+    @media(min-width: 1100px) { .grid { max-width: 1320px; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 18px 18px 100px; } }
+    @media(min-width: 1500px) { .grid { max-width: 1720px; grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+
+    /* Clamp sticky control bar's inner elements so the search input doesn't stretch edge-to-edge on wide monitors */
+    @media(min-width: 1100px) {
+      .controls > .search-wrap,
+      .controls > .filter-row,
+      .controls > .sort-row,
+      .stats-bar { max-width: 1320px; margin-left: auto; margin-right: auto; }
+    }
+    @media(min-width: 1500px) {
+      .controls > .search-wrap,
+      .controls > .filter-row,
+      .controls > .sort-row,
+      .stats-bar { max-width: 1720px; }
+    }
 
     /* ══ CARD ════════════════════════════════════════════ */
     .card {
