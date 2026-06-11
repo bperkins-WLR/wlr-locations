@@ -12,6 +12,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <title>WLR Automotive Group — Locations</title>
   <style>
     :root {
@@ -167,6 +171,70 @@
       .controls > .filter-row,
       .controls > .sort-row,
       .stats-bar { max-width: 1720px; }
+    }
+
+    /* ══ MAP VIEW ════════════════════════════════════════ */
+    .view-toggle { margin-left: auto; display: flex; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+    .view-btn {
+      padding: 3px 10px; border: none; background: #000;
+      color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 700;
+      cursor: pointer; -webkit-appearance: none; transition: all 0.15s;
+    }
+    .view-btn + .view-btn { border-left: 1px solid rgba(255,255,255,0.25); }
+    .view-btn.active { background: var(--yellow); color: var(--deep); }
+
+    .map-wrap { display: none; padding: 12px 12px 90px; max-width: 1320px; margin: 0 auto; }
+    .map-wrap.show { display: block; }
+    @media(min-width: 1500px) { .map-wrap { max-width: 1720px; } }
+    #map {
+      height: calc(100vh - 280px); height: calc(100dvh - 280px); min-height: 380px;
+      border-radius: 16px; border: 1px solid var(--bord);
+      box-shadow: 0 5px 22px rgba(0,0,0,.6); background: #0a1830;
+    }
+    .map-fallback { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 13px; }
+
+    .map-pin {
+      position: relative; width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 11px;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    }
+    .map-pin::after {
+      content: ''; position: absolute; left: 50%; top: 100%;
+      transform: translateX(-50%); margin-top: -1px;
+      border: 6px solid transparent; border-bottom: none; border-top-width: 9px;
+    }
+    .pin-TLC  { background: #FADC00; color: #0d3268; }  .pin-TLC::after  { border-top-color: #FADC00; }
+    .pin-TAS  { background: #0C4D8F; color: #ffffff; }  .pin-TAS::after  { border-top-color: #0C4D8F; }
+    .pin-TASE { background: #0C4D8F; color: #ffffff; }  .pin-TASE::after { border-top-color: #0C4D8F; }
+    .pin-TAR  { background: #1a1a1a; color: #ffffff; }  .pin-TAR::after  { border-top-color: #1a1a1a; }
+
+    .leaflet-popup-content-wrapper {
+      background: #0d0d0d; color: var(--text); border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 8px 30px rgba(0,0,0,0.65);
+      overflow: hidden;
+    }
+    .leaflet-popup-tip { background: #0d0d0d; }
+    .leaflet-popup-content { margin: 0; width: 228px !important; font-family: 'Work Sans', sans-serif; line-height: 1.35; }
+    .mp-img { width: 100%; height: 110px; overflow: hidden; background: #000; }
+    .mp-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .mp-body { padding: 10px 12px 12px; }
+    .mp-name { font-weight: 800; font-size: 13px; }
+    .mp-city { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .mp-actions { display: flex; gap: 6px; margin-top: 9px; }
+    .mp-actions a, .mp-actions button {
+      flex: 1; text-align: center; padding: 5px 6px; border-radius: 7px;
+      font-size: 11px; font-weight: 700; font-family: 'Work Sans', sans-serif;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .mp-dir  { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
+    .mp-view { background: var(--yellow); color: var(--deep); }
+
+    .card.flash { animation: cardFlash 1.6s ease; }
+    @keyframes cardFlash {
+      0%, 100% { box-shadow: 0 5px 22px rgba(0,0,0,.6); }
+      25%, 60% { box-shadow: 0 0 0 3px var(--yellow), 0 5px 22px rgba(0,0,0,.6); }
     }
 
     /* ══ CARD ════════════════════════════════════════════ */
@@ -611,10 +679,15 @@
       <option value="PA">PA</option>
       <option value="WV">WV</option>
     </select>
+    <div class="view-toggle" id="viewToggle">
+      <button class="view-btn active" data-view="grid" title="Grid view">▦ Grid</button>
+      <button class="view-btn" data-view="map" title="Map view">🗺️ Map</button>
+    </div>
   </div>
 </div>
 
 <div class="stats-bar" id="statsBar"></div>
+<div class="map-wrap" id="mapWrap"><div id="map"><div class="map-fallback">Loading map…</div></div></div>
 <div class="grid" id="grid"></div>
 <div class="no-results" id="noResults">
   <div class="no-results-icon">🔍</div>
@@ -740,6 +813,25 @@ const locations = [
     locations.sort((a,b) => a.num - b.num);
   } catch(e) {}
 })();
+
+// Geocoded from official washluberepair.com location pages (Census + OSM geocoders).
+// #4 shares the #1 campus (1395 W Patrick St) — nudged east so both pins stay clickable.
+const COORDS = {
+  1:[39.41954,-77.46034],  2:[39.39172,-77.40935],  3:[39.17681,-76.82890],
+  4:[39.41954,-77.45999],  5:[39.11633,-77.20604],  6:[39.42129,-77.46726],
+  7:[39.15203,-76.73281],  8:[39.19199,-77.24419],  9:[39.17918,-77.24052],
+ 10:[39.05617,-76.65630], 11:[39.05579,-76.65671], 12:[39.40724,-77.43020],
+ 13:[39.17658,-77.23864], 14:[39.05540,-76.65709], 15:[39.07603,-76.86828],
+ 16:[39.76987,-76.66356], 17:[39.97793,-76.76046], 18:[38.58312,-76.60522],
+ 19:[39.54715,-76.31182], 20:[39.98263,-76.69266], 21:[39.39074,-77.40948],
+ 22:[38.95295,-76.87843], 23:[39.44940,-77.38756], 24:[39.96567,-76.77575],
+ 25:[38.86839,-76.85002], 26:[39.25262,-76.66868], 27:[39.09823,-76.72050],
+ 28:[39.45608,-77.98855], 31:[39.15293,-76.73017], 32:[39.63164,-77.76047],
+ 33:[39.28414,-76.80836], 35:[39.27863,-76.50487],
+ // Future sites (hidden until published via admin)
+ 30:[39.07230,-76.86542], 36:[39.11663,-77.20605], 38:[39.52281,-76.35812],
+ 40:[39.18859,-76.79639], 44:[39.29955,-77.83032],
+};
 
 const TYPE_FULL = { TLC:"The Lube Center", TAS:"The Auto Spa", TAR:"The Auto Repair", TASE:"The Auto Spa Express" };
 const TYPE_LOGO = { TLC:"images/logo-tlc.png", TAS:"images/logo-tas.png", TAR:"images/logo-tar.png", TASE:"images/logo-tase.png" };
@@ -975,6 +1067,7 @@ function buildCard(baseLoc) {
 
 // ══ STATE ══════════════════════════════════════════════════
 let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
+let currentView = 'grid', mapInstance = null, markerLayer = null, lastPinKey = '';
 
 function getSorted() {
   let list = [...locations];
@@ -1041,6 +1134,8 @@ function render() {
   statBar.textContent = activeFilter === 'ALL'
     ? `Showing all ${locations.length} locations`
     : `Showing ${visible.length} of ${locations.length} — ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
+
+  if (currentView === 'map') updateMapMarkers();
 
   // Detect overflowing names — measure inner text span vs container for accuracy
   const measureOverflow = () => {
@@ -1307,6 +1402,90 @@ searchInput.addEventListener('input', () => {
 });
 searchClear.addEventListener('click', () => {
   searchInput.value=''; searchQuery=''; searchClear.style.display='none'; renderWithTransition();
+});
+
+// ══ MAP VIEW ══════════════════════════════════════════════
+function initMap() {
+  mapInstance = L.map('map', { zoomControl: true });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd', maxZoom: 19,
+  }).addTo(mapInstance);
+  markerLayer = L.layerGroup().addTo(mapInstance);
+  mapInstance.setView([39.3, -77.0], 8); // Mid-Atlantic
+}
+
+function pinPopupHtml(loc) {
+  const dn = loc.numOverride || loc.num;
+  const comingSoon = !loc.opened;
+  const src = getPhotoSrc(loc.num, 'ext')
+    || (comingSoon ? 'images/tase-Coming soon.JPG' : `images/loc-${pad(dn)}/01.jpg`);
+  const est = loc.opened ? `Est. ${esc(loc.opened)}` : 'Coming Soon';
+  return `
+    <div class="mp-img"><img src="${src}" alt="${esc(loc.name)}" onerror="this.parentElement.style.display='none'"></div>
+    <div class="mp-body">
+      <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
+      <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · ${est}</div>
+      <div class="mp-actions">
+        <a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">📍 Directions</a>
+        <button class="mp-view" onclick="showCardFromMap(${loc.num})">Photos →</button>
+      </div>
+    </div>`;
+}
+
+function updateMapMarkers() {
+  if (!mapInstance) return;
+  const pinned = getSorted().filter(l => isLocVisible(l) && matches(l) && COORDS[l.num]);
+  markerLayer.clearLayers();
+  pinned.forEach(baseLoc => {
+    const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
+    const dn  = loc.numOverride || loc.num;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="map-pin pin-${loc.type}"><span>${pad(dn)}</span></div>`,
+      iconSize: [28, 36], iconAnchor: [14, 36], popupAnchor: [0, -34],
+    });
+    L.marker(COORDS[loc.num], { icon })
+      .bindPopup(pinPopupHtml(loc), { closeButton: false })
+      .addTo(markerLayer);
+  });
+  // Refit only when the visible set changes, so panning isn't hijacked
+  const key = pinned.map(l => l.num).join(',');
+  if (pinned.length && key !== lastPinKey) {
+    mapInstance.fitBounds(L.latLngBounds(pinned.map(l => COORDS[l.num])), { padding: [36, 36], maxZoom: 12 });
+  }
+  lastPinKey = key;
+}
+
+function setView(view) {
+  if (view === 'map' && typeof L === 'undefined') {
+    document.querySelector('#map .map-fallback')?.replaceChildren('Map failed to load — check your connection.');
+  }
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.getElementById('grid').style.display      = view === 'map' ? 'none' : '';
+  document.getElementById('noResults').style.display = view === 'map' ? 'none' : '';
+  document.getElementById('mapWrap').classList.toggle('show', view === 'map');
+  if (view === 'map' && typeof L !== 'undefined') {
+    if (!mapInstance) initMap();
+    requestAnimationFrame(() => { mapInstance.invalidateSize(); updateMapMarkers(); });
+  }
+}
+
+function showCardFromMap(num) {
+  setView('grid');
+  requestAnimationFrame(() => {
+    const card = document.querySelector(`.card[data-num="${num}"]`);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('flash');
+    setTimeout(() => card.classList.remove('flash'), 1700);
+  });
+}
+
+document.getElementById('viewToggle').addEventListener('click', e => {
+  const btn = e.target.closest('.view-btn');
+  if (btn && btn.dataset.view !== currentView) setView(btn.dataset.view);
 });
 
 // ══ SCROLL TOP ════════════════════════════════════════════
