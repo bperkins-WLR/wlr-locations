@@ -845,13 +845,13 @@ const MGMT = {
   1:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Tyler DeGrange',                       am:['Michael Morris'],                                 sup:['Open'] },
   2:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Cristian Botero',                      am:['John Strott'],                                    sup:['Jose Jandres'] },
   3:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Brian Haire',                          am:['Cesar Quinteros'],                                sup:['Lorraine Eiland'] },
-  4:  { mp:'Michael Allen',   dm:null,                    lm:'Jorge Urizar',                         am:['Douglas "DJ" Allen'],                             sup:[] },
+  4:  { mp:'Michael Allen',   dm:'Mike Clark',            lm:'Aaron Gotthardt',                      am:['Nicqolas Clements'],                              sup:[] },
   5:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Jorge Lacayo',                         am:['Carl Kongo'],                                     sup:['Open'] },
   6:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Erik Borkman',                         am:['Willian Reyes','Open'],                           sup:['Aaron Bravo'] },
   7:  { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Shane Seales',                         am:['Shelton Willett'],                                sup:['Mekhi Anderson'] },
-  8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                   sup:['DeAnna King'] },
+  8:  { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:'Daniel Martinez',                      am:['Anthony Tran'],                                   sup:['Open'] },
   9:  { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'José "JR" Diosdado-Quintana',          am:['Enrique Alfaro'],                                 sup:['Open'] },
-  10: { mp:'Michael Allen',   dm:null,                    lm:'Michael Clark',                        am:['Clyde McGee','Aaron Gotthardt'],                  sup:[] },
+  10: { mp:'Michael Allen',   dm:'Mike Clark',            lm:'Clyde McGee',                          am:['Open'],                                           sup:[] },
   11: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Ismaila "Ismail" Bangura',             am:['Sean Smith','Dustardi Davis'],                    sup:[] },
   12: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'Alec Shackett',                        am:['Marriah Gunder'],                                 sup:['Wendi Molina'] },
   13: { mp:'Michael Allen',   dm:'Michael Mastrangelo',   lm:'William Simms',                        am:['Jackson Krasche'],                                sup:['Open'] },
@@ -861,6 +861,7 @@ const MGMT = {
   17: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Nathan "Nate" Markle',                 am:['Jacob "Jake" Leiphart','Brandon Little'],          sup:['Open'] },
   18: { mp:'Megan Solomon',   dm:'Roy Whitehead',         lm:null,                                   am:[],                                                 sup:[] },
   19: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Jose Velez',                           am:['Chiquetta Hooper'],                               sup:['Paige Pollard','Nicholas Tunzi'] },
+  20: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:null,                                   am:[],                                                 sup:[] },
   21: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Samantha "Sam" Taylor',                am:['Jacob Chilcoat'],                                 sup:['Ignacio Rodriguez','Bill McKenna','Triston Barzey'] },
   22: { mp:'Michael Allen',   dm:'James "JT" Kelley',     lm:'Dakota Belcher',                       am:['Walter Benitez'],                                 sup:['Kristen Alvarez'] },
   23: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Garrett Mayhew',                       am:['Maura Rivera Ramos'],                             sup:['Jonathan Hacen','Ethyn Benning'] },
@@ -869,8 +870,9 @@ const MGMT = {
   26: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Jamila Mitchell',                      am:['Demetrius "Demi" Wilson'],                         sup:['Ella Martin','Max Keepers'] },
   27: { mp:'Megan Solomon',   dm:'Herb Wilson',           lm:'Christine Reuling',                    am:['Denia Sanders'],                                  sup:['Tariq Robinson','Quincy Brown','Michael Shorter'] },
   28: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Peter Martin',                         am:['Kimberly "Kym" Hart'],                            sup:['Kimberly Pett','Sigourney Rodriguez'] },
-  31: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:'Jada Jordan',                          am:['Yania Stewart'],                                  sup:['Ijanai Harris','Christine Pena'] },
-  32: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Douglas Breeden',                      am:['Ryan Ross'],                                      sup:['Samantha Mays','Ashauna Calder'] },
+  31: { mp:'Megan Solomon',   dm:'Carla Castellon',       lm:['Jada Jordan','Ben Martucci'],         am:['Yania Stewart'],                                  sup:['Ijanai Harris','Christine Pena'] },
+  32: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Douglas Breeden',                      am:['Ryan Ross'],                                      sup:['Ashauna Calder','Kevin Kretzer'] },
+  33: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:null,                                   am:['Open'],                                           sup:['Anthony Branch','Ekim Elijah Davis'] },
   35: { mp:'Megan Solomon',   dm:'Megan Monroe',          lm:'Felicia Fitez',                        am:['Open'],                                           sup:['Donte Winfield','Jessica Stumbo','Hunter Smith'] },
 };
 
@@ -1521,7 +1523,7 @@ function openTeam(num) {
   document.getElementById('teamPanelBody').innerHTML =
     singleRow('Managing Partner', m.mp || null) +
     singleRow('District Manager', m.dm || null) +
-    singleRow('Location Manager', m.lm || null) +
+    (Array.isArray(m.lm) ? multiRow('Location Managers', m.lm) : singleRow('Location Manager', m.lm || null)) +
     (m.am && m.am.length > 0 ? multiRow(amLabel, m.am) : singleRow('Assistant Manager', null)) +
     (m.sup && m.sup.length > 0 ? multiRow(supLabel, m.sup) : '');
 
