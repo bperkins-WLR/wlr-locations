@@ -210,6 +210,7 @@
     .pin-TASE { background: #0C4D8F; color: #ffffff; }  .pin-TASE::after { border-top-color: #0C4D8F; }
     .pin-TAR  { background: #1a1a1a; color: #ffffff; }  .pin-TAR::after  { border-top-color: #1a1a1a; }
     .pin-SOON { background: #e11d2a; color: #ffffff; border-style: dashed; }  .pin-SOON::after { border-top-color: #e11d2a; }
+    .pin-approx { opacity: 0.6; }  /* approximate (city-level) coming-soon sites read as fainter */
 
     /* Coming-soon map toggle (Leaflet control, top-right of map) */
     .cs-toggle {
@@ -219,6 +220,7 @@
     .cs-toggle label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-family: 'Work Sans', sans-serif; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; }
     .cs-toggle input { accent-color: #e11d2a; width: 14px; height: 14px; cursor: pointer; }
     .mp-soon { color: #ff5a5a; font-weight: 800; }
+    .mp-approx { margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.55); font-style: italic; }
 
     .leaflet-popup-content-wrapper {
       background: #0d0d0d; color: var(--text); border-radius: 14px;
@@ -797,17 +799,17 @@ const locations = [
   { num: 32, name:"West Hagerstown",        type:"TASE", city:"Hagerstown",      state:"MD", opened:"October 2022",      ts:20221001, addr:"", render3d:"https://my.matterport.com/show/?m=TgogTei79Nn" },
   { num: 35, name:"Dundalk",                type:"TASE", city:"Dundalk",         state:"MD", opened:"November 17, 2025", ts:20251117, addr:"", render3d:"https://my.matterport.com/show/?m=PPxhyrfqCZg" },
   { num: 20, name:"East York",              type:"TASE", city:"York",             state:"PA", opened:"", ts:20991231, addr:"1715 Whiteford Rd, York, PA 17402",                       cam:"https://app.truelook.cloud/link?code=eJR8Tu4OyH-nKKLiHyMu5g&type=sharing_link" },
-  { num: 29, name:"Aviation Station",      type:"TASE", city:"Linthicum",        state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 29, name:"Aviation Station",      type:"TASE", city:"Linthicum",        state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 30, name:"South Laurel",          type:"TASE", city:"Laurel",           state:"MD", opened:"", ts:20991231, addr:"13401 Mid Atlantic Blvd, Laurel, MD 20708",               hidden:true },
   { num: 33, name:"Ellicott City",         type:"TASE", city:"Ellicott City",    state:"MD", opened:"", ts:20991231, addr:"8532 Baltimore National Pike, Ellicott City, MD 21043", cam:"https://app.truelook.cloud/link?code=xb0XT2acpeP8jSc0AqZ4Fg&type=sharing_link" },
-  { num: 34, name:"Cockeysville",          type:"TASE", city:"Cockeysville",     state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 34, name:"Cockeysville",          type:"TASE", city:"Cockeysville",     state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 36, name:"Fields Road",           type:"TASE", city:"Gaithersburg",     state:"MD", opened:"", ts:20991231, addr:"10009 Fields Rd, Gaithersburg, MD 20878",                 hidden:true },
-  { num: 37, name:"Elkridge",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 37, name:"Elkridge",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 38, name:"West Bel Air",          type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"710 Baltimore Pike, Bel Air, MD 21014",                   hidden:true },
   { num: 39, name:"Reisterstown Rd Plaza", type:"TASE", city:"Baltimore",         state:"MD", opened:"", ts:20991231, addr:"Reisterstown Road Plaza, Baltimore, MD 21215",                hidden:true },
   { num: 40, name:"Columbia",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"8181 Lark Brown Rd, Elkridge, MD 21075",                  hidden:true },
-  { num: 41, name:"Bel Air Village",       type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
-  { num: 42, name:"Capitol Heights",       type:"TASE", city:"Capitol Heights",  state:"MD", opened:"", ts:20991231, addr:"",                                                        hidden:true },
+  { num: 41, name:"Bel Air Village",       type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
+  { num: 42, name:"Capitol Heights",       type:"TASE", city:"Capitol Heights",  state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 43, name:"Beltway Plaza",         type:"TASE", city:"Greenbelt",        state:"MD", opened:"", ts:20991231, addr:"6000 Greenbelt Rd, Greenbelt, MD 20770",                     hidden:true },
   { num: 44, name:"Charles Town",          type:"TASE", city:"Charles Town",     state:"WV", opened:"", ts:20991231, addr:"60 Patrick Henry Way, Charles Town, WV 25414",            hidden:true },
 ];
@@ -841,6 +843,9 @@ const COORDS = {
  30:[39.07230,-76.86542], 36:[39.11663,-77.20605], 38:[39.52281,-76.35812],
  40:[39.18859,-76.79639], 44:[39.29955,-77.83032],
  39:[39.35642,-76.70671], 43:[38.99947,-76.90835], // Reisterstown Rd Plaza (Baltimore), Beltway Plaza Mall
+ // Approximate (city-level) — awaiting exact addresses; entries flagged approx:true
+ 29:[39.21058,-76.66257], 34:[39.48376,-76.62351], 37:[39.19386,-76.74209],
+ 41:[39.53551,-76.34904], 42:[38.88499,-76.91348],
 };
 
 const TYPE_FULL = { TLC:"The Lube Center", TAS:"The Auto Spa", TAR:"The Auto Repair", TASE:"The Auto Spa Express" };
@@ -1479,11 +1484,15 @@ function comingSoonPopupHtml(loc) {
   const dir = loc.addr
     ? `<div class="mp-actions"><a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">📍 Directions</a></div>`
     : '';
+  const approxNote = loc.approx
+    ? `<div class="mp-approx">◇ Approximate — exact address pending</div>`
+    : '';
   return `
     <div class="mp-img"><img src="images/tase-Coming soon.JPG" alt="${esc(loc.name)} — Coming Soon" onerror="this.parentElement.style.display='none'"></div>
     <div class="mp-body">
       <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · <span class="mp-soon">Coming Soon</span></div>
+      ${approxNote}
       ${dir}
     </div>`;
 }
@@ -1514,7 +1523,7 @@ function updateMapMarkers() {
     : [];
   soon.forEach(baseLoc => {
     const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
-    makePin(loc, 'pin-SOON', comingSoonPopupHtml(loc)).addTo(markerLayer);
+    makePin(loc, loc.approx ? 'pin-SOON pin-approx' : 'pin-SOON', comingSoonPopupHtml(loc)).addTo(markerLayer);
   });
 
   // Refit only when the shown set changes, so panning isn't hijacked
