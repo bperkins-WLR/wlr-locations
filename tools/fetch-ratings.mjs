@@ -92,7 +92,7 @@ async function placeDetails(id) {
 }
 
 const ratings = {};
-let ok = 0, miss = 0;
+let ok = 0, miss = 0, firstError = null;
 for (const [num, type, addr] of LOCS) {
   try {
     let p;
@@ -111,9 +111,24 @@ for (const [num, type, addr] of LOCS) {
       miss++;
     }
   } catch (e) {
+    if (!firstError) firstError = e.message;
     console.warn(`#${num}  error: ${e.message}`);
     miss++;
   }
+}
+
+// Fail the run (red status) if nothing came back, so a misconfigured key is obvious.
+if (ok === 0) {
+  console.error('\n================ NO RATINGS RETRIEVED ================');
+  console.error('First error:\n' + (firstError || 'requests succeeded but returned no places'));
+  console.error('\nMost likely causes:');
+  console.error('  1. "Places API (New)" is not enabled on the project (enabling legacy "Places API" is NOT enough).');
+  console.error('  2. Billing is not active on the Google Cloud project.');
+  console.error('  3. The API key has an "Application restriction" of "HTTP referrers" — server-side');
+  console.error('     calls from GitHub have no referer and get blocked. Set Application restriction to');
+  console.error('     "None" (or "IP addresses"), and keep the API restriction limited to "Places API (New)".');
+  console.error('=====================================================');
+  process.exit(1);
 }
 
 ratings._updated = new Date().toISOString().slice(0, 10);
