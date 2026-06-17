@@ -339,10 +339,16 @@
     .mp-hours .hrs-word.is-closed { color: #f87171; font-weight: 700; }
 
     /* ══ GOOGLE RATING ═══════════════════════════════════ */
-    .loc-rating { display: inline-flex; align-items: center; gap: 3px; margin-top: 3px; font-size: 12.5px; font-weight: 800; line-height: 1; }
+    .loc-rating { display: inline-flex; align-items: center; gap: 3px; margin-top: 3px; font-size: 12.5px; font-weight: 800; line-height: 1; text-decoration: none; color: inherit; cursor: pointer; }
     .rate-star  { color: #FFC107; font-size: 13px; }
     .rate-num   { color: #fff; }
     .rate-count { color: rgba(255,255,255,0.45); font-weight: 600; font-size: 10px; }
+    .rate-go    { color: rgba(255,255,255,0.35); font-size: 10px; font-weight: 700; }
+    .loc-rating:active { opacity: 0.65; }
+    @media (hover: hover) {
+      .loc-rating:hover .rate-num { text-decoration: underline; }
+      .loc-rating:hover .rate-go  { color: var(--yellow); }
+    }
     .loc-rating.compact { margin-top: 0; font-size: 11px; vertical-align: middle; }
     .loc-rating.compact .rate-star { font-size: 11px; }
     .loc-rating.compact .rate-count { display: none; }
@@ -1030,12 +1036,18 @@ function callBtnHtml(num) {
   return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">📞 Call</a>`;
 }
 
-// Live Google rating chip (empty until ratings.json is populated)
+// Live Google rating chip — links to the location's Google Maps page via its
+// Place ID (captured in ratings.json). Empty until ratings.json is populated.
 function ratingHtml(num, compact) {
   const R = RATINGS[num]; if (!R || typeof R.r !== 'number') return '';
   const count = R.n ? `<span class="rate-count">(${R.n.toLocaleString()})</span>` : '';
-  return `<span class="loc-rating${compact ? ' compact' : ''}" title="${R.r} from ${R.n||0} Google reviews">
-    <span class="rate-star">★</span><span class="rate-num">${R.r.toFixed(1)}</span>${count}</span>`;
+  const url = R.id
+    ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(R.id)}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(R.name || ('WLR location ' + num))}`;
+  const go = compact ? '' : `<span class="rate-go">↗</span>`;
+  return `<a class="loc-rating${compact ? ' compact' : ''}" href="${url}" target="_blank" rel="noopener"
+    onclick="event.stopPropagation()" title="${R.r}★ from ${(R.n||0).toLocaleString()} Google reviews — open in Google Maps">
+    <span class="rate-star">★</span><span class="rate-num">${R.r.toFixed(1)}</span>${count}${go}</a>`;
 }
 
 // ── ANIMATION HELPERS ──────────────────────────────────────
