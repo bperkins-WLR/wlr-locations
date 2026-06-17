@@ -338,6 +338,15 @@
     .mp-hours .hrs-word.is-open { color: #4ade80; font-weight: 700; }
     .mp-hours .hrs-word.is-closed { color: #f87171; font-weight: 700; }
 
+    /* ══ GOOGLE RATING ═══════════════════════════════════ */
+    .loc-rating { display: inline-flex; align-items: center; gap: 3px; margin-top: 3px; font-size: 12.5px; font-weight: 800; line-height: 1; }
+    .rate-star  { color: #FFC107; font-size: 13px; }
+    .rate-num   { color: #fff; }
+    .rate-count { color: rgba(255,255,255,0.45); font-weight: 600; font-size: 10px; }
+    .loc-rating.compact { margin-top: 0; font-size: 11px; vertical-align: middle; }
+    .loc-rating.compact .rate-star { font-size: 11px; }
+    .loc-rating.compact .rate-count { display: none; }
+
     /* ══ PHOTOS ══════════════════════════════════════════ */
     .photos { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     .photo-slot {
@@ -710,6 +719,7 @@
     <button class="sort-btn active" data-sort="num">By #</button>
     <button class="sort-btn" data-sort="date">By Date</button>
     <button class="sort-btn" data-sort="state">By State</button>
+    <button class="sort-btn" data-sort="rating">★ Top Rated</button>
     <select class="state-select" id="stateSelect">
       <option value="">All States</option>
       <option value="MD">MD</option>
@@ -1020,6 +1030,14 @@ function callBtnHtml(num) {
   return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">📞 Call</a>`;
 }
 
+// Live Google rating chip (empty until ratings.json is populated)
+function ratingHtml(num, compact) {
+  const R = RATINGS[num]; if (!R || typeof R.r !== 'number') return '';
+  const count = R.n ? `<span class="rate-count">(${R.n.toLocaleString()})</span>` : '';
+  return `<span class="loc-rating${compact ? ' compact' : ''}" title="${R.r} from ${R.n||0} Google reviews">
+    <span class="rate-star">★</span><span class="rate-num">${R.r.toFixed(1)}</span>${count}</span>`;
+}
+
 // ── ANIMATION HELPERS ──────────────────────────────────────
 function setupCardAnimations() {
   const cards = [...document.querySelectorAll('.card')];
@@ -1194,6 +1212,7 @@ function buildCard(baseLoc) {
         <div class="loc-info">
           <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${esc(loc.name)}</span></div>
           <div class="loc-city">${esc(loc.city)}, ${esc(loc.state)}</div>
+          ${ratingHtml(loc.num)}
           ${addrLine}
           ${phoneLine}
           ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
@@ -1211,12 +1230,16 @@ function buildCard(baseLoc) {
 let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
 let currentView = 'grid', mapInstance = null, markerLayer = null, lastPinKey = '';
 let showComingSoon = true; // red "coming soon" pins on the map (map-only, never in grid)
+let RATINGS = {};          // num -> { r:rating, n:reviewCount } from ratings.json (refreshed daily)
 
 function getSorted() {
   let list = [...locations];
   if (activeSort === 'num')   list.sort((a,b) => a.num - b.num);
   if (activeSort === 'date')  list.sort((a,b) => a.ts  - b.ts);
   if (activeSort === 'state') list.sort((a,b) => a.state.localeCompare(b.state) || a.city.localeCompare(b.city));
+  if (activeSort === 'rating') list.sort((a,b) =>
+    ((RATINGS[b.num]?.r ?? -1) - (RATINGS[a.num]?.r ?? -1)) ||
+    ((RATINGS[b.num]?.n ?? 0)  - (RATINGS[a.num]?.n ?? 0)));
   return list;
 }
 function matches(baseLoc) {
@@ -1589,7 +1612,7 @@ function pinPopupHtml(loc) {
   return `
     <div class="mp-img"><img src="${src}" alt="${esc(loc.name)}" onerror="this.parentElement.style.display='none'"></div>
     <div class="mp-body">
-      <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
+      <div class="mp-name">#${pad(dn)} | ${esc(loc.name)} ${ratingHtml(loc.num, true)}</div>
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · ${est}</div>
       ${statusLine}
       <div class="mp-actions">
@@ -1748,6 +1771,15 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
 // ══ INIT ══════════════════════════════════════════════════
 // Load all photos from IndexedDB into memory cache, then render
 dbGetAll().then(all => { photoCache = all; render(); }).catch(() => render());
+
+// Live Google ratings (refreshed daily by the GitHub Action → ratings.json)
+fetch('ratings.json', { cache: 'no-store' })
+  .then(r => r.ok ? r.json() : {})
+  .then(data => {
+    RATINGS = data || {};
+    if (currentView === 'map') updateMapMarkers(); else render();
+  })
+  .catch(() => {});
 </script>
 </body>
 </html>
