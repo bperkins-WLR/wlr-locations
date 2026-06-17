@@ -311,7 +311,32 @@
     .loc-3d:active { background: rgba(167,139,250,0.3); }
     .loc-cam    { display: inline-flex; align-items: center; gap: 3px; background: rgba(34,197,94,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #4ade80; text-decoration: none; border: 1px solid rgba(34,197,94,0.3); }
     .loc-cam:active { background: rgba(34,197,94,0.3); }
+    .loc-call   { display: inline-flex; align-items: center; gap: 3px; background: rgba(34,197,94,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #4ade80; text-decoration: none; border: 1px solid rgba(34,197,94,0.3); }
+    .loc-call:active { background: rgba(34,197,94,0.3); }
     .type-full { font-size: 9px; color: rgba(255,255,255,0.45); text-align: right; max-width: 80px; line-height: 1.2; }
+
+    /* ══ HOURS ═══════════════════════════════════════════ */
+    .loc-hours { margin-top: 5px; }
+    .hrs-toggle { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; padding: 3px 8px; font-size: 10px; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+    .hrs-toggle:active { background: rgba(255,255,255,0.12); }
+    .hrs-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+    .hrs-dot.is-open { background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.75); }
+    .hrs-dot.is-closed { background: #ef4444; }
+    .hrs-state { font-weight: 800; }
+    .hrs-state.is-open { color: #4ade80; }
+    .hrs-state.is-closed { color: #f87171; }
+    .hrs-detail { color: rgba(255,255,255,0.55); }
+    .hrs-caret { color: rgba(255,255,255,0.4); transition: transform 0.18s; }
+    .loc-hours.open .hrs-caret { transform: rotate(180deg); }
+    .hrs-week { display: none; margin-top: 5px; padding: 6px 9px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; max-width: 210px; }
+    .loc-hours.open .hrs-week { display: block; }
+    .hw-row { display: flex; justify-content: space-between; gap: 14px; font-size: 10px; line-height: 1.75; }
+    .hw-day { color: rgba(255,255,255,0.55); }
+    .hw-time { color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
+    .hw-time.hw-closed { color: rgba(255,120,120,0.7); }
+    .mp-hours { display: flex; align-items: center; gap: 5px; font-size: 11px; margin-top: 5px; color: rgba(255,255,255,0.7); }
+    .mp-hours .hrs-word.is-open { color: #4ade80; font-weight: 700; }
+    .mp-hours .hrs-word.is-closed { color: #f87171; font-weight: 700; }
 
     /* ══ PHOTOS ══════════════════════════════════════════ */
     .photos { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -898,6 +923,103 @@ const NOW_YEAR = new Date().getFullYear();
 function pad(n) { return String(n).padStart(2,'0'); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ── HOURS OF OPERATION ─────────────────────────────────────
+// Scraped from washluberepair.com. d[] is indexed Sun=0..Sat=6; each entry is
+// [open, close] in 24h (decimal hrs), or null = closed that day. p = phone.
+const HOURS = {
+ 1:{p:'301-694-3450',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 2:{p:'301-668-1151',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 3:{p:'410-381-3407',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 4:{p:'301-663-6304',d:[null,[8,18],[8,18],[8,18],[8,18],[8,18],[8,16]]},
+ 5:{p:'301-330-9860',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 6:{p:'301-631-1421',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 7:{p:'410-904-5127',d:[[9,17],[8,19],[8,19],[8,19],[8,19],[8,19],[8,18]]},
+ 8:{p:'301-528-0400',d:[[9,17],[8,18],[8,18],[8,18],[8,18],[8,18],[8,18]]},
+ 9:{p:'301-540-9550',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 10:{p:'410-697-3153',d:[null,[8,18],[8,18],[8,18],[8,18],[8,18],[8,16]]},
+ 11:{p:'410-697-3162',d:[[9,17],[8,19],[8,19],[8,19],[8,19],[8,19],[8,18]]},
+ 12:{p:'301-846-4380',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 13:{p:'301-601-9037',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 14:{p:'410-697-3148',d:[[9,17],[8,19],[8,19],[8,19],[8,19],[8,19],[8,18]]},
+ 15:{p:'240-241-4666',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 16:{p:'717-235-0595',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 17:{p:'717-848-4885',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 19:{p:'410-638-0004',d:[[8,18],[7,19],[7,19],[7,19],[7,19],[7,19],[7,19]]},
+ 21:{p:'301-228-9027',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 22:{p:'240-714-4688',d:[[9,16],[8,19],[8,19],[8,19],[8,19],[8,19],[8,17]]},
+ 23:{p:'240-815-7995',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 24:{p:'717-650-6600',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 25:{p:'240-392-2497',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 26:{p:'443-297-8109',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 27:{p:'410-874-7824',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 28:{p:'304-901-5115',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 31:{p:'443-620-5161',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 32:{p:'240-850-2419',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+ 35:{p:'443-503-5324',d:[[8,18],[7,20],[7,20],[7,20],[7,20],[7,20],[7,20]]},
+};
+const DAY_ABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Current time in the locations' timezone (Eastern), regardless of viewer TZ
+function nowET() { return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })); }
+
+function fmtHr(h) {
+  const ap = h >= 12 ? 'PM' : 'AM';
+  let hr = Math.floor(h) % 12; if (hr === 0) hr = 12;
+  const min = Math.round((h - Math.floor(h)) * 60);
+  return min ? `${hr}:${String(min).padStart(2,'0')} ${ap}` : `${hr} ${ap}`;
+}
+
+// Live open/closed status for a location number (null if no hours on file)
+function hoursStatus(num) {
+  const H = HOURS[num]; if (!H) return null;
+  const n = nowET(), day = n.getDay(), cur = n.getHours() + n.getMinutes() / 60;
+  const today = H.d[day];
+  if (today && cur >= today[0] && cur < today[1]) return { open: true, detail: `Closes ${fmtHr(today[1])}` };
+  if (today && cur < today[0]) return { open: false, detail: `Opens ${fmtHr(today[0])}` };
+  for (let i = 1; i <= 7; i++) {
+    const d = (day + i) % 7, slot = H.d[d];
+    if (slot) return { open: false, detail: `Opens ${fmtHr(slot[0])} ${i === 1 ? 'tomorrow' : DAY_ABBR[d]}` };
+  }
+  return { open: false, detail: 'Closed' };
+}
+
+// Group the week (Mon-first) into ranges of identical hours for display
+function formatWeek(num) {
+  const H = HOURS[num]; if (!H) return [];
+  const order = [1,2,3,4,5,6,0]; // Mon..Sun
+  const key = s => s ? `${s[0]}-${s[1]}` : 'x';
+  const rows = []; let i = 0;
+  while (i < order.length) {
+    const slot = H.d[order[i]]; let j = i;
+    while (j + 1 < order.length && key(H.d[order[j+1]]) === key(slot)) j++;
+    const lbl = i === j ? DAY_ABBR[order[i]] : `${DAY_ABBR[order[i]]}–${DAY_ABBR[order[j]]}`;
+    rows.push({ label: lbl, time: slot ? `${fmtHr(slot[0])}–${fmtHr(slot[1])}` : 'Closed' });
+    i = j + 1;
+  }
+  return rows;
+}
+
+function hoursBlockHtml(num) {
+  const st = hoursStatus(num); if (!st) return '';
+  const week = formatWeek(num).map(r =>
+    `<div class="hw-row"><span class="hw-day">${r.label}</span><span class="hw-time${r.time==='Closed'?' hw-closed':''}">${r.time}</span></div>`).join('');
+  return `
+    <div class="loc-hours">
+      <button class="hrs-toggle" onclick="event.stopPropagation(); this.parentElement.classList.toggle('open')">
+        <span class="hrs-dot ${st.open ? 'is-open' : 'is-closed'}"></span>
+        <span class="hrs-state ${st.open ? 'is-open' : 'is-closed'}">${st.open ? 'Open' : 'Closed'}</span>
+        <span class="hrs-detail">${st.detail}</span>
+        <span class="hrs-caret">▾</span>
+      </button>
+      <div class="hrs-week">${week}</div>
+    </div>`;
+}
+
+function callBtnHtml(num) {
+  const H = HOURS[num]; if (!H || !H.p) return '';
+  return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">📞 Call</a>`;
+}
+
 // ── ANIMATION HELPERS ──────────────────────────────────────
 function setupCardAnimations() {
   const cards = [...document.querySelectorAll('.card')];
@@ -1024,9 +1146,11 @@ function buildCard(baseLoc) {
     : `<span class="loc-opened" style="color:var(--tase-c)">Coming Soon</span>`;
 
   const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">📍 Directions</a>`;
+  const callBtn  = callBtnHtml(loc.num);
   const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">3D Tour</a>` : '';
   const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">📷 Live Cam</a>` : '';
   const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">👤 Team</button>` : '';
+  const hoursHtml = hoursBlockHtml(loc.num);
 
   const slots = [
     { key:'ext', label:'Exterior' },
@@ -1074,7 +1198,8 @@ function buildCard(baseLoc) {
           ${phoneLine}
           ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
           ${opened}
-          <div class="loc-meta" style="flex-wrap:nowrap">${mapsBtn}${tourBtn}${camBtn}${teamBtn}</div>
+          ${hoursHtml}
+          <div class="loc-meta" style="flex-wrap:nowrap">${mapsBtn}${callBtn}${tourBtn}${camBtn}${teamBtn}</div>
           ${notesLine}
         </div>
       </div>
@@ -1457,11 +1582,16 @@ function pinPopupHtml(loc) {
   const src = getPhotoSrc(loc.num, 'ext')
     || (comingSoon ? 'images/tase-Coming soon.JPG' : `images/loc-${pad(dn)}/01.jpg`);
   const est = loc.opened ? `Est. ${esc(loc.opened)}` : 'Coming Soon';
+  const st = hoursStatus(loc.num);
+  const statusLine = st
+    ? `<div class="mp-hours"><span class="hrs-dot ${st.open ? 'is-open' : 'is-closed'}"></span><span class="hrs-word ${st.open ? 'is-open' : 'is-closed'}">${st.open ? 'Open' : 'Closed'}</span> · ${st.detail}</div>`
+    : '';
   return `
     <div class="mp-img"><img src="${src}" alt="${esc(loc.name)}" onerror="this.parentElement.style.display='none'"></div>
     <div class="mp-body">
       <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · ${est}</div>
+      ${statusLine}
       <div class="mp-actions">
         <a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">📍 Directions</a>
         <button class="mp-view" onclick="showCardFromMap(${loc.num})">Photos →</button>
