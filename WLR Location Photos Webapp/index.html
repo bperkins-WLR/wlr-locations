@@ -389,7 +389,10 @@
     }
     .photo-slot:active { opacity: 0.85; }
     .photo-slot.has-photo { border-style: solid; border-color: rgba(255,255,255,0.1); }
-    .photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* object-position shifts the cover-crop right so the burned-in top-left
+       number tag falls outside the thumbnail. The lightbox/slideshow use
+       object-fit:contain, so they still show the full photo. */
+    .photo-slot img { width: 100%; height: 100%; object-fit: cover; object-position: 82% 50%; display: block; }
     .photo-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 6px 5px; background: linear-gradient(transparent, rgba(0,0,0,.75)); font-size: 9px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
     .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5px; position: absolute; inset: 0; }
     .ph-icon { font-size: 24px; opacity: .2; }
