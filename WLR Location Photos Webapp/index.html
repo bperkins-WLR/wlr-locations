@@ -746,7 +746,7 @@
     <div class="h-title"><span>WLR</span> Automotive Group</div>
     <div class="h-sub">Location Gallery</div>
   </div>
-  <button class="header-btn" id="incOpenBtn" title="Incident videos">🎥</button>
+  <button class="header-btn" id="incOpenBtn" title="Videos">🎥</button>
   <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
 </header>
 
@@ -887,29 +887,14 @@
   </div>
 </footer>
 
-<!-- ══ INCIDENT VIDEOS ══════════════════════════════════════ -->
+<!-- ══ VIDEOS ═══════════════════════════════════════════════ -->
 <div class="inc-overlay" id="incOverlay">
   <div class="inc-head">
-    <div class="inc-title">🎥 Incident Videos</div>
-    <button class="inc-headbtn" id="incAddToggle">＋ Add</button>
+    <div class="inc-title">🎥 Videos</div>
     <button class="inc-close" id="incClose" title="Close">✕</button>
   </div>
-  <div class="inc-form" id="incForm" hidden>
-    <input class="inc-in" id="incUrl" placeholder="Paste a video link (YouTube, Vimeo, Google Drive, …)" autocomplete="off">
-    <input class="inc-in" id="incTitle" placeholder="Title — e.g. Bay 3 fender bump" autocomplete="off">
-    <div class="inc-form-row">
-      <input class="inc-in" id="incDate" type="date">
-      <select class="inc-in" id="incLoc"><option value="">No location</option></select>
-    </div>
-    <div class="inc-form-actions">
-      <button class="inc-save" id="incSave">Add video</button>
-      <button class="inc-cancel" id="incCancel">Cancel</button>
-      <button class="inc-publish" id="incPublish" title="Copy all videos as publish code">📋 Copy publish code</button>
-    </div>
-    <div class="inc-hint" id="incHint">New videos save on this device. Use “Copy publish code” and send it to publish for everyone.</div>
-  </div>
   <div class="inc-grid" id="incGrid"></div>
-  <div class="inc-empty" id="incEmpty">No incident videos yet. Tap <b>＋ Add</b> to paste a link.</div>
+  <div class="inc-empty" id="incEmpty">No videos yet.</div>
 </div>
 <div class="inc-player" id="incPlayer">
   <div class="inc-player-bar">
@@ -2033,10 +2018,6 @@ function renderIncidents() {
   const grid = document.getElementById('incGrid');
   const list = allIncidents();
   document.getElementById('incOverlay').classList.toggle('empty', list.length === 0);
-  const sel = document.getElementById('incLoc');
-  if (sel.options.length <= 1) locations.filter(isLocVisible).sort((a, b) => a.num - b.num).forEach(l => {
-    const o = document.createElement('option'); o.value = l.num; o.textContent = `#${pad(l.num)} ${l.name}`; sel.appendChild(o);
-  });
   grid.innerHTML = list.map(v => {
     const p = parseVideo(v.url);
     let locTxt = '';
@@ -2060,7 +2041,7 @@ function playIncident(id) {
   body.innerHTML = p.kind === 'file'
     ? `<video src="${esc(p.embed)}" controls autoplay playsinline></video>`
     : `<iframe src="${esc(p.embed)}${p.kind === 'youtube' ? '?autoplay=1' : ''}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
-  document.getElementById('incPlayerTitle').textContent = (v.title || 'Incident') + (v.date ? ` · ${v.date}` : '');
+  document.getElementById('incPlayerTitle').textContent = (v.title || 'Video') + (v.date ? ` · ${v.date}` : '');
   document.getElementById('incPlayer').classList.add('open');
 }
 function closeIncPlayer() { document.getElementById('incPlayer').classList.remove('open'); document.getElementById('incPlayerBody').innerHTML = ''; }
@@ -2070,34 +2051,6 @@ function closeIncidents() { document.getElementById('incOverlay').classList.remo
 document.getElementById('incOpenBtn').addEventListener('click', openIncidents);
 document.getElementById('incClose').addEventListener('click', closeIncidents);
 document.getElementById('incPlayerClose').addEventListener('click', closeIncPlayer);
-document.getElementById('incAddToggle').addEventListener('click', () => {
-  const f = document.getElementById('incForm'); f.hidden = !f.hidden;
-  if (!f.hidden) document.getElementById('incUrl').focus();
-});
-document.getElementById('incCancel').addEventListener('click', () => { document.getElementById('incForm').hidden = true; });
-document.getElementById('incSave').addEventListener('click', () => {
-  const urlEl = document.getElementById('incUrl'), url = urlEl.value.trim();
-  if (!url) { urlEl.focus(); return; }
-  const arr = getLocalIncidents();
-  arr.push({
-    id: 'v' + Date.now().toString(36), url,
-    title: document.getElementById('incTitle').value.trim(),
-    date: document.getElementById('incDate').value,
-    loc: document.getElementById('incLoc').value ? +document.getElementById('incLoc').value : null,
-  });
-  saveLocalIncidents(arr);
-  ['incUrl', 'incTitle', 'incDate'].forEach(i => document.getElementById(i).value = '');
-  document.getElementById('incLoc').value = '';
-  document.getElementById('incForm').hidden = true;
-  renderIncidents();
-});
-document.getElementById('incPublish').addEventListener('click', () => {
-  const data = JSON.stringify(allIncidents().map(({ _local, ...v }) => v));
-  const btn = document.getElementById('incPublish'), orig = btn.textContent;
-  navigator.clipboard.writeText(data)
-    .then(() => { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1600); })
-    .catch(() => { document.getElementById('incHint').textContent = data; });
-});
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (document.getElementById('incPlayer').classList.contains('open')) closeIncPlayer();

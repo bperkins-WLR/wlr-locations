@@ -275,6 +275,7 @@
     </div>
     <div class="h-actions">
       <button class="h-btn yellow" id="addLocBtn">＋ New Location</button>
+      <button class="h-btn" id="videosBtn">🎥 Videos</button>
       <a href="index.html" class="h-btn">← Gallery</a>
       <button class="h-btn" id="logoutBtn">Lock 🔒</button>
     </div>
@@ -353,6 +354,46 @@
     <div class="modal-actions">
       <button class="modal-save" id="nlSaveBtn">➕ Add Location</button>
       <button class="modal-cancel" id="nlCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VIDEOS MODAL ───────────────────────────────────────── -->
+<div class="modal-bg" id="videosModal">
+  <div class="modal-box">
+    <div class="modal-title">🎥 <span>Videos</span></div>
+
+    <div class="field-row">
+      <label class="field-label">Video Link</label>
+      <input class="field-input" id="vid-url" type="text" placeholder="YouTube, Vimeo, Google Drive, or .mp4 link">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Title</label>
+      <input class="field-input" id="vid-title" type="text" placeholder="e.g. Bay 3 fender bump">
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">Date</label>
+        <input class="field-input" id="vid-date" type="date">
+      </div>
+      <div>
+        <label class="field-label">Location # <span style="font-size:9px;color:var(--tase-c);font-weight:400">(optional)</span></label>
+        <input class="field-input" id="vid-loc" type="number" placeholder="e.g. 2" min="1" max="999">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-save" id="vidAddBtn">➕ Add Video</button>
+      <button class="modal-cancel" id="vidCancelBtn">Close</button>
+    </div>
+
+    <div id="vidList" style="margin-top:18px"></div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="h-btn yellow" id="vidPublishBtn" style="width:100%;justify-content:center">📋 Copy publish code</button>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:9px;line-height:1.5">
+        Videos save on this device and show in the gallery here. To publish for <b>everyone</b>, tap “Copy publish code” and send it to your developer (or paste it into <code>incidents.json</code>).
+      </div>
     </div>
   </div>
 </div>
@@ -843,6 +884,69 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// ── VIDEOS MANAGER ───────────────────────────────────────────
+// Same localStorage key the gallery reads (index.html). "Publish code" exports
+// the list to paste into incidents.json (shared with everyone).
+const VIDEOS_KEY = 'wlr_incidents';
+function getVideos() { try { return JSON.parse(localStorage.getItem(VIDEOS_KEY) || '[]'); } catch(e) { return []; } }
+function saveVideos(a) { localStorage.setItem(VIDEOS_KEY, JSON.stringify(a)); }
+
+function openVideos() {
+  // On first use, seed from the published incidents.json so the admin list is complete
+  if (getVideos().length === 0) {
+    fetch('incidents.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : []).then(d => {
+      if (Array.isArray(d) && d.length && getVideos().length === 0) { saveVideos(d); renderVidList(); }
+    }).catch(() => {});
+  }
+  renderVidList();
+  document.getElementById('videosModal').classList.add('open');
+}
+
+function renderVidList() {
+  const list = getVideos().slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const el = document.getElementById('vidList');
+  if (!list.length) { el.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.4);text-align:center;padding:12px 0">No videos yet — add one above.</div>'; return; }
+  el.innerHTML = `<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${list.length} video${list.length > 1 ? 's' : ''}</div>` +
+    list.map(v => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.07)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(v.title || 'Untitled')}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.date ? escHtml(v.date) + ' · ' : ''}${v.loc ? '#' + escHtml(String(v.loc)) + ' · ' : ''}${escHtml(v.url || '')}</div>
+      </div>
+      <button class="vid-del" data-id="${escHtml(v.id || v.url)}" style="flex-shrink:0;background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);color:#ff8080;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">Delete</button>
+    </div>`).join('');
+  el.querySelectorAll('.vid-del').forEach(b => b.addEventListener('click', () => {
+    if (!confirm('Delete this video?')) return;
+    saveVideos(getVideos().filter(v => (v.id || v.url) !== b.dataset.id));
+    renderVidList();
+    showToast('Video deleted');
+  }));
+}
+
+document.getElementById('videosBtn').addEventListener('click', openVideos);
+document.getElementById('vidCancelBtn').addEventListener('click', () => document.getElementById('videosModal').classList.remove('open'));
+document.getElementById('videosModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('videosModal')) document.getElementById('videosModal').classList.remove('open');
+});
+document.getElementById('vidAddBtn').addEventListener('click', () => {
+  const urlEl = document.getElementById('vid-url'), url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  const arr = getVideos();
+  arr.push({
+    id: 'v' + Date.now().toString(36), url,
+    title: document.getElementById('vid-title').value.trim(),
+    date: document.getElementById('vid-date').value,
+    loc: document.getElementById('vid-loc').value ? +document.getElementById('vid-loc').value : null,
+  });
+  saveVideos(arr);
+  ['vid-url', 'vid-title', 'vid-date', 'vid-loc'].forEach(i => document.getElementById(i).value = '');
+  renderVidList();
+  showToast('Video added');
+});
+document.getElementById('vidPublishBtn').addEventListener('click', () => {
+  const data = JSON.stringify(getVideos());
+  navigator.clipboard.writeText(data).then(() => showToast('Publish code copied')).catch(() => showToast('Copy failed — long-press to copy'));
+});
 
 // ── NEW LOCATION MODAL ───────────────────────────────────────
 document.getElementById('addLocBtn').addEventListener('click', () => {
