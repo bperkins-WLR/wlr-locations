@@ -59,6 +59,12 @@
       font-size: 12px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px;
     }
     .slideshow-btn:active { opacity: 0.8; }
+    .header-btn {
+      flex-shrink: 0; width: 34px; height: 32px; border-radius: 9px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      font-size: 15px; cursor: pointer; margin-right: 8px; line-height: 1;
+    }
+    .header-btn:active { background: rgba(255,255,255,0.22); }
 
     /* ══ HERO SECTION ════════════════════════════════════ */
     .hero {
@@ -684,6 +690,49 @@
     #lightboxImg.slide-in {
       animation: photoSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
+
+    /* ══ INCIDENT VIDEOS ═════════════════════════════════ */
+    .inc-overlay { display: none; position: fixed; inset: 0; z-index: 950;
+      background: linear-gradient(160deg, #0c2c5a 0%, #071a38 100%); flex-direction: column; }
+    .inc-overlay.open { display: flex; }
+    .inc-head { display: flex; align-items: center; gap: 10px; padding: max(env(safe-area-inset-top),12px) 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .inc-title { font-size: 18px; font-weight: 800; color: #fff; flex: 1; }
+    .inc-headbtn { padding: 7px 13px; border-radius: 9px; background: var(--yellow); border: none; color: var(--deep); font-size: 13px; font-weight: 800; cursor: pointer; }
+    .inc-close { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 17px; cursor: pointer; }
+    .inc-form { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 9px; background: rgba(0,0,0,0.18); }
+    .inc-form[hidden] { display: none; }
+    .inc-form-row { display: flex; gap: 9px; }
+    .inc-in { width: 100%; padding: 9px 11px; border-radius: 9px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 14px; font-family: inherit; outline: none; }
+    .inc-in::placeholder { color: rgba(255,255,255,0.45); }
+    .inc-in:focus { border-color: var(--yellow); background: rgba(255,255,255,0.15); }
+    .inc-form-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .inc-save { padding: 8px 16px; border-radius: 9px; background: var(--yellow); border: none; color: var(--deep); font-weight: 800; font-size: 13px; cursor: pointer; }
+    .inc-cancel { padding: 8px 14px; border-radius: 9px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .inc-publish { margin-left: auto; padding: 8px 13px; border-radius: 9px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .inc-hint { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+    .inc-grid { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; align-content: start; }
+    .inc-empty { display: none; flex: 1; align-items: center; justify-content: center; color: rgba(255,255,255,0.55); font-size: 14px; text-align: center; padding: 30px; }
+    .inc-overlay.empty .inc-grid { display: none; }
+    .inc-overlay.empty .inc-empty { display: flex; }
+    .inc-card { text-align: left; background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.14); border-radius: 13px; overflow: hidden; cursor: pointer; padding: 0; transition: transform 0.12s, border-color 0.12s; }
+    .inc-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+    .inc-thumb { position: relative; aspect-ratio: 16/9; background: #061528; display: flex; align-items: center; justify-content: center; }
+    .inc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .inc-poster { font-size: 40px; opacity: 0.5; }
+    .inc-play { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: rgba(12,44,90,0.78); border: 2px solid rgba(255,255,255,0.85); color: #fff; font-size: 17px; display: flex; align-items: center; justify-content: center; padding-left: 3px; }
+    .inc-draft { position: absolute; top: 7px; left: 7px; background: var(--yellow); color: var(--deep); font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .inc-meta { padding: 9px 11px 11px; }
+    .inc-vtitle { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.25; }
+    .inc-vsub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+    .inc-vloc { color: var(--yellow); }
+
+    .inc-player { display: none; position: fixed; inset: 0; z-index: 980; background: rgba(4,14,30,0.97); flex-direction: column; }
+    .inc-player.open { display: flex; }
+    .inc-player-bar { display: flex; align-items: center; gap: 12px; padding: max(env(safe-area-inset-top),12px) 16px 12px; }
+    .inc-player-title { flex: 1; color: #fff; font-size: 14px; font-weight: 700; }
+    .inc-player-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.14); border: none; color: #fff; font-size: 18px; cursor: pointer; }
+    .inc-player-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 0 16px 20px; }
+    .inc-player-body iframe, .inc-player-body video { width: 100%; max-width: 1100px; aspect-ratio: 16/9; height: auto; max-height: 100%; border: none; border-radius: 12px; background: #000; }
   </style>
 </head>
 <body>
@@ -697,6 +746,7 @@
     <div class="h-title"><span>WLR</span> Automotive Group</div>
     <div class="h-sub">Location Gallery</div>
   </div>
+  <button class="header-btn" id="incOpenBtn" title="Incident videos">🎥</button>
   <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
 </header>
 
@@ -836,6 +886,38 @@
     </div>
   </div>
 </footer>
+
+<!-- ══ INCIDENT VIDEOS ══════════════════════════════════════ -->
+<div class="inc-overlay" id="incOverlay">
+  <div class="inc-head">
+    <div class="inc-title">🎥 Incident Videos</div>
+    <button class="inc-headbtn" id="incAddToggle">＋ Add</button>
+    <button class="inc-close" id="incClose" title="Close">✕</button>
+  </div>
+  <div class="inc-form" id="incForm" hidden>
+    <input class="inc-in" id="incUrl" placeholder="Paste a video link (YouTube, Vimeo, Google Drive, …)" autocomplete="off">
+    <input class="inc-in" id="incTitle" placeholder="Title — e.g. Bay 3 fender bump" autocomplete="off">
+    <div class="inc-form-row">
+      <input class="inc-in" id="incDate" type="date">
+      <select class="inc-in" id="incLoc"><option value="">No location</option></select>
+    </div>
+    <div class="inc-form-actions">
+      <button class="inc-save" id="incSave">Add video</button>
+      <button class="inc-cancel" id="incCancel">Cancel</button>
+      <button class="inc-publish" id="incPublish" title="Copy all videos as publish code">📋 Copy publish code</button>
+    </div>
+    <div class="inc-hint" id="incHint">New videos save on this device. Use “Copy publish code” and send it to publish for everyone.</div>
+  </div>
+  <div class="inc-grid" id="incGrid"></div>
+  <div class="inc-empty" id="incEmpty">No incident videos yet. Tap <b>＋ Add</b> to paste a link.</div>
+</div>
+<div class="inc-player" id="incPlayer">
+  <div class="inc-player-bar">
+    <span class="inc-player-title" id="incPlayerTitle"></span>
+    <button class="inc-player-close" id="incPlayerClose" title="Close">✕</button>
+  </div>
+  <div class="inc-player-body" id="incPlayerBody"></div>
+</div>
 
 <script>
 // ══ DATA ══════════════════════════════════════════════════
@@ -1915,6 +1997,112 @@ fetch('ratings.json', { cache: 'no-store' })
     if (currentView === 'map') updateMapMarkers(); else render();
   })
   .catch(() => {});
+
+// ══ INCIDENT VIDEOS ════════════════════════════════════════
+const INCIDENTS_KEY = 'wlr_incidents';
+let incidentsPublished = []; // from committed incidents.json (public)
+
+fetch('incidents.json', { cache: 'no-store' })
+  .then(r => r.ok ? r.json() : [])
+  .then(d => { incidentsPublished = Array.isArray(d) ? d : []; if (document.getElementById('incOverlay').classList.contains('open')) renderIncidents(); })
+  .catch(() => {});
+
+function getLocalIncidents() { try { return JSON.parse(localStorage.getItem(INCIDENTS_KEY) || '[]'); } catch(e) { return []; } }
+function saveLocalIncidents(a) { localStorage.setItem(INCIDENTS_KEY, JSON.stringify(a)); }
+// Merge published (everyone) + local (this device, not yet published); local wins on id clash
+function allIncidents() {
+  const byId = {};
+  incidentsPublished.forEach(v => { byId[v.id || v.url] = v; });
+  getLocalIncidents().forEach(v => { byId[v.id || v.url] = { ...v, _local: true }; });
+  return Object.values(byId).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+}
+
+function parseVideo(url) {
+  url = (url || '').trim(); let m;
+  if (m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/))
+    return { kind: 'youtube', embed: `https://www.youtube.com/embed/${m[1]}`, thumb: `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` };
+  if (m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))
+    return { kind: 'vimeo', embed: `https://player.vimeo.com/video/${m[1]}`, thumb: null };
+  if (m = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/))
+    return { kind: 'drive', embed: `https://drive.google.com/file/d/${m[1]}/preview`, thumb: null };
+  if (/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url)) return { kind: 'file', embed: url, thumb: null };
+  return { kind: 'link', embed: url, thumb: null };
+}
+
+function renderIncidents() {
+  const grid = document.getElementById('incGrid');
+  const list = allIncidents();
+  document.getElementById('incOverlay').classList.toggle('empty', list.length === 0);
+  const sel = document.getElementById('incLoc');
+  if (sel.options.length <= 1) locations.filter(isLocVisible).sort((a, b) => a.num - b.num).forEach(l => {
+    const o = document.createElement('option'); o.value = l.num; o.textContent = `#${pad(l.num)} ${l.name}`; sel.appendChild(o);
+  });
+  grid.innerHTML = list.map(v => {
+    const p = parseVideo(v.url);
+    let locTxt = '';
+    if (v.loc) { const l = locations.find(x => x.num == v.loc); locTxt = l ? `#${pad(l.num)} ${esc(l.name)}` : `#${esc(String(v.loc))}`; }
+    const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="" onerror="this.remove()">` : `<div class="inc-poster">🎥</div>`;
+    return `<button class="inc-card" data-id="${esc(v.id || v.url)}">
+      <div class="inc-thumb">${thumb}<div class="inc-play">▶</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
+      <div class="inc-meta">
+        <div class="inc-vtitle">${esc(v.title || 'Untitled')}</div>
+        <div class="inc-vsub">${v.date ? esc(v.date) : ''}${locTxt ? `${v.date ? ' · ' : ''}<span class="inc-vloc">${locTxt}</span>` : ''}</div>
+      </div></button>`;
+  }).join('');
+  grid.querySelectorAll('.inc-card').forEach(c => c.addEventListener('click', () => playIncident(c.dataset.id)));
+}
+
+function playIncident(id) {
+  const v = allIncidents().find(x => (x.id || x.url) === id); if (!v) return;
+  const p = parseVideo(v.url);
+  if (p.kind === 'link') { window.open(p.embed, '_blank', 'noopener'); return; }
+  const body = document.getElementById('incPlayerBody');
+  body.innerHTML = p.kind === 'file'
+    ? `<video src="${esc(p.embed)}" controls autoplay playsinline></video>`
+    : `<iframe src="${esc(p.embed)}${p.kind === 'youtube' ? '?autoplay=1' : ''}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
+  document.getElementById('incPlayerTitle').textContent = (v.title || 'Incident') + (v.date ? ` · ${v.date}` : '');
+  document.getElementById('incPlayer').classList.add('open');
+}
+function closeIncPlayer() { document.getElementById('incPlayer').classList.remove('open'); document.getElementById('incPlayerBody').innerHTML = ''; }
+function openIncidents() { renderIncidents(); document.getElementById('incOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeIncidents() { document.getElementById('incOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+document.getElementById('incOpenBtn').addEventListener('click', openIncidents);
+document.getElementById('incClose').addEventListener('click', closeIncidents);
+document.getElementById('incPlayerClose').addEventListener('click', closeIncPlayer);
+document.getElementById('incAddToggle').addEventListener('click', () => {
+  const f = document.getElementById('incForm'); f.hidden = !f.hidden;
+  if (!f.hidden) document.getElementById('incUrl').focus();
+});
+document.getElementById('incCancel').addEventListener('click', () => { document.getElementById('incForm').hidden = true; });
+document.getElementById('incSave').addEventListener('click', () => {
+  const urlEl = document.getElementById('incUrl'), url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  const arr = getLocalIncidents();
+  arr.push({
+    id: 'v' + Date.now().toString(36), url,
+    title: document.getElementById('incTitle').value.trim(),
+    date: document.getElementById('incDate').value,
+    loc: document.getElementById('incLoc').value ? +document.getElementById('incLoc').value : null,
+  });
+  saveLocalIncidents(arr);
+  ['incUrl', 'incTitle', 'incDate'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('incLoc').value = '';
+  document.getElementById('incForm').hidden = true;
+  renderIncidents();
+});
+document.getElementById('incPublish').addEventListener('click', () => {
+  const data = JSON.stringify(allIncidents().map(({ _local, ...v }) => v));
+  const btn = document.getElementById('incPublish'), orig = btn.textContent;
+  navigator.clipboard.writeText(data)
+    .then(() => { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1600); })
+    .catch(() => { document.getElementById('incHint').textContent = data; });
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('incPlayer').classList.contains('open')) closeIncPlayer();
+  else if (document.getElementById('incOverlay').classList.contains('open')) closeIncidents();
+});
 </script>
 </body>
 </html>
