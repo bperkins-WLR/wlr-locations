@@ -1996,9 +1996,11 @@ function getLocalIncidents() { try { return JSON.parse(localStorage.getItem(INCI
 function saveLocalIncidents(a) { localStorage.setItem(INCIDENTS_KEY, JSON.stringify(a)); }
 // Merge published (everyone) + local (this device, not yet published); local wins on id clash
 function allIncidents() {
+  const publishedIds = new Set(incidentsPublished.map(v => v.id || v.url));
   const byId = {};
   incidentsPublished.forEach(v => { byId[v.id || v.url] = v; });
-  getLocalIncidents().forEach(v => { byId[v.id || v.url] = { ...v, _local: true }; });
+  // A local video is a "draft" ONLY if it isn't also in the published list
+  getLocalIncidents().forEach(v => { const k = v.id || v.url; byId[k] = { ...v, _local: !publishedIds.has(k) }; });
   return Object.values(byId).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 }
 
@@ -2007,7 +2009,7 @@ function parseVideo(url) {
   if (m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/))
     return { kind: 'youtube', embed: `https://www.youtube.com/embed/${m[1]}`, thumb: `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` };
   if (m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))
-    return { kind: 'vimeo', embed: `https://player.vimeo.com/video/${m[1]}`, thumb: null };
+    return { kind: 'vimeo', id: m[1], embed: `https://player.vimeo.com/video/${m[1]}`, thumb: null };
   if (m = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/))
     return { kind: 'drive', embed: `https://drive.google.com/file/d/${m[1]}/preview`, thumb: null };
   if (/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url)) return { kind: 'file', embed: url, thumb: null };
@@ -2023,14 +2025,33 @@ function renderIncidents() {
     let locTxt = '';
     if (v.loc) { const l = locations.find(x => x.num == v.loc); locTxt = l ? `#${pad(l.num)} ${esc(l.name)}` : `#${esc(String(v.loc))}`; }
     const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="" onerror="this.remove()">` : `<div class="inc-poster">🎥</div>`;
+    const vimeoAttr = p.kind === 'vimeo' ? ` data-vimeo="${esc(p.id)}"` : '';
     return `<button class="inc-card" data-id="${esc(v.id || v.url)}">
-      <div class="inc-thumb">${thumb}<div class="inc-play">▶</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
+      <div class="inc-thumb"${vimeoAttr}>${thumb}<div class="inc-play">▶</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
       <div class="inc-meta">
         <div class="inc-vtitle">${esc(v.title || 'Untitled')}</div>
         <div class="inc-vsub">${v.date ? esc(v.date) : ''}${locTxt ? `${v.date ? ' · ' : ''}<span class="inc-vloc">${locTxt}</span>` : ''}</div>
       </div></button>`;
   }).join('');
   grid.querySelectorAll('.inc-card').forEach(c => c.addEventListener('click', () => playIncident(c.dataset.id)));
+  grid.querySelectorAll('.inc-thumb[data-vimeo]').forEach(loadVimeoThumb);
+}
+
+// Vimeo has no thumbnail in the URL — fetch it from Vimeo's public oEmbed endpoint
+const vimeoThumbCache = {};
+function loadVimeoThumb(thumbEl) {
+  const id = thumbEl.dataset.vimeo;
+  const apply = url => {
+    if (thumbEl.querySelector('img')) return;
+    thumbEl.querySelector('.inc-poster')?.remove();
+    const img = new Image(); img.alt = ''; img.onerror = () => img.remove();
+    img.src = url; thumbEl.insertBefore(img, thumbEl.firstChild);
+  };
+  if (vimeoThumbCache[id]) { apply(vimeoThumbCache[id]); return; }
+  fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=640`)
+    .then(r => r.ok ? r.json() : null)
+    .then(d => { if (d && d.thumbnail_url) { vimeoThumbCache[id] = d.thumbnail_url; apply(d.thumbnail_url); } })
+    .catch(() => {});
 }
 
 function playIncident(id) {
