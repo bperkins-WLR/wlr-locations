@@ -364,6 +364,9 @@
     .timeline-wrap { display: none; padding: 16px 14px 90px; max-width: 1100px; margin: 0 auto; }
     .timeline-wrap.show { display: block; }
     @media(min-width: 1500px) { .timeline-wrap { max-width: 1280px; } }
+    .tl-metric { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tlm-btn { padding: 7px 14px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12.5px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; transition: all 0.15s; white-space: nowrap; }
+    .tlm-btn.active { background: var(--yellow); color: var(--deep); border-color: transparent; }
     .tl-head { text-align: center; margin-bottom: 12px; }
     .tl-head h2 { font-size: 21px; font-weight: 900; color: #fff; letter-spacing: 0.3px; }
     .tl-head h2 span { color: var(--yellow); }
@@ -1804,6 +1807,32 @@ const TL_COLOR = { TLC:'#FADC00', TAR:'#8a9099', TAS:'#1d5fa8', TASE:'#4a9fe0' }
 const TL_LABEL = { TLC:'Lube Centers', TAR:'Auto Repair', TAS:'Auto Spas', TASE:'Auto Spa Express' };
 const TL_ORDER = ['TLC','TAR','TAS','TASE']; // stack order, bottom → top (oldest brand first)
 
+// WLR "Our Growth Story" — [cars serviced, annual revenue] per year (from the executive chart)
+const GROWTH = {
+  1988:[15000,200000],1989:[20500,320000],1990:[24000,430000],1991:[27000,730000],
+  1992:[29000,810000],1993:[34041,1040000],1994:[39751,1350000],1995:[48733,1820000],
+  1996:[54925,2210000],1997:[55760,2520000],1998:[62552,2958000],1999:[69192,3516000],
+  2000:[70910,3769000],2001:[73831,4175000],2002:[89526,4650000],2003:[101989,6185000],
+  2004:[189068,8354000],2005:[238185,10956000],2006:[242483,13605000],2007:[275909,16707000],
+  2008:[271720,17270000],2009:[278679,17355000],2010:[356298,21213000],2011:[384169,22524000],
+  2012:[362442,24812000],2013:[368575,26118000],2014:[359620,27141000],2015:[403077,27027000],
+  2016:[427113,31060000],2017:[549192,33089090],2018:[632961,36134958],2019:[806058,42704108],
+  2020:[924384,38515349],2021:[1438006,57384944],2022:[1995014,70935252],2023:[2535023,82488957],
+  2024:[3104744,93162689],2025:[3196780,101262723],2026:[3829975,107751955],
+};
+let growthMetric = 'rev'; // 'rev' | 'cars' | 'loc'
+
+function fmtMoney(v){ return v>=1e6 ? '$'+(v/1e6).toFixed(1).replace(/\.0$/,'')+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+v; }
+function fmtMoneyTick(v){ return v>=1e6 ? '$'+Math.round(v/1e6)+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+v; }
+function fmtCount(v){ return v>=1e6 ? (v/1e6).toFixed(2).replace(/\.?0+$/,'')+'M' : v>=1e3 ? Math.round(v/1e3)+'K' : String(v); }
+function fmtCountTick(v){ return v>=1e6 ? (v/1e6).toFixed(1).replace(/\.0$/,'')+'M' : v>=1e3 ? Math.round(v/1e3)+'K' : String(v); }
+const GROWTH_META = {
+  rev:  { idx:1, label:'Annual Revenue', color:'#FADC00', fmt:fmtMoney, tick:fmtMoneyTick, note:'Annual revenue by year — 2020 dip reflects COVID; 2026 is projected.' },
+  cars: { idx:0, label:'Cars Serviced',  color:'#4a9fe0', fmt:fmtCount, tick:fmtCountTick, note:'Cars serviced per year — 2026 is projected.' },
+};
+function niceMax(v){ const rough=v/5, mag=Math.pow(10,Math.floor(Math.log10(rough))), norm=rough/mag;
+  const step=(norm<=1?1:norm<=2?2:norm<=2.5?2.5:norm<=5?5:10)*mag; return Math.ceil(v/step)*step; }
+
 function timelineData() {
   const qualifies = l => isLocVisible(l) && l.ts < 20991231 &&
     (activeFilter === 'ALL' || l.type === activeFilter) &&
@@ -1828,8 +1857,66 @@ function timelineData() {
 
 function renderTimeline() {
   const wrap = document.getElementById('timelineWrap');
+  const toggle = `<div class="tl-metric">
+    <button class="tlm-btn ${growthMetric==='rev'?'active':''}" data-metric="rev">💵 Revenue</button>
+    <button class="tlm-btn ${growthMetric==='cars'?'active':''}" data-metric="cars">🚗 Cars Serviced</button>
+    <button class="tlm-btn ${growthMetric==='loc'?'active':''}" data-metric="loc">📍 Locations</button>
+  </div>`;
+  wrap.innerHTML = toggle + (growthMetric === 'loc' ? renderLocationsChart() : renderSeriesChart(growthMetric));
+  wrap.querySelectorAll('.tlm-btn').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.metric !== growthMetric) { growthMetric = b.dataset.metric; renderTimeline(); }
+  }));
+}
+
+// Single-series bar chart for Revenue / Cars Serviced (company-wide; ignores brand/state filters)
+function renderSeriesChart(metric) {
+  const meta = GROWTH_META[metric];
+  const years = Object.keys(GROWTH).map(Number).sort((a, b) => a - b);
+  const vals = years.map(y => GROWTH[y][meta.idx]);
+  const W = 1000, H = 460, padL = 54, padR = 16, padT = 24, padB = 40;
+  const px0 = padL, px1 = W - padR, py0 = padT, py1 = H - padB;
+  const plotW = px1 - px0, plotH = py1 - py0, n = years.length, colW = plotW / n;
+  const yMax = niceMax(Math.max(...vals));
+  const yOf = v => py1 - (v / yMax) * plotH, xOf = i => px0 + i * colW;
+  let grid = '';
+  for (let g = 0; g <= 5; g++) {
+    const v = yMax / 5 * g, yy = yOf(v);
+    grid += `<line class="tl-grid" x1="${px0}" y1="${yy.toFixed(1)}" x2="${px1}" y2="${yy.toFixed(1)}"/><text class="tl-ylabel" x="${px0 - 7}" y="${(yy + 3.5).toFixed(1)}">${meta.tick(Math.round(v))}</text>`;
+  }
+  let cols = '';
+  years.forEach((yr, i) => {
+    const v = vals[i], yT = yOf(v), yB = yOf(0), proj = yr === 2026, covid = yr === 2020 && metric === 'rev';
+    cols += `<rect x="${(xOf(i) + colW * 0.12).toFixed(1)}" y="${yT.toFixed(1)}" width="${(colW * 0.76).toFixed(1)}" height="${(yB - yT).toFixed(1)}" fill="${meta.color}" rx="0.5"${proj ? ' opacity="0.5"' : ''}/>`;
+    cols += `<rect class="tl-hit" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${yr}${proj ? ' (projected)' : ''}${covid ? ' (COVID)' : ''}: ${meta.fmt(v)}</title></rect>`;
+  });
+  let xlab = '';
+  years.forEach((yr, i) => {
+    const show = yr % 5 === 0 || i === 0 || (i === n - 1 && yr % 5 >= 2);
+    if (show) xlab += `<text class="tl-xlabel" x="${(xOf(i) + colW / 2).toFixed(1)}" y="${(py1 + 17).toFixed(1)}">${yr}</text>`;
+  });
+  const last = vals[n - 1], endX = Math.min(xOf(n - 1) + colW / 2, px1 - 4);
+  const endLabel = `<text class="tl-end" x="${endX.toFixed(1)}" y="${(yOf(last) - 7).toFixed(1)}">${meta.fmt(last)}</text>`;
+  const first = vals[0], span = years[n - 1] - years[0];
+  const mult = Math.round(last / first), cagr = (Math.pow(last / first, 1 / span) - 1) * 100;
+  return `
+    <div class="tl-head">
+      <h2>Our Growth <span>Since ${years[0]}</span></h2>
+      <div class="tl-stats">
+        <div class="tl-stat"><span class="tl-num">${meta.fmt(last)}</span><span class="tl-lab">${years[n-1]}${years[n-1]===2026?' proj.':''}</span></div>
+        <div class="tl-stat"><span class="tl-num">${mult.toLocaleString()}×</span><span class="tl-lab">Since ${years[0]}</span></div>
+        <div class="tl-stat"><span class="tl-num">${cagr.toFixed(0)}%</span><span class="tl-lab">Avg / Yr</span></div>
+        <div class="tl-stat"><span class="tl-num">${span + 1}</span><span class="tl-lab">Years</span></div>
+      </div>
+    </div>
+    <svg class="tl-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="WLR ${meta.label} by year">
+      ${grid}${cols}${xlab}${endLabel}
+    </svg>
+    <div class="tl-foot">${meta.note} Hover a year for the value.</div>`;
+}
+
+function renderLocationsChart() {
   const d = timelineData();
-  if (!d.total) { wrap.innerHTML = '<div class="tl-empty">No locations match this filter.</div>'; return; }
+  if (!d.total) return '<div class="tl-empty">No locations match this filter.</div>';
 
   const W = 1000, H = 460, padL = 40, padR = 16, padT = 24, padB = 40;
   const px0 = padL, px1 = W - padR, py0 = padT, py1 = H - padB;
@@ -1871,7 +1958,7 @@ function renderTimeline() {
 
   const legend = d.brands.map(b => `<span class="tl-leg"><span class="tl-sw" style="background:${TL_COLOR[b]}"></span>${TL_LABEL[b]}</span>`).join('');
 
-  wrap.innerHTML = `
+  return `
     <div class="tl-head">
       <h2>Our Growth <span>Since ${d.firstYear}</span></h2>
       <div class="tl-stats">
