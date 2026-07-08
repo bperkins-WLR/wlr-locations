@@ -2144,8 +2144,8 @@ function parseVideo(url) {
   url = (url || '').trim(); let m;
   if (m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/))
     return { kind: 'youtube', embed: `https://www.youtube.com/embed/${m[1]}`, thumb: `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` };
-  if (m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))
-    return { kind: 'vimeo', id: m[1], embed: `https://player.vimeo.com/video/${m[1]}`, thumb: null };
+  if (m = url.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/(\w+))?/))
+    return { kind: 'vimeo', id: m[1], hash: m[2] || null, embed: `https://player.vimeo.com/video/${m[1]}${m[2] ? `?h=${m[2]}` : ''}`, thumb: null };
   if (m = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/))
     return { kind: 'drive', embed: `https://drive.google.com/file/d/${m[1]}/preview`, thumb: null };
   if (/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url)) return { kind: 'file', embed: url, thumb: null };
@@ -2161,7 +2161,7 @@ function renderIncidents() {
     let locTxt = '';
     if (v.loc) { const l = locations.find(x => x.num == v.loc); locTxt = l ? `#${pad(l.num)} ${esc(l.name)}` : `#${esc(String(v.loc))}`; }
     const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="" onerror="this.remove()">` : `<div class="inc-poster">🎥</div>`;
-    const vimeoAttr = p.kind === 'vimeo' ? ` data-vimeo="${esc(p.id)}"` : '';
+    const vimeoAttr = p.kind === 'vimeo' ? ` data-vimeo="${esc(p.id)}" data-vhash="${esc(p.hash || '')}"` : '';
     return `<button class="inc-card" data-id="${esc(v.id || v.url)}">
       <div class="inc-thumb"${vimeoAttr}>${thumb}<div class="inc-play">▶</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
       <div class="inc-meta">
@@ -2176,17 +2176,18 @@ function renderIncidents() {
 // Vimeo has no thumbnail in the URL — fetch it from Vimeo's public oEmbed endpoint
 const vimeoThumbCache = {};
 function loadVimeoThumb(thumbEl) {
-  const id = thumbEl.dataset.vimeo;
+  const id = thumbEl.dataset.vimeo, hash = thumbEl.dataset.vhash;
+  const key = id + (hash ? '/' + hash : ''); // unlisted videos need the privacy hash in the oEmbed URL
   const apply = url => {
     if (thumbEl.querySelector('img')) return;
     thumbEl.querySelector('.inc-poster')?.remove();
     const img = new Image(); img.alt = ''; img.onerror = () => img.remove();
     img.src = url; thumbEl.insertBefore(img, thumbEl.firstChild);
   };
-  if (vimeoThumbCache[id]) { apply(vimeoThumbCache[id]); return; }
-  fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=640`)
+  if (vimeoThumbCache[key]) { apply(vimeoThumbCache[key]); return; }
+  fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${key}&width=640`)
     .then(r => r.ok ? r.json() : null)
-    .then(d => { if (d && d.thumbnail_url) { vimeoThumbCache[id] = d.thumbnail_url; apply(d.thumbnail_url); } })
+    .then(d => { if (d && d.thumbnail_url) { vimeoThumbCache[key] = d.thumbnail_url; apply(d.thumbnail_url); } })
     .catch(() => {});
 }
 
