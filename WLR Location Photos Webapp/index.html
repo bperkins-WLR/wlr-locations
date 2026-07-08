@@ -751,6 +751,9 @@
     .sw-hero-total { font-size: 33px; font-weight: 900; color: var(--yellow); line-height: 1.1; margin: 3px 0 11px; }
     .sw-wow { font-size: 14px; font-weight: 800; margin-left: 6px; vertical-align: middle; }
     .sw-wow.up { color: #4ade80; } .sw-wow.down { color: #f87171; }
+    .sw-reset { margin-left: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: #fff; border-radius: 5px; padding: 1px 8px; font-size: 10px; font-weight: 800; cursor: pointer; font-family: inherit; vertical-align: middle; }
+    .sw-reset:active { background: rgba(255,255,255,0.22); }
+    .sw-chart .tl-hit { cursor: pointer; }
     .sw-segs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
     .sw-seg { display: flex; align-items: center; gap: 6px; font-size: 12px; }
     .sw-seg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
@@ -2265,17 +2268,21 @@ function renderSales() {
   const all = swRows();
   if (!all.length) { body.innerHTML = '<div class="sw-loading">No sales data available.</div>'; return; }
   const rows = SW.weeks >= 999 ? all : all.slice(-SW.weeks);
-  const latest = all[all.length - 1], prev = all[all.length - 2];
+  const latest = all[all.length - 1];
+  // Selected week drives the hero card (defaults to latest; click a bar to change)
+  const selDate = (SW.selectedDate && all.some(r => r.date === SW.selectedDate)) ? SW.selectedDate : latest.date;
+  const selIdx = all.findIndex(r => r.date === selDate);
+  const sel = all[selIdx], prev = selIdx > 0 ? all[selIdx - 1] : null, isLatest = selDate === latest.date;
 
-  const lw = latest.weather, cat = swCat(lw && lw.category);
-  const wow = prev ? ((latest.total - prev.total) / prev.total * 100) : null;
-  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}%</span>`;
+  const lw = sel.weather, cat = swCat(lw && lw.category);
+  const wow = prev ? ((sel.total - prev.total) / prev.total * 100) : null;
+  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}% vs prior</span>`;
   const hero = `
     <div class="sw-hero">
       <div class="sw-hero-main">
-        <div class="sw-hero-wk">Latest pageout · week of ${swWeekLabel(latest.date, true)}</div>
-        <div class="sw-hero-total">$${Math.round(latest.total).toLocaleString()}${wowHtml}</div>
-        <div class="sw-segs">${SW_SEG.map(([lbl, k, c]) => `<div class="sw-seg"><span class="sw-seg-dot" style="background:${c}"></span><span class="sw-seg-lbl">${lbl}</span><span class="sw-seg-val">${fmtMoney(latest[k] || 0)}</span></div>`).join('')}</div>
+        <div class="sw-hero-wk">${isLatest ? 'Latest pageout' : 'Pageout'} · week of ${swWeekLabel(sel.date, true)}${isLatest ? '' : ` <button class="sw-reset" id="swReset">↩ Latest</button>`}</div>
+        <div class="sw-hero-total">$${Math.round(sel.total).toLocaleString()}${wowHtml}</div>
+        <div class="sw-segs">${SW_SEG.map(([lbl, k, c]) => `<div class="sw-seg"><span class="sw-seg-dot" style="background:${c}"></span><span class="sw-seg-lbl">${lbl}</span><span class="sw-seg-val">${fmtMoney(sel[k] || 0)}</span></div>`).join('')}</div>
       </div>
       <div class="sw-hero-wx" style="border-color:${cat.color}66">
         <div class="sw-wx-icon">${cat.icon}</div>
@@ -2295,20 +2302,26 @@ function renderSales() {
     : `<div class="sw-legend">${Object.values(SW_CAT).map(v => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${v.color}"></span>${v.icon} ${v.label}</span>`).join('')}</div>`;
 
   const upd = SW.weather && SW.weather.updated;
-  body.innerHTML = hero + toggles + swChart(rows, SW.metric) + legend +
-    `<div class="sw-foot">Weekly gross sales joined to that week’s weather${upd ? ` · data through ${upd}` : ''}. ${SW.metric === 'seg' ? 'Bars stacked by segment.' : 'Bars colored by weather category — car-wash revenue (Spa + Express) tracks the weather.'} Hover a week for detail.</div>`;
+  const sc = body.scrollTop;
+  body.innerHTML = hero + toggles + swChart(rows, SW.metric, selDate) + legend +
+    `<div class="sw-foot">Weekly gross sales joined to that week’s weather${upd ? ` · data through ${upd}` : ''}. ${SW.metric === 'seg' ? 'Bars stacked by segment.' : 'Bars colored by weather category — car-wash revenue (Spa + Express) tracks the weather.'} Tap a week to load it above.</div>`;
+  body.scrollTop = sc;
 
   body.querySelectorAll('.sw-tab[data-metric]').forEach(b => b.addEventListener('click', () => { SW.metric = b.dataset.metric; renderSales(); }));
   body.querySelectorAll('.sw-tab[data-weeks]').forEach(b => b.addEventListener('click', () => { SW.weeks = +b.dataset.weeks; renderSales(); }));
+  body.querySelectorAll('.sw-chart .tl-hit').forEach(h => h.addEventListener('click', () => { SW.selectedDate = h.dataset.date; renderSales(); }));
+  const rb = document.getElementById('swReset'); if (rb) rb.addEventListener('click', e => { e.stopPropagation(); SW.selectedDate = null; renderSales(); });
 }
 
-function swChart(rows, metric) {
+function swChart(rows, metric, selDate) {
   const W = 1000, H = 380, padL = 52, padR = 14, padT = 16, padB = 32;
   const px0 = padL, px1 = W - padR, py0 = padT, py1 = H - padB, plotW = px1 - px0, plotH = py1 - py0;
   const n = rows.length, colW = plotW / n;
   const maxV = Math.max(...rows.map(r => metric === 'seg' ? (r.total || 0) : swMetricVal(r, metric)), 1);
   const yMax = niceMax(maxV);
   const yOf = v => py1 - (v / yMax) * plotH, xOf = i => px0 + i * colW;
+  const selI = rows.findIndex(r => r.date === selDate);
+  const hl = selI < 0 ? '' : `<rect x="${xOf(selI).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}" fill="rgba(255,255,255,0.1)"/><rect x="${xOf(selI).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="2.5" fill="#FADC00"/>`;
   let grid = '';
   for (let g = 0; g <= 5; g++) { const v = yMax / 5 * g, yy = yOf(v);
     grid += `<line class="tl-grid" x1="${px0}" y1="${yy.toFixed(1)}" x2="${px1}" y2="${yy.toFixed(1)}"/><text class="tl-ylabel" x="${px0 - 7}" y="${(yy + 3.5).toFixed(1)}">${fmtMoneyTick(Math.round(v))}</text>`; }
@@ -2324,7 +2337,7 @@ function swChart(rows, metric) {
     }
     const wx = r.weather, c = swCat(wx && wx.category);
     const tip = `${swWeekLabel(r.date, true)}  ·  ${metric === 'wash' ? 'Wash ' + fmtMoney(swMetricVal(r, 'wash')) : fmtMoney(r.total)}${wx ? `  ·  ${c.label} ${Math.round(wx.avgHigh)}°/${Math.round(wx.avgLow)}°` : ''}`;
-    bars += `<rect class="tl-hit" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${tip}</title></rect>`;
+    bars += `<rect class="tl-hit" data-date="${r.date}" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${tip}</title></rect>`;
   });
   let xlab = '', lastMo = null;
   const step = n > 60 ? 3 : n > 34 ? 2 : 1;
@@ -2333,7 +2346,7 @@ function swChart(rows, metric) {
     const mo = e.getMonth();
     if (mo !== lastMo) { lastMo = mo; if (mo % step === 0) xlab += `<text class="tl-xlabel" x="${(xOf(i) + colW / 2).toFixed(1)}" y="${(py1 + 15).toFixed(1)}">${SW_MO[mo]}${mo === 0 ? ` ’${String(e.getFullYear()).slice(2)}` : ''}</text>`; }
   });
-  return `<svg class="tl-chart sw-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weekly WLR sales by weather">${grid}${bars}${xlab}</svg>`;
+  return `<svg class="tl-chart sw-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weekly WLR sales by weather">${grid}${hl}${bars}${xlab}</svg>`;
 }
 
 document.getElementById('swOpenBtn').addEventListener('click', openSales);
