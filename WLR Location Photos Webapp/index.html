@@ -736,6 +736,39 @@
     .inc-player-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.14); border: none; color: #fff; font-size: 18px; cursor: pointer; }
     .inc-player-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 0 16px 20px; }
     .inc-player-body iframe, .inc-player-body video { width: 100%; max-width: 1100px; aspect-ratio: 16/9; height: auto; max-height: 100%; border: none; border-radius: 12px; background: #000; }
+
+    /* ══ SALES & WEATHER ═════════════════════════════════ */
+    .sw-overlay { display: none; position: fixed; inset: 0; z-index: 955; background: linear-gradient(160deg, #0c2c5a 0%, #071a38 100%); flex-direction: column; }
+    .sw-overlay.open { display: flex; }
+    .sw-head { display: flex; align-items: center; gap: 10px; padding: max(env(safe-area-inset-top),12px) 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .sw-title { font-size: 18px; font-weight: 800; color: #fff; flex: 1; }
+    .sw-title span { color: rgba(255,255,255,0.55); }
+    .sw-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; max-width: 1080px; width: 100%; margin: 0 auto; }
+    .sw-loading { text-align: center; color: rgba(255,255,255,0.55); padding: 50px 20px; font-size: 14px; }
+    .sw-hero { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+    .sw-hero-main { flex: 1; min-width: 240px; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
+    .sw-hero-wk { font-size: 11px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1.2px; }
+    .sw-hero-total { font-size: 33px; font-weight: 900; color: var(--yellow); line-height: 1.1; margin: 3px 0 11px; }
+    .sw-wow { font-size: 14px; font-weight: 800; margin-left: 6px; vertical-align: middle; }
+    .sw-wow.up { color: #4ade80; } .sw-wow.down { color: #f87171; }
+    .sw-segs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
+    .sw-seg { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .sw-seg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+    .sw-seg-lbl { color: rgba(255,255,255,0.6); flex: 1; }
+    .sw-seg-val { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .sw-hero-wx { width: 156px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.22); border: 1.5px solid var(--bord); border-radius: 14px; padding: 12px; text-align: center; }
+    .sw-wx-icon { font-size: 34px; line-height: 1; }
+    .sw-wx-cat { font-size: 14px; font-weight: 800; margin-top: 5px; }
+    .sw-wx-det { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px; line-height: 1.45; }
+    .sw-toggles { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .sw-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sw-tab { padding: 6px 13px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+    .sw-tab.active { background: var(--yellow); color: var(--deep); border-color: transparent; }
+    .sw-chart { width: 100%; height: auto; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; }
+    .sw-legend { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    .sw-leg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 700; }
+    .sw-leg-sw { width: 11px; height: 11px; border-radius: 3px; }
+    .sw-foot { text-align: center; font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 10px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -749,6 +782,7 @@
     <div class="h-title"><span>WLR</span> Automotive Group</div>
     <div class="h-sub">Location Gallery</div>
   </div>
+  <button class="header-btn" id="swOpenBtn" title="Weekly sales & weather">📊</button>
   <button class="header-btn" id="incOpenBtn" title="Videos">🎥</button>
   <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
 </header>
@@ -905,6 +939,15 @@
     <button class="inc-player-close" id="incPlayerClose" title="Close">✕</button>
   </div>
   <div class="inc-player-body" id="incPlayerBody"></div>
+</div>
+
+<!-- ══ WEEKLY SALES & WEATHER ═══════════════════════════════ -->
+<div class="sw-overlay" id="swOverlay">
+  <div class="sw-head">
+    <div class="sw-title">📊 Weekly Sales <span>&amp; Weather</span></div>
+    <button class="inc-close" id="swClose" title="Close">✕</button>
+  </div>
+  <div class="sw-scroll" id="swBody"><div class="sw-loading">Loading sales &amp; weather…</div></div>
 </div>
 
 <script>
@@ -1823,7 +1866,7 @@ const GROWTH = {
 let growthMetric = 'rev'; // 'rev' | 'cars' | 'loc'
 
 function fmtMoney(v){ return v>=1e6 ? '$'+(v/1e6).toFixed(1).replace(/\.0$/,'')+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+v; }
-function fmtMoneyTick(v){ return v>=1e6 ? '$'+Math.round(v/1e6)+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+v; }
+function fmtMoneyTick(v){ if(v>=1e6){ const m=v/1e6; return '$'+(m>=10?Math.round(m):(m%1?m.toFixed(1):m))+'M'; } return v>=1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+v; }
 function fmtCount(v){ return v>=1e6 ? (v/1e6).toFixed(2).replace(/\.?0+$/,'')+'M' : v>=1e3 ? Math.round(v/1e3)+'K' : String(v); }
 function fmtCountTick(v){ return v>=1e6 ? (v/1e6).toFixed(1).replace(/\.0$/,'')+'M' : v>=1e3 ? Math.round(v/1e3)+'K' : String(v); }
 const GROWTH_META = {
@@ -2163,7 +2206,138 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (document.getElementById('incPlayer').classList.contains('open')) closeIncPlayer();
   else if (document.getElementById('incOverlay').classList.contains('open')) closeIncidents();
+  else if (document.getElementById('swOverlay').classList.contains('open')) closeSales();
 });
+
+// ══ WEEKLY SALES & WEATHER (live from the WLR Bonus Tracker) ═
+const SW = { state: null, weather: null, fetchedAt: 0, metric: 'total', weeks: 52 };
+const SW_CAT = {
+  hot:      { icon: '☀️', color: '#f5a623', label: 'Hot' },
+  rain:     { icon: '🌧️', color: '#4a9fe0', label: 'Rain' },
+  snow:     { icon: '❄️', color: '#9fd3ff', label: 'Snow' },
+  moderate: { icon: '⛅', color: '#6bbf6b', label: 'Mild' },
+};
+function swCat(c) { return SW_CAT[c] || { icon: '·', color: '#5a6472', label: '—' }; }
+const SW_MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SW_SEG = [['Lube','lube','#FADC00'],['Repair','repair','#8a9099'],['Spa','spa','#1d5fa8'],['Express','express','#4a9fe0']];
+
+async function swLoad(force) {
+  if (SW.state && SW.weather && (Date.now() - SW.fetchedAt < 300000) && !force) return true;
+  try {
+    const [s, w] = await Promise.all([
+      fetch('https://wlr-bonus-tracker.vercel.app/state.json', { cache: 'no-store' }).then(r => r.json()),
+      fetch('https://wlr-bonus-tracker.vercel.app/weather.json', { cache: 'no-store' }).then(r => r.json()),
+    ]);
+    SW.state = s; SW.weather = w; SW.fetchedAt = Date.now();
+    return true;
+  } catch (e) { return false; }
+}
+function swRows() {
+  const wk = (SW.state && SW.state.weekly) || [];
+  const wm = (SW.weather && SW.weather.weeks) || {};
+  return wk.filter(w => typeof w.total === 'number').map(w => ({ ...w, weather: wm[w.date] || null }));
+}
+// Pageout date D → the sales week it covers (Mon D-7 through Sun D-1)
+function swWeekLabel(dateStr, withYear) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const s = new Date(d); s.setDate(d.getDate() - 7);
+  const e = new Date(d); e.setDate(d.getDate() - 1);
+  const base = s.getMonth() === e.getMonth()
+    ? `${SW_MO[s.getMonth()]} ${s.getDate()}–${e.getDate()}`
+    : `${SW_MO[s.getMonth()]} ${s.getDate()} – ${SW_MO[e.getMonth()]} ${e.getDate()}`;
+  return withYear ? `${base}, ${e.getFullYear()}` : base;
+}
+function swMetricVal(r, m) { return m === 'wash' ? (r.spa || 0) + (r.express || 0) : (r.total || 0); }
+
+async function openSales() {
+  document.getElementById('swOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!(SW.state && SW.weather)) {
+    document.getElementById('swBody').innerHTML = '<div class="sw-loading">Loading sales &amp; weather…</div>';
+    if (!await swLoad()) { document.getElementById('swBody').innerHTML = '<div class="sw-loading">Couldn’t load the data — check your connection and try again.</div>'; return; }
+  } else { swLoad(); } // refresh in background if stale
+  renderSales();
+}
+function closeSales() { document.getElementById('swOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+function renderSales() {
+  const body = document.getElementById('swBody');
+  const all = swRows();
+  if (!all.length) { body.innerHTML = '<div class="sw-loading">No sales data available.</div>'; return; }
+  const rows = SW.weeks >= 999 ? all : all.slice(-SW.weeks);
+  const latest = all[all.length - 1], prev = all[all.length - 2];
+
+  const lw = latest.weather, cat = swCat(lw && lw.category);
+  const wow = prev ? ((latest.total - prev.total) / prev.total * 100) : null;
+  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}%</span>`;
+  const hero = `
+    <div class="sw-hero">
+      <div class="sw-hero-main">
+        <div class="sw-hero-wk">Latest pageout · week of ${swWeekLabel(latest.date, true)}</div>
+        <div class="sw-hero-total">$${Math.round(latest.total).toLocaleString()}${wowHtml}</div>
+        <div class="sw-segs">${SW_SEG.map(([lbl, k, c]) => `<div class="sw-seg"><span class="sw-seg-dot" style="background:${c}"></span><span class="sw-seg-lbl">${lbl}</span><span class="sw-seg-val">${fmtMoney(latest[k] || 0)}</span></div>`).join('')}</div>
+      </div>
+      <div class="sw-hero-wx" style="border-color:${cat.color}66">
+        <div class="sw-wx-icon">${cat.icon}</div>
+        <div class="sw-wx-cat" style="color:${cat.color}">${lw ? cat.label : 'Weather pending'}</div>
+        ${lw ? `<div class="sw-wx-det">${Math.round(lw.avgHigh)}° / ${Math.round(lw.avgLow)}°<br>${lw.precipIn}" precip${lw.snowIn > 0 ? ` · ${lw.snowIn}" snow` : ''}</div>` : ''}
+      </div>
+    </div>`;
+
+  const metricBtns = [['total','Total'],['wash','Car Wash'],['seg','By Segment']]
+    .map(([m, l]) => `<button class="sw-tab ${SW.metric === m ? 'active' : ''}" data-metric="${m}">${l}</button>`).join('');
+  const rangeBtns = [[26,'26w'],[52,'1yr'],[999,'All']]
+    .map(([nw, l]) => `<button class="sw-tab ${SW.weeks === nw ? 'active' : ''}" data-weeks="${nw}">${l}</button>`).join('');
+  const toggles = `<div class="sw-toggles"><div class="sw-tabs">${metricBtns}</div><div class="sw-tabs">${rangeBtns}</div></div>`;
+
+  const legend = SW.metric === 'seg'
+    ? `<div class="sw-legend">${SW_SEG.map(([l, , c]) => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${c}"></span>${l}</span>`).join('')}</div>`
+    : `<div class="sw-legend">${Object.values(SW_CAT).map(v => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${v.color}"></span>${v.icon} ${v.label}</span>`).join('')}</div>`;
+
+  const upd = SW.weather && SW.weather.updated;
+  body.innerHTML = hero + toggles + swChart(rows, SW.metric) + legend +
+    `<div class="sw-foot">Weekly gross sales joined to that week’s weather${upd ? ` · data through ${upd}` : ''}. ${SW.metric === 'seg' ? 'Bars stacked by segment.' : 'Bars colored by weather category — car-wash revenue (Spa + Express) tracks the weather.'} Hover a week for detail.</div>`;
+
+  body.querySelectorAll('.sw-tab[data-metric]').forEach(b => b.addEventListener('click', () => { SW.metric = b.dataset.metric; renderSales(); }));
+  body.querySelectorAll('.sw-tab[data-weeks]').forEach(b => b.addEventListener('click', () => { SW.weeks = +b.dataset.weeks; renderSales(); }));
+}
+
+function swChart(rows, metric) {
+  const W = 1000, H = 380, padL = 52, padR = 14, padT = 16, padB = 32;
+  const px0 = padL, px1 = W - padR, py0 = padT, py1 = H - padB, plotW = px1 - px0, plotH = py1 - py0;
+  const n = rows.length, colW = plotW / n;
+  const maxV = Math.max(...rows.map(r => metric === 'seg' ? (r.total || 0) : swMetricVal(r, metric)), 1);
+  const yMax = niceMax(maxV);
+  const yOf = v => py1 - (v / yMax) * plotH, xOf = i => px0 + i * colW;
+  let grid = '';
+  for (let g = 0; g <= 5; g++) { const v = yMax / 5 * g, yy = yOf(v);
+    grid += `<line class="tl-grid" x1="${px0}" y1="${yy.toFixed(1)}" x2="${px1}" y2="${yy.toFixed(1)}"/><text class="tl-ylabel" x="${px0 - 7}" y="${(yy + 3.5).toFixed(1)}">${fmtMoneyTick(Math.round(v))}</text>`; }
+  let bars = '';
+  rows.forEach((r, i) => {
+    const x = xOf(i) + colW * 0.14, bw = colW * 0.72;
+    if (metric === 'seg') {
+      let base = 0;
+      SW_SEG.forEach(([, k, c]) => { const v = r[k] || 0; if (!v) return; const yT = yOf(base + v), yB = yOf(base); bars += `<rect x="${x.toFixed(1)}" y="${yT.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, yB - yT).toFixed(1)}" fill="${c}"/>`; base += v; });
+    } else {
+      const v = swMetricVal(r, metric), col = swCat(r.weather && r.weather.category).color, yT = yOf(v), yB = yOf(0);
+      bars += `<rect x="${x.toFixed(1)}" y="${yT.toFixed(1)}" width="${bw.toFixed(1)}" height="${(yB - yT).toFixed(1)}" fill="${col}" rx="0.5"/>`;
+    }
+    const wx = r.weather, c = swCat(wx && wx.category);
+    const tip = `${swWeekLabel(r.date, true)}  ·  ${metric === 'wash' ? 'Wash ' + fmtMoney(swMetricVal(r, 'wash')) : fmtMoney(r.total)}${wx ? `  ·  ${c.label} ${Math.round(wx.avgHigh)}°/${Math.round(wx.avgLow)}°` : ''}`;
+    bars += `<rect class="tl-hit" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${tip}</title></rect>`;
+  });
+  let xlab = '', lastMo = null;
+  const step = n > 60 ? 3 : n > 34 ? 2 : 1;
+  rows.forEach((r, i) => {
+    const e = new Date(r.date + 'T00:00:00'); e.setDate(e.getDate() - 1);
+    const mo = e.getMonth();
+    if (mo !== lastMo) { lastMo = mo; if (mo % step === 0) xlab += `<text class="tl-xlabel" x="${(xOf(i) + colW / 2).toFixed(1)}" y="${(py1 + 15).toFixed(1)}">${SW_MO[mo]}${mo === 0 ? ` ’${String(e.getFullYear()).slice(2)}` : ''}</text>`; }
+  });
+  return `<svg class="tl-chart sw-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weekly WLR sales by weather">${grid}${bars}${xlab}</svg>`;
+}
+
+document.getElementById('swOpenBtn').addEventListener('click', openSales);
+document.getElementById('swClose').addEventListener('click', closeSales);
 </script>
 </body>
 </html>
