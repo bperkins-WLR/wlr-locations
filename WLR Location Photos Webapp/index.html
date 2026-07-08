@@ -748,8 +748,9 @@
     .sw-hero { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
     .sw-hero-main { flex: 1; min-width: 240px; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
     .sw-hero-wk { font-size: 11px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1.2px; }
-    .sw-hero-total { font-size: 33px; font-weight: 900; color: var(--yellow); line-height: 1.1; margin: 3px 0 11px; }
-    .sw-wow { font-size: 14px; font-weight: 800; margin-left: 6px; vertical-align: middle; }
+    .sw-hero-total { font-size: 33px; font-weight: 900; color: var(--yellow); line-height: 1.1; margin: 3px 0 3px; }
+    .sw-deltas { display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 11px; }
+    .sw-wow { font-size: 13px; font-weight: 800; }
     .sw-wow.up { color: #4ade80; } .sw-wow.down { color: #f87171; }
     .sw-reset { margin-left: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: #fff; border-radius: 5px; padding: 1px 8px; font-size: 10px; font-weight: 800; cursor: pointer; font-family: inherit; vertical-align: middle; }
     .sw-reset:active { background: rgba(255,255,255,0.22); }
@@ -2251,6 +2252,14 @@ function swWeekLabel(dateStr, withYear) {
   return withYear ? `${base}, ${e.getFullYear()}` : base;
 }
 function swMetricVal(r, m) { return m === 'wash' ? (r.spa || 0) + (r.express || 0) : (r.total || 0); }
+// Nearest weekly entry to ~1 year before the given pageout date (null if none within ~2 weeks — e.g. the 2025 gap)
+function swYearAgo(all, dateStr) {
+  const t = new Date(dateStr + 'T00:00:00'); t.setFullYear(t.getFullYear() - 1);
+  const tt = t.getTime();
+  let best = null, bestDiff = Infinity;
+  for (const e of all) { const d = Math.abs(new Date(e.date + 'T00:00:00').getTime() - tt); if (d < bestDiff) { bestDiff = d; best = e; } }
+  return best && bestDiff <= 14 * 86400000 ? best : null;
+}
 
 async function openSales() {
   document.getElementById('swOverlay').classList.add('open');
@@ -2276,12 +2285,16 @@ function renderSales() {
 
   const lw = sel.weather, cat = swCat(lw && lw.category);
   const wow = prev ? ((sel.total - prev.total) / prev.total * 100) : null;
-  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}% vs prior</span>`;
+  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}% vs prior wk</span>`;
+  const yoyEntry = swYearAgo(all, sel.date);
+  const yoy = yoyEntry ? ((sel.total - yoyEntry.total) / yoyEntry.total * 100) : null;
+  const yoyHtml = yoy === null ? '' : `<span class="sw-wow ${yoy >= 0 ? 'up' : 'down'}">${yoy >= 0 ? '▲' : '▼'} ${Math.abs(yoy).toFixed(1)}% vs last yr</span>`;
   const hero = `
     <div class="sw-hero">
       <div class="sw-hero-main">
         <div class="sw-hero-wk">${isLatest ? 'Latest pageout' : 'Pageout'} · week of ${swWeekLabel(sel.date, true)}${isLatest ? '' : ` <button class="sw-reset" id="swReset">↩ Latest</button>`}</div>
-        <div class="sw-hero-total">$${Math.round(sel.total).toLocaleString()}${wowHtml}</div>
+        <div class="sw-hero-total">$${Math.round(sel.total).toLocaleString()}</div>
+        <div class="sw-deltas">${wowHtml}${yoyHtml}</div>
         <div class="sw-segs">${SW_SEG.map(([lbl, k, c]) => `<div class="sw-seg"><span class="sw-seg-dot" style="background:${c}"></span><span class="sw-seg-lbl">${lbl}</span><span class="sw-seg-val">${fmtMoney(sel[k] || 0)}</span></div>`).join('')}</div>
       </div>
       <div class="sw-hero-wx" style="border-color:${cat.color}66">
