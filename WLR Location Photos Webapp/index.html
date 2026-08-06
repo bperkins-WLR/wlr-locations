@@ -2230,6 +2230,10 @@ document.addEventListener('keydown', e => {
 });
 
 // ══ WEEKLY SALES & WEATHER (live from the WLR Bonus Tracker) ═
+// ⛔ Weekly Sales & Weather is HIDDEN (confidential figures — off for external demos).
+// Flip to true to bring the 📊 button and dashboard back. Nothing else to change.
+const SHOW_SALES = false;
+
 const SW = { state: null, weather: null, fetchedAt: 0, metric: 'total', weeks: 52 };
 const SW_CAT = {
   hot:      { icon: '☀️', color: '#f5a623', label: 'Hot' },
@@ -2278,6 +2282,7 @@ function swYearAgo(all, dateStr) {
 }
 
 async function openSales() {
+  if (!SHOW_SALES) return; // hidden — never opens, and no sales data is fetched
   document.getElementById('swOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   if (!(SW.state && SW.weather)) {
@@ -2383,7 +2388,14 @@ function swChart(rows, metric, selDate) {
   return `<svg class="tl-chart sw-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weekly WLR sales by weather">${grid}${hl}${bars}${xlab}</svg>`;
 }
 
-document.getElementById('swOpenBtn').addEventListener('click', openSales);
+if (SHOW_SALES) {
+  document.getElementById('swOpenBtn').addEventListener('click', openSales);
+} else {
+  // Remove the only entry point. The (empty) overlay markup stays in place so
+  // closeSales()/goHome()/Esc keep working, but openSales() refuses to open it
+  // and no sales or weather data is ever fetched.
+  document.getElementById('swOpenBtn').remove();
+}
 document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ HOME BUTTON (header logo) ══════════════════════════════
