@@ -415,6 +415,8 @@
        object-fit:contain, so they still show the full photo. */
     .photo-slot img { width: 100%; height: 100%; object-fit: cover; object-position: 82% 50%; display: block; }
     .photo-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 6px 5px; background: linear-gradient(transparent, rgba(0,0,0,.75)); font-size: 9px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
+    /* Marks not-yet-open locations as architectural renderings, not photos */
+    .photo-render-tag { position: absolute; top: 5px; right: 5px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.28); font-size: 8px; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase; color: rgba(255,255,255,0.9); pointer-events: none; }
     .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5px; position: absolute; inset: 0; }
     .ph-icon { font-size: 24px; opacity: .2; }
     .ph-text { font-size: 9px; color: rgba(255,255,255,0.35); text-align: center; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
@@ -1357,19 +1359,25 @@ function buildCard(baseLoc) {
     const fileNum  = s.key === 'ext' ? '01' : '02';
     const fileSrc  = `images/loc-${pad(displayNum)}/${fileNum}.jpg`;
     const localSrc = getPhotoSrc(loc.num, s.key);
-    const src      = localSrc || (comingSoon ? 'images/tase-Coming soon.JPG' : fileSrc);
+    // Always try the location's own photos first. Coming-soon sites fall back to the
+    // generic prototype render if they don't have their own yet.
+    const src      = localSrc || fileSrc;
     const isLocal  = !!localSrc;
-    const useStatic = !isLocal && comingSoon;
+    const onErr = isLocal ? ''
+      : comingSoon
+        ? `onerror="this.onerror=null; this.src='images/tase-Coming soon.JPG';"`
+        : `onerror="this.style.display='none'; this.parentElement.querySelector('.ph').style.display='flex';"`;
     return `
       <div class="photo-slot has-photo" data-num="${loc.num}" data-slot="${s.key}">
         <img src="${src}" alt="${loc.name} ${s.label}"
-             ${(!isLocal && !useStatic) ? `onerror="this.style.display='none'; this.parentElement.querySelector('.ph').style.display='flex';"` : ''}
+             ${onErr}
              onload="this.parentElement.querySelector('.ph').style.display='none';">
         <div class="ph" style="display:none">
           <div class="ph-icon">📷</div>
           <div class="ph-text">${s.label}</div>
         </div>
         <div class="photo-label">${s.label}</div>
+        ${comingSoon ? `<div class="photo-render-tag">Rendering</div>` : ''}
       </div>`;
   }).join('');
 
