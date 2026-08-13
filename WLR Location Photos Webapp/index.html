@@ -426,7 +426,18 @@
     .intro.intro-off { display: none; }
     @keyframes introOut { to { opacity: 0; visibility: hidden; pointer-events: none; } }
     @keyframes introIn  { to { opacity: 1; transform: none; } }
-    .intro-inner { text-align: center; padding: 20px; width: 100%; }
+    /* Abstract bubble loop behind the lockup. If it fails to load the gradient still shows. */
+    .intro-bg {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      z-index: 0; opacity: 0; animation: introBgIn 1.4s ease 0.15s forwards;
+    }
+    @keyframes introBgIn { to { opacity: 0.5; } }
+    /* Scrim keeps the logo and numbers readable over the moving bubbles */
+    .intro::before {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(7,26,56,0.55) 0%, rgba(7,26,56,0.84) 68%, rgba(7,26,56,0.95) 100%);
+    }
+    .intro-inner { text-align: center; padding: 20px; width: 100%; position: relative; z-index: 2; }
     .intro-logo {
       width: min(86%, 620px); height: auto; display: block; margin: 0 auto;
       opacity: 0; transform: scale(0.93);
@@ -442,13 +453,14 @@
     .intro-num { display: block; font-size: clamp(30px, 7vw, 46px); font-weight: 900; color: var(--yellow); line-height: 1; font-variant-numeric: tabular-nums; }
     .intro-lab { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.6px; color: rgba(255,255,255,0.55); margin-top: 6px; }
     .intro-skip {
-      position: absolute; bottom: max(env(safe-area-inset-bottom), 24px);
+      position: absolute; bottom: max(env(safe-area-inset-bottom), 24px); z-index: 2;
       font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase;
       color: rgba(255,255,255,0.35); opacity: 0; animation: introIn 0.6s ease 1.7s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
       .intro { animation-delay: 1s; }
       .intro-logo, .intro-tagline, .intro-stats, .intro-skip { animation-duration: 0.01s; animation-delay: 0s; }
+      .intro-bg { display: none; }
     }
 
     /* Marks not-yet-open locations as architectural renderings, not photos */
@@ -831,6 +843,9 @@
 
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
+  <video class="intro-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="videos/intro-bubbles.mp4" type="video/mp4">
+  </video>
   <div class="intro-inner">
     <img class="intro-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
          onerror="this.style.display='none'">
@@ -2199,6 +2214,10 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
     if (intro.classList.contains('intro-off')) return;
     intro.classList.add('intro-off');
     document.body.style.overflow = '';
+    // Stop decoding the background loop once it's off screen (the intro is
+    // done for this session, so drop the element entirely)
+    const bg = intro.querySelector('.intro-bg');
+    if (bg) { try { bg.pause(); } catch (e) {} bg.remove(); }
   };
 
   // Count up once the stats have faded in
