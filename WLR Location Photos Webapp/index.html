@@ -415,6 +415,42 @@
        object-fit:contain, so they still show the full photo. */
     .photo-slot img { width: 100%; height: 100%; object-fit: cover; object-position: 82% 50%; display: block; }
     .photo-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 6px 5px; background: linear-gradient(transparent, rgba(0,0,0,.75)); font-size: 9px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
+    /* ══ INTRO SPLASH ════════════════════════════════════ */
+    /* Fades itself out via CSS, so it can never trap the user if JS fails. */
+    .intro {
+      position: fixed; inset: 0; z-index: 3000;
+      background: linear-gradient(160deg, #0a2755 0%, #0d3268 55%, #071a38 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      animation: introOut 0.7s ease 3.2s forwards;
+    }
+    .intro.intro-off { display: none; }
+    @keyframes introOut { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+    @keyframes introIn  { to { opacity: 1; transform: none; } }
+    .intro-inner { text-align: center; padding: 20px; width: 100%; }
+    .intro-logo {
+      width: min(86%, 620px); height: auto; display: block; margin: 0 auto;
+      opacity: 0; transform: scale(0.93);
+      animation: introIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+    }
+    .intro-tagline {
+      margin-top: 20px; font-size: 12.5px; letter-spacing: 2.6px; text-transform: uppercase;
+      color: rgba(255,255,255,0.6); opacity: 0; animation: introIn 0.8s ease 0.65s forwards;
+    }
+    .intro-stats { display: flex; justify-content: center; margin-top: 26px; opacity: 0; animation: introIn 0.8s ease 1s forwards; }
+    .intro-stat { padding: 0 clamp(11px, 4vw, 30px); border-right: 1px solid rgba(255,255,255,0.14); }
+    .intro-stat:last-child { border-right: none; }
+    .intro-num { display: block; font-size: clamp(30px, 7vw, 46px); font-weight: 900; color: var(--yellow); line-height: 1; font-variant-numeric: tabular-nums; }
+    .intro-lab { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.6px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+    .intro-skip {
+      position: absolute; bottom: max(env(safe-area-inset-bottom), 24px);
+      font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); opacity: 0; animation: introIn 0.6s ease 1.7s forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .intro { animation-delay: 1s; }
+      .intro-logo, .intro-tagline, .intro-stats, .intro-skip { animation-duration: 0.01s; animation-delay: 0s; }
+    }
+
     /* Marks not-yet-open locations as architectural renderings, not photos */
     .photo-render-tag { position: absolute; top: 5px; right: 5px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.28); font-size: 8px; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase; color: rgba(255,255,255,0.9); pointer-events: none; }
     .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5px; position: absolute; inset: 0; }
@@ -792,6 +828,26 @@
   </style>
 </head>
 <body>
+
+<!-- ══ INTRO ═══════════════════════════════════════════ -->
+<div class="intro" id="intro" role="presentation" aria-hidden="true">
+  <div class="intro-inner">
+    <img class="intro-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+         onerror="this.style.display='none'">
+    <div class="intro-tagline">Serving the Mid-Atlantic Since 1987</div>
+    <div class="intro-stats">
+      <div class="intro-stat"><span class="intro-num" id="introLocs">0</span><span class="intro-lab">Locations</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introYears">0</span><span class="intro-lab">Years</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introStates">0</span><span class="intro-lab">States</span></div>
+      <div class="intro-stat"><span class="intro-num">4</span><span class="intro-lab">Brands</span></div>
+    </div>
+  </div>
+  <div class="intro-skip">Tap to skip</div>
+</div>
+<script>
+  /* Hide before first paint if the intro already played this session (no flash) */
+  try { if (sessionStorage.getItem('wlr_intro_seen')) document.getElementById('intro').classList.add('intro-off'); } catch (e) {}
+</script>
 
 <!-- ══ HEADER ══════════════════════════════════════════ -->
 <header>
@@ -2129,6 +2185,33 @@ function closeTeam() {
 }
 document.getElementById('teamOverlay').addEventListener('click', closeTeam);
 document.getElementById('teamClose').addEventListener('click', closeTeam);
+
+// ══ INTRO SPLASH ══════════════════════════════════════════
+// Plays once per session. CSS fades it out on its own; this only adds the
+// counter animation, tap-to-skip, and the session flag.
+(function () {
+  const intro = document.getElementById('intro');
+  if (!intro || intro.classList.contains('intro-off')) return;
+  try { sessionStorage.setItem('wlr_intro_seen', '1'); } catch (e) {}
+
+  document.body.style.overflow = 'hidden';
+  const dismiss = () => {
+    if (intro.classList.contains('intro-off')) return;
+    intro.classList.add('intro-off');
+    document.body.style.overflow = '';
+  };
+
+  // Count up once the stats have faded in
+  setTimeout(() => {
+    animateNum(document.getElementById('introLocs'),   locations.filter(isLocVisible).length, 1100);
+    animateNum(document.getElementById('introYears'),  NOW_YEAR - 1987, 1100);
+    animateNum(document.getElementById('introStates'), 3, 900);
+  }, 950);
+
+  intro.addEventListener('click', dismiss);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') dismiss(); }, { once: true });
+  setTimeout(dismiss, 4000); // after the CSS fade completes
+})();
 
 // ══ INIT ══════════════════════════════════════════════════
 // Load all photos from IndexedDB into memory cache, then render
