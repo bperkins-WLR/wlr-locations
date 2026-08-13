@@ -421,7 +421,7 @@
       position: fixed; inset: 0; z-index: 3000;
       background: linear-gradient(160deg, #0a2755 0%, #0d3268 55%, #071a38 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      animation: introOut 0.7s ease 3.2s forwards;
+      animation: introOut 0.8s ease 4.5s forwards;
     }
     .intro.intro-off { display: none; }
     @keyframes introOut { to { opacity: 0; visibility: hidden; pointer-events: none; } }
@@ -429,7 +429,9 @@
     /* Abstract bubble loop behind the lockup. If it fails to load the gradient still shows. */
     .intro-bg {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      z-index: 0; opacity: 0; animation: introBgIn 1.4s ease 0.15s forwards;
+      z-index: 0; opacity: 0;
+      /* same delay + duration as the logo so bubbles and lockup arrive together */
+      animation: introBgIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
     }
     @keyframes introBgIn { to { opacity: 0.5; } }
     /* Scrim keeps the logo and numbers readable over the moving bubbles */
@@ -843,7 +845,8 @@
 
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
-  <video class="intro-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+  <video class="intro-bg" autoplay muted loop playsinline preload="auto"
+         poster="videos/intro-bubbles-poster.jpg" aria-hidden="true">
     <source src="videos/intro-bubbles.mp4" type="video/mp4">
   </video>
   <div class="intro-inner">
@@ -2229,7 +2232,7 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
 
   intro.addEventListener('click', dismiss);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') dismiss(); }, { once: true });
-  setTimeout(dismiss, 4000); // after the CSS fade completes
+  setTimeout(dismiss, 5400); // after the CSS fade completes
 })();
 
 // ══ INIT ══════════════════════════════════════════════════
