@@ -1901,7 +1901,8 @@ function comingSoonPopupHtml(loc) {
     ? `<div class="mp-approx">◇ Approximate — exact address pending</div>`
     : '';
   return `
-    <div class="mp-img"><img src="images/tase-Coming soon.JPG" alt="${esc(loc.name)} — Coming Soon" onerror="this.parentElement.style.display='none'"></div>
+    <div class="mp-img"><img src="images/loc-${pad(dn)}/01.jpg" alt="${esc(loc.name)} — Coming Soon"
+         onerror="this.onerror=null; this.src='images/tase-Coming soon.JPG';"></div>
     <div class="mp-body">
       <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · <span class="mp-soon">Coming Soon</span></div>
@@ -2346,9 +2347,9 @@ document.addEventListener('keydown', e => {
 });
 
 // ══ WEEKLY SALES & WEATHER (live from the WLR Bonus Tracker) ═
-// ⛔ Weekly Sales & Weather is HIDDEN (confidential figures — off for external demos).
-// Flip to true to bring the 📊 button and dashboard back. Nothing else to change.
-const SHOW_SALES = false;
+// Weekly Sales & Weather visibility. Set to false to hide the 📊 button and the
+// dashboard entirely (no sales data is even fetched) — used for external demos.
+const SHOW_SALES = true;
 
 const SW = { state: null, weather: null, fetchedAt: 0, metric: 'total', weeks: 52 };
 const SW_CAT = {
