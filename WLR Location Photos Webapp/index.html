@@ -1272,6 +1272,25 @@ function hoursBlockHtml(num) {
     </div>`;
 }
 
+// A stalled image (weak signal) used to leave a permanent "no photo" tile until
+// reload. Retry once before giving up.
+function photoOk(el) {
+  el.style.display = '';
+  const ph = el.parentElement && el.parentElement.querySelector('.ph');
+  if (ph) ph.style.display = 'none';
+}
+function photoErr(el) {
+  if (!el.dataset.retried) {
+    el.dataset.retried = '1';
+    const base = el.src.split('?')[0];
+    setTimeout(() => { el.src = base + '?r=1'; }, 800);
+    return;
+  }
+  el.style.display = 'none';
+  const ph = el.parentElement && el.parentElement.querySelector('.ph');
+  if (ph) ph.style.display = 'flex';
+}
+
 function callBtnHtml(num) {
   const H = HOURS[num]; if (!H || !H.p) return '';
   return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">📞 Call</a>`;
@@ -1440,12 +1459,13 @@ function buildCard(baseLoc) {
     const onErr = isLocal ? ''
       : comingSoon
         ? `onerror="this.onerror=null; this.src='images/tase-Coming soon.JPG';"`
-        : `onerror="this.style.display='none'; this.parentElement.querySelector('.ph').style.display='flex';"`;
+        : `onerror="photoErr(this)"`;
     return `
       <div class="photo-slot has-photo" data-num="${loc.num}" data-slot="${s.key}">
         <img src="${src}" alt="${loc.name} ${s.label}"
+             loading="lazy" decoding="async"
              ${onErr}
-             onload="this.parentElement.querySelector('.ph').style.display='none';">
+             onload="photoOk(this)">
         <div class="ph" style="display:none">
           <div class="ph-icon">📷</div>
           <div class="ph-text">${s.label}</div>
