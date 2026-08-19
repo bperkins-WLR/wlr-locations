@@ -398,6 +398,39 @@
     .yb-old  { background: rgba(0,0,0,0.28); color: var(--yellow); }
 
     .loc-info  { flex: 1; min-width: 0; padding: 11px 12px; display: flex; flex-direction: column; justify-content: center; }
+    .loc-title-row { display: flex; align-items: center; gap: var(--s-2); }
+    .loc-title-row .loc-name { flex: 1; min-width: 0; }
+    .loc-share {
+      flex: none; display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; margin: -2px -4px -2px 0;
+      background: none; border: none; border-radius: var(--r-sm);
+      color: rgba(255,255,255,0.4); cursor: pointer; -webkit-appearance: none;
+      transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+    }
+    .loc-share:active { background: rgba(255,255,255,0.14); color: #fff; }
+    @media (hover: hover) { .loc-share:hover { color: #fff; background: rgba(255,255,255,0.10); } }
+
+    /* Landing from a ?loc= link: draw the eye to the right card without
+       yanking anything around. */
+    @keyframes cardFocus {
+      0%   { box-shadow: 0 0 0 0 rgba(250,220,0,0.0); }
+      15%  { box-shadow: 0 0 0 3px rgba(250,220,0,0.85); }
+      100% { box-shadow: 0 0 0 3px rgba(250,220,0,0.0); }
+    }
+    .card.card-focus { animation: cardFocus 2.4s ease-out both; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 76px; transform: translate(-50%, 12px);
+      z-index: 1300; pointer-events: none; opacity: 0;
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      background: rgba(8,20,40,0.97); color: var(--text);
+      border: 1px solid rgba(255,255,255,0.22); border-radius: var(--r-full);
+      padding: var(--s-2) var(--s-4); box-shadow: var(--e-3);
+      font-size: var(--f-sm); font-weight: var(--w-semi);
+      transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
     .loc-name  { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
     .loc-name.has-overflow { cursor: pointer; text-overflow: clip; }
     .loc-name-text { display: inline-block; }
@@ -1649,6 +1682,102 @@ function dirBtn(loc, cls) {
          ` onclick="event.stopPropagation(); openDirMenu(this)">${ic('pin')}Directions</button>`;
 }
 
+// ══ PER-LOCATION LINKS ═════════════════════════════════════
+// Shared links point at l/NN.html — a tiny stub carrying that location's own
+// Open Graph tags, so a texted link previews with its photo and name before
+// bouncing into the app. tools/build-location-pages.py generates them.
+
+function locShareUrl(num) {
+  return new URL(`l/${pad(num)}.html`, document.baseURI).href;
+}
+
+let toastTimer = null;
+function toast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status');
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  // setTimeout rather than rAF: frames do not run in a backgrounded tab, and a
+  // toast that never un-hides is worse than one that appears a frame late.
+  setTimeout(() => t.classList.add('show'), 20);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+async function shareLoc(num) {
+  const base = locations.find(l => l.num === num);
+  if (!base) return;
+  const loc = { ...base, ...getLocInfo(num) };
+  const url = locShareUrl(loc.numOverride || num);
+  const title = `#${pad(loc.numOverride || num)} ${loc.name} — WLR Automotive Group`;
+  // The native sheet is the point on a phone: it puts Messages one tap away.
+  if (navigator.share) {
+    try { await navigator.share({ title, url }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }   // user dismissed
+  }
+  try { await navigator.clipboard.writeText(url); toast('Link copied'); }
+  catch { window.prompt('Copy this link', url); }
+}
+
+/* The card a ?loc= link is pointing at. Held across re-renders because the
+   ratings fetch rebuilds the grid a moment after boot, which would otherwise
+   discard the reveal and highlight. Cleared once things settle. */
+let pendingFocus = null, pendingFocusScrolled = false;
+/* Same idea for a ?loc= pointing at a future site: markers are rebuilt when
+   the basemap finishes loading, which would drop a popup opened before that. */
+let pendingMapFocus = null;
+
+function applyPendingMapFocus() {
+  if (pendingMapFocus == null || !mapInstance) return;
+  const m = mapMarkers.get(pendingMapFocus);
+  if (!m) return;
+  if (!m.getPopup().isOpen()) m.togglePopup();
+  mapInstance.flyTo({ center: ll(pendingMapFocus), zoom: 15, pitch: 55, duration: 1200 });
+  setTimeout(() => { pendingMapFocus = null; }, 4000);
+}
+
+function applyPendingFocus() {
+  if (pendingFocus == null) return;
+  const card = document.querySelector(`.card[data-num="${pendingFocus}"]`);
+  if (!card) return;
+  card.classList.remove('card-anim');           // never leave a linked card invisible
+  card.classList.add('card-focus');
+  if (pendingFocusScrolled) return;             // only steal the scroll once
+  pendingFocusScrolled = true;
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => {
+    pendingFocus = null;
+    card.classList.remove('card-focus');
+  }, 5000);
+}
+
+/* Land on a specific location from ?loc=NN. Open sites live in the grid;
+   future sites only exist on the map, so those open their pin instead. */
+function focusLocFromUrl() {
+  const raw = new URLSearchParams(location.search).get('loc');
+  const num = parseInt(raw, 10);
+  if (!num) return;
+  const loc = locations.find(l => l.num === num || l.numOverride === num);
+  if (!loc) return;
+
+  if (loc.hidden) {
+    showComingSoon = true;
+    pendingMapFocus = loc.num;
+    setView('map');            // updateMapMarkers() applies it, now and on rebuild
+    return;
+  }
+
+  setView('grid');
+  // Clear any filter that would hide the linked card.
+  activeFilter = 'ALL'; searchQuery = ''; activeState = '';
+  const input = document.querySelector('.search-wrap input'); if (input) input.value = '';
+  pendingFocus = loc.num; pendingFocusScrolled = false;
+  render();          // render() applies the pending focus, and so will re-renders
+}
+
 // ══ DIRECTIONS APP PICKER ══════════════════════════════════
 let dirMenuEl = null, dirMenuBtn = null;
 
@@ -1799,7 +1928,12 @@ function buildCard(baseLoc) {
           ${yrsBadge}
         </div>
         <div class="loc-info">
-          <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${esc(loc.name)}</span></div>
+          <div class="loc-title-row">
+            <div class="loc-name"><span class="loc-name-text"><span class="loc-num-prefix">#${pad(displayNum)}</span><span class="loc-pipe">|</span>${esc(loc.name)}</span></div>
+            <button class="loc-share" type="button" title="Share a link to this location"
+                    aria-label="Share a link to ${esc(loc.name)}"
+                    onclick="event.stopPropagation(); shareLoc(${loc.num})">${ic('share')}</button>
+          </div>
           <div class="loc-city">${esc(loc.city)}, ${esc(loc.state)}</div>
           ${ratingHtml(loc.num)}
           ${addrLine}
@@ -1932,6 +2066,8 @@ function render() {
   requestAnimationFrame(measureOverflow);
   // Re-run after fonts load in case Work Sans renders wider than the fallback
   document.fonts.ready.then(measureOverflow);
+
+  applyPendingFocus();
 }
 
 // ══ LIGHTBOX ══════════════════════════════════════════════
@@ -2455,7 +2591,8 @@ function updateMapMarkers() {
   const shown = [...live, ...soon];
   const key = shown.map(l => (l.hidden ? 's' : '') + l.num).join(',');
   mapShown = shown;
-  if (shown.length && key !== lastPinKey && !mapTour.running) fitMapToPins(700);
+  applyPendingMapFocus();
+  if (shown.length && key !== lastPinKey && !mapTour.running && pendingMapFocus == null) fitMapToPins(700);
   lastPinKey = key;
 }
 
@@ -2832,6 +2969,13 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
 (function () {
   const intro = document.getElementById('intro');
   if (!intro || intro.classList.contains('intro-off')) return;
+  // Someone following a ?loc= link came for that location, not the splash.
+  if (new URLSearchParams(location.search).get('loc')) {
+    intro.classList.add('intro-off');
+    const bg = intro.querySelector('.intro-bg');
+    if (bg) { try { bg.pause(); } catch (e) {} bg.remove(); }
+    return;
+  }
   try { sessionStorage.setItem('wlr_intro_seen', '1'); } catch (e) {}
 
   document.body.style.overflow = 'hidden';
@@ -2859,7 +3003,10 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
 
 // ══ INIT ══════════════════════════════════════════════════
 // Load all photos from IndexedDB into memory cache, then render
-dbGetAll().then(all => { photoCache = all; render(); }).catch(() => render());
+dbGetAll()
+  .then(all => { photoCache = all; render(); })
+  .catch(() => render())
+  .finally(() => focusLocFromUrl());     // honour ?loc= once the grid exists
 
 // Live Google ratings (refreshed daily by the GitHub Action → ratings.json)
 fetch('ratings.json', { cache: 'no-store' })
@@ -3138,7 +3285,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-08-19 15:32';
+const BUILD = '2026-08-19 16:20';
 
 (() => {
   const el = document.getElementById('buildStamp');
