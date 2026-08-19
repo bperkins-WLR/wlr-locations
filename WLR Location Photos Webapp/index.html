@@ -429,6 +429,29 @@
       cursor: pointer; -webkit-appearance: none;
       transition: background var(--t-fast) var(--ease);
     }
+    /* Directions app picker. Fixed to the viewport rather than nested in the
+       card or map popup, so the map popup's overflow:hidden cannot clip it. */
+    .dir-menu {
+      position: fixed; z-index: 1200; min-width: 176px;
+      background: #0d1a30; border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--r-md); box-shadow: var(--e-3);
+      padding: var(--s-1); overflow: hidden;
+    }
+    .dir-menu[hidden] { display: none; }
+    .dir-menu a {
+      display: flex; align-items: center; gap: var(--s-2);
+      padding: var(--s-2) var(--s-3); border-radius: var(--r-sm);
+      color: var(--text); text-decoration: none;
+      font-size: var(--f-sm); font-weight: var(--w-semi); white-space: nowrap;
+    }
+    .dir-menu a:active { background: rgba(255,255,255,0.14); }
+    @media (hover: hover) { .dir-menu a:hover { background: rgba(255,255,255,0.10); } }
+    .dir-menu-head {
+      padding: var(--s-1) var(--s-3) var(--s-2);
+      font-size: var(--f-2xs); letter-spacing: 0.6px; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+
     .loc-maps { background: rgba(245,200,0,0.15); color: var(--yellow); border: 1px solid rgba(245,200,0,0.25); }
     .loc-maps:active { background: rgba(245,200,0,0.3); }
     .loc-3d { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
@@ -1585,11 +1608,94 @@ function yearsOpen(ts) {
   return NOW_YEAR - yr;
 }
 
-function mapsUrl(loc) {
-  const q = loc.addr
-    ? `${loc.addr}, ${loc.city}, ${loc.state}`
-    : `${TYPE_FULL[loc.type]} ${loc.name} ${loc.city} ${loc.state}`;
-  return `https://maps.google.com/?q=${encodeURIComponent(q)}`;
+/* What we hand a navigation app. A street address routes to the right
+   driveway far more reliably than a geocoded point, so prefer it; fall back to
+   coordinates, then to a name search for sites with neither. */
+function dirDest(loc) {
+  if (loc.addr) {
+    // Some stored addresses already carry city/state/zip; appending them again
+    // produced "1715 Whiteford Rd, York, PA 17402, York, PA".
+    let a = loc.addr.trim().replace(/[,\s]+$/, '');
+    const has = t => t && new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(a);
+    if (!has(loc.city))  a += `, ${loc.city}`;
+    if (!has(loc.state)) a += `, ${loc.state}`;
+    return a;
+  }
+  const c = COORDS[loc.num];
+  if (c && !loc.approx) return `${c[0]},${c[1]}`;
+  return `${TYPE_FULL[loc.type]} ${loc.name} ${loc.city} ${loc.state}`;
+}
+
+/* Universal links, so each one hands off to the installed app where there is
+   one and falls back to that provider's website where there isn't. */
+function dirUrls(dest) {
+  const q = encodeURIComponent(dest);
+  // Most sites route by geocoded point rather than street address, and Waze
+  // wants those as ll= — passing coordinates through q= makes it search for
+  // them as text instead of navigating there.
+  const isLatLng = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(dest);
+  return {
+    google: `https://www.google.com/maps/dir/?api=1&destination=${q}`,
+    apple:  `https://maps.apple.com/?daddr=${q}&dirflg=d`,
+    waze:   isLatLng
+      ? `https://waze.com/ul?ll=${q}&navigate=yes`
+      : `https://waze.com/ul?q=${q}&navigate=yes`,
+  };
+}
+
+function dirBtn(loc, cls) {
+  return `<button class="${cls}" type="button" aria-haspopup="menu" aria-expanded="false"` +
+         ` data-dest="${esc(dirDest(loc))}"` +
+         ` onclick="event.stopPropagation(); openDirMenu(this)">${ic('pin')}Directions</button>`;
+}
+
+// ══ DIRECTIONS APP PICKER ══════════════════════════════════
+let dirMenuEl = null, dirMenuBtn = null;
+
+function closeDirMenu() {
+  if (!dirMenuEl) return;
+  dirMenuEl.hidden = true;
+  if (dirMenuBtn) dirMenuBtn.setAttribute('aria-expanded', 'false');
+  dirMenuBtn = null;
+}
+
+function openDirMenu(btn) {
+  if (!dirMenuEl) {
+    dirMenuEl = document.createElement('div');
+    dirMenuEl.className = 'dir-menu';
+    dirMenuEl.setAttribute('role', 'menu');
+    dirMenuEl.hidden = true;
+    document.body.appendChild(dirMenuEl);
+    // Any of these should dismiss it rather than leave it floating.
+    document.addEventListener('pointerdown', e => {
+      if (dirMenuEl && !dirMenuEl.hidden && !e.target.closest('.dir-menu') && e.target !== dirMenuBtn) closeDirMenu();
+    }, true);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDirMenu(); });
+    addEventListener('scroll', closeDirMenu, true);
+    addEventListener('resize', closeDirMenu);
+  }
+  if (dirMenuBtn === btn && !dirMenuEl.hidden) return closeDirMenu();   // tapping again closes
+
+  const u = dirUrls(btn.dataset.dest || '');
+  dirMenuEl.innerHTML =
+    `<div class="dir-menu-head">Open directions in</div>` +
+    `<a role="menuitem" href="${u.google}" target="_blank" rel="noopener">${ic('pin')}Google Maps</a>` +
+    `<a role="menuitem" href="${u.apple}"  target="_blank" rel="noopener">${ic('map')}Apple Maps</a>` +
+    `<a role="menuitem" href="${u.waze}"   target="_blank" rel="noopener">${ic('car')}Waze</a>`;
+  dirMenuEl.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDirMenu));
+
+  dirMenuEl.hidden = false;
+  dirMenuBtn = btn;
+  btn.setAttribute('aria-expanded', 'true');
+
+  // Anchor under the button, flipping up and clamping so it always stays on screen.
+  const b = btn.getBoundingClientRect(), m = dirMenuEl.getBoundingClientRect();
+  const gap = 6;
+  let top = b.bottom + gap;
+  if (top + m.height > innerHeight - 8) top = Math.max(8, b.top - m.height - gap);
+  let left = Math.min(Math.max(8, b.left), innerWidth - m.width - 8);
+  dirMenuEl.style.top = top + 'px';
+  dirMenuEl.style.left = left + 'px';
 }
 
 // ══ HERO COUNTER ANIMATION ═════════════════════════════════
@@ -1635,7 +1741,7 @@ function buildCard(baseLoc) {
     ? `<span class="loc-opened">Est. ${loc.opened}</span>`
     : `<span class="loc-opened" style="color:var(--tase-c)">Coming Soon${loc.target ? ` · Target ${esc(loc.target)}` : ''}</span>`;
 
-  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">${ic('pin')}Directions</a>`;
+  const mapsBtn  = dirBtn(loc, 'loc-maps');
   const callBtn  = callBtnHtml(loc.num);
   const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">${ic('cube')}3D Tour</a>` : '';
   const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">${ic('camera')}Live Cam</a>` : '';
@@ -2254,7 +2360,7 @@ function pinPopupHtml(loc) {
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · ${est}</div>
       ${statusLine}
       <div class="mp-actions">
-        <a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">${ic('pin')}Directions</a>
+        ${dirBtn(loc, 'mp-dir')}
         <button class="mp-view" onclick="showCardFromMap(${loc.num})">Photos ${ic('arrow-right')}</button>
       </div>
     </div>`;
@@ -2273,7 +2379,7 @@ function matchesComingSoon(baseLoc) {
 function comingSoonPopupHtml(loc) {
   const dn  = loc.numOverride || loc.num;
   const dir = loc.addr
-    ? `<div class="mp-actions"><a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">${ic('pin')}Directions</a></div>`
+    ? `<div class="mp-actions">${dirBtn(loc, 'mp-dir')}</div>`
     : '';
   const approxNote = loc.approx
     ? `<div class="mp-approx">${ic('diamond')}Approximate — exact address pending</div>`
@@ -3032,7 +3138,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-08-19 15:06';
+const BUILD = '2026-08-19 15:22';
 
 (() => {
   const el = document.getElementById('buildStamp');
