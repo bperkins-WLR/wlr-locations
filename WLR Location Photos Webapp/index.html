@@ -29,8 +29,50 @@
       --tas-c:  #0C4D8F;
       --tar-c:  #1a1a1a;
       --tase-c: #0C4D8F;
+
+      /* ── Design tokens ──────────────────────────────────────────
+         One scale for each dimension. Component rules should pull from
+         these rather than inventing one-off pixel values.            */
+      --s-1: 4px;   --s-2: 8px;   --s-3: 12px;  --s-4: 16px;
+      --s-5: 24px;  --s-6: 32px;  --s-7: 48px;
+
+      --r-sm: 6px;  --r-md: 10px; --r-lg: 16px; --r-full: 999px;
+
+      --f-2xs: 10px; --f-xs: 11px; --f-sm: 13px; --f-md: 15px;
+      --f-lg: 18px;  --f-xl: 24px; --f-2xl: 32px; --f-3xl: 40px;
+
+      --w-normal: 400; --w-med: 500; --w-semi: 600; --w-bold: 700; --w-black: 900;
+
+      --e-1: 0 1px 2px rgba(0,0,0,.30);
+      --e-2: 0 4px 14px rgba(0,0,0,.38);
+      --e-3: 0 12px 34px rgba(0,0,0,.48);
+
+      --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms;
+      --ease: cubic-bezier(.2,.7,.3,1);
+
+      --ico-size: 1.15em; --ico-stroke: 1.9;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    /* ══ ICONS ═══════════════════════════════════════════
+       Single stroked set drawn from the #i-* sprite below. Icons inherit
+       currentColor and sit on the text baseline, so a button only ever has
+       to set its own colour and font-size. */
+    .ico {
+      width: var(--ico-size); height: var(--ico-size); flex: none;
+      fill: none; stroke: currentColor; stroke-width: var(--ico-stroke);
+      stroke-linecap: round; stroke-linejoin: round;
+      vertical-align: -0.18em; overflow: visible;
+    }
+    .ico--fill { fill: currentColor; stroke: none; }
+    .soon-dot { width: 9px; height: 9px; border-radius: 50%; background: #e33; display: inline-block; flex: none; margin-right: var(--s-2); vertical-align: 0.02em; }
+    .loc-addr, .loc-phone, .mp-approx, .mp-target, .sw-leg, .inc-title, .sw-title,
+    .no-results-icon, .hrs-caret, .rate-go, .rate-star, .ph-icon,
+    .mp-dir, .mp-view, .loc-status { display: inline-flex; align-items: center; gap: var(--s-1); }
+    .sw-wx-icon, .inc-poster, .inc-play { display: flex; align-items: center; justify-content: center; }
+    .sw-wow { display: inline-flex; align-items: center; gap: var(--s-1); }
+    /* Numerals must not reflow as values change */
+    .hero-stat-num, .rate-num, .sw-hero-val, .tl-stat-num { font-variant-numeric: tabular-nums; }
     body {
       font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--deep);
@@ -65,15 +107,20 @@
     .h-title span { color: var(--yellow); }
     .h-sub      { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
     .slideshow-btn {
-      flex-shrink: 0; padding: 7px 12px; border-radius: 10px;
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: var(--s-2) var(--s-3); border-radius: var(--r-md);
       background: var(--yellow); border: none; color: var(--deep);
-      font-size: 12px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px;
+      font-size: 12px; font-weight: var(--w-bold); cursor: pointer; letter-spacing: 0.3px;
+      transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
     }
     .slideshow-btn:active { opacity: 0.8; }
     .header-btn {
-      flex-shrink: 0; width: 34px; height: 32px; border-radius: 9px;
+      flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 32px; border-radius: var(--r-md);
       background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-      font-size: 15px; cursor: pointer; margin-right: 8px; line-height: 1;
+      color: var(--text); font-size: var(--f-md); cursor: pointer;
+      margin-right: var(--s-2); line-height: 1;
+      transition: background var(--t-fast) var(--ease);
     }
     .header-btn:active { background: rgba(255,255,255,0.22); }
 
@@ -142,13 +189,13 @@
     }
     .search-wrap input::placeholder { color: rgba(255,255,255,0.45); }
     .search-wrap input:focus { background: rgba(255,255,255,0.18); border-color: var(--yellow); }
-    .search-wrap .icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+    .search-wrap .icon { position: absolute; left: var(--s-3); top: 50%; transform: translateY(-50%); display: flex; font-size: var(--f-md); color: rgba(255,255,255,0.45); pointer-events: none; }
     .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; display: none; padding: 2px; }
 
     .filter-row { display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
     .filter-row::-webkit-scrollbar { display: none; }
     .filter-btn {
-      flex-shrink: 0; padding: 5px 12px; border-radius: 999px;
+      flex-shrink: 0; padding: var(--s-1) var(--s-3); border-radius: var(--r-full);
       border: 1.5px solid rgba(255,255,255,0.15); background: #000;
       color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700;
       cursor: pointer; transition: all 0.18s; white-space: nowrap; -webkit-appearance: none;
@@ -162,7 +209,7 @@
 
     .sort-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; row-gap: 7px; }
     .sort-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
-    .sort-btn { padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: #000; color: rgba(255,255,255,0.6); font-size: 11px; cursor: pointer; -webkit-appearance: none; transition: all 0.15s; }
+    .sort-btn { display: inline-flex; align-items: center; gap: var(--s-1); padding: var(--s-1) var(--s-3); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.15); background: #000; color: rgba(255,255,255,0.6); font-size: var(--f-xs); cursor: pointer; -webkit-appearance: none; transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
     .sort-btn.active { background: #000; color: #fff; border-color: rgba(255,255,255,0.5); }
     .state-select { display: none; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: #000; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; -webkit-appearance: none; outline: none; }
     .state-select.show { display: block; }
@@ -194,9 +241,11 @@
     .view-toggle { display: flex; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
     @media(min-width: 560px) { .view-toggle { margin-left: auto; } }
     .view-btn {
-      padding: 3px 10px; border: none; background: #000;
-      color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 700;
-      cursor: pointer; -webkit-appearance: none; transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: var(--s-1);
+      padding: var(--s-1) var(--s-3); border: none; background: #000;
+      color: rgba(255,255,255,0.6); font-size: var(--f-xs); font-weight: var(--w-bold);
+      cursor: pointer; -webkit-appearance: none;
+      transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
     }
     .view-btn + .view-btn { border-left: 1px solid rgba(255,255,255,0.25); }
     .view-btn.active { background: var(--yellow); color: var(--deep); }
@@ -322,15 +371,26 @@
     .loc-phone { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
     .loc-notes { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; font-style: italic; line-height: 1.4; }
     .loc-status { font-size: 10px; font-weight: 700; }
-    .loc-meta  { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .loc-meta  { display: flex; align-items: center; gap: var(--s-1) var(--s-2); margin-top: var(--s-1); flex-wrap: wrap; }
     .loc-opened { display: inline-flex; align-items: center; gap: 3px; padding: 0; font-size: 10px; color: rgba(255,255,255,0.55); }
-    .loc-maps   { display: inline-flex; align-items: center; gap: 3px; background: rgba(245,200,0,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: var(--yellow); text-decoration: none; border: 1px solid rgba(245,200,0,0.25); }
+    /* Card action pills — one shape from the token scale; the variant
+       classes below differ only in colour. */
+    .loc-maps, .loc-call, .loc-3d, .loc-cam, .loc-team {
+      --ico-size: 1.05em;
+      display: inline-flex; align-items: center; gap: var(--s-1);
+      padding: 3px var(--s-2); border-radius: var(--r-sm);
+      font-size: var(--f-2xs); font-weight: var(--w-semi); line-height: 1.6;
+      font-family: inherit; white-space: nowrap; text-decoration: none;
+      cursor: pointer; -webkit-appearance: none;
+      transition: background var(--t-fast) var(--ease);
+    }
+    .loc-maps { background: rgba(245,200,0,0.15); color: var(--yellow); border: 1px solid rgba(245,200,0,0.25); }
     .loc-maps:active { background: rgba(245,200,0,0.3); }
-    .loc-3d     { display: inline-flex; align-items: center; gap: 3px; background: rgba(167,139,250,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #c4b5fd; text-decoration: none; border: 1px solid rgba(167,139,250,0.3); }
+    .loc-3d { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
     .loc-3d:active { background: rgba(167,139,250,0.3); }
-    .loc-cam    { display: inline-flex; align-items: center; gap: 3px; background: rgba(34,197,94,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #4ade80; text-decoration: none; border: 1px solid rgba(34,197,94,0.3); }
+    .loc-cam { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
     .loc-cam:active { background: rgba(34,197,94,0.3); }
-    .loc-call   { display: inline-flex; align-items: center; gap: 3px; background: rgba(34,197,94,0.15); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: #4ade80; text-decoration: none; border: 1px solid rgba(34,197,94,0.3); }
+    .loc-call { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
     .loc-call:active { background: rgba(34,197,94,0.3); }
     .type-full { font-size: 9px; color: rgba(255,255,255,0.45); text-align: right; max-width: 80px; line-height: 1.2; }
 
@@ -377,7 +437,7 @@
     .timeline-wrap.show { display: block; }
     @media(min-width: 1500px) { .timeline-wrap { max-width: 1280px; } }
     .tl-metric { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-    .tlm-btn { padding: 7px 14px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12.5px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; transition: all 0.15s; white-space: nowrap; }
+    .tlm-btn { display: inline-flex; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-4); border-radius: var(--r-full); border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12.5px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; transition: all 0.15s; white-space: nowrap; }
     .tlm-btn.active { background: var(--yellow); color: var(--deep); border-color: transparent; }
     .tl-head { text-align: center; margin-bottom: 12px; }
     .tl-head h2 { font-size: 21px; font-weight: 900; color: #fff; letter-spacing: 0.3px; }
@@ -479,6 +539,48 @@
       padding: 16px;
     }
     .lightbox.open { display: flex; animation: lbIn 0.18s ease; }
+
+    /* ══ VIEW TRANSITIONS ════════════════════════════════
+       The tapped card photo morphs into (and back out of) the lightbox
+       rather than hard-cutting. Progressive enhancement: browsers without
+       the API keep the old lbIn fade and behave exactly as before.
+
+       #lightboxImg holds the shared name permanently — it only participates
+       while the lightbox is rendered, so it can never collide with the
+       thumbnail, which is tagged only for the duration of a transition. */
+    #lightboxImg { view-transition-name: lb-photo; }
+
+    @supports (view-transition-name: none) {
+      /* The overlay's own entrance would be captured mid-flight by the
+         transition snapshot, which reads as a flash. The morph plus the
+         root cross-fade already cover the entrance. */
+      .lightbox.open { animation: none; }
+
+      ::view-transition-group(lb-photo) {
+        animation-duration: var(--t-slow);
+        animation-timing-function: var(--ease);
+      }
+      /* Both snapshots fill the morphing box, so the crop change
+         (thumbnails cover-crop off-centre, lightbox contains the whole
+         frame) cross-fades instead of squashing. */
+      ::view-transition-old(lb-photo),
+      ::view-transition-new(lb-photo) {
+        width: 100%; height: 100%; object-fit: cover;
+        animation-duration: var(--t-slow);
+        animation-timing-function: var(--ease);
+      }
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: var(--t-base);
+        animation-timing-function: var(--ease);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-group(*),
+      ::view-transition-old(*),
+      ::view-transition-new(*) { animation: none !important; }
+    }
     @keyframes lbIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
 
     .lightbox img {
@@ -610,7 +712,7 @@
     .scroll-top.show { display: flex; }
 
     /* ══ TEAM BUTTON ══════════════════════════════════════ */
-    .loc-team { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; -webkit-appearance: none; }
+    .loc-team { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); }
     .loc-team:active { background: rgba(255,255,255,0.22); }
 
     /* ══ TEAM MODAL ════════════════════════════════════════ */
@@ -843,6 +945,52 @@
 </head>
 <body>
 
+<!-- ══ ICON SPRITE ═════════════════════════════════════
+     Every icon in the UI resolves from here via <use href="#i-name">.
+     Stroked, 24x24, inheriting currentColor. -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M6.5 21v-8"/><path d="M12 21V4.5"/><path d="M17.5 21v-11"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 11l6-3.6v9.2l-6-3.6z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8l12 7.2-12 7.2z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M20.5 20.5l-4.9-4.9"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.72 5.66 6.18.88-4.48 4.3 1.07 6.14L12 17.3l-5.49 2.88 1.07-6.14L3.1 9.74l6.18-.88z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.2" y="3.2" width="7.4" height="7.4" rx="1.8"/><rect x="13.4" y="3.2" width="7.4" height="7.4" rx="1.8"/><rect x="3.2" y="13.4" width="7.4" height="7.4" rx="1.8"/><rect x="13.4" y="13.4" width="7.4" height="7.4" rx="1.8"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.2L3.4 6.6v13.2L9 17.4l6 2.4 5.6-2.4V4.2L15 6.6z"/><path d="M9 4.2v13.2M15 6.6v13.2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3.2 17.2l6-6 4 4 7.4-7.4"/><path d="M14.4 7.8h6.2V14"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.4 3.2h3.1l1.6 4.4-2.1 1.5a13.4 13.4 0 0 0 5.9 5.9l1.5-2.1 4.4 1.6v3.1a2 2 0 0 1-2.2 2A17.6 17.6 0 0 1 4.4 5.4a2 2 0 0 1 2-2.2z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.2s6.8-6.3 6.8-11.1a6.8 6.8 0 1 0-13.6 0C5.2 14.9 12 21.2 12 21.2z"/><circle cx="12" cy="9.9" r="2.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M2.8 8.6h3.4L7.6 6.2h8.8l1.4 2.4h3.4a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H2.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.8" r="3.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4.6M5.8 10.8L12 4.6l6.2 6.2"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4v15.4M18.2 13.2L12 19.4l-6.2-6.2"/></symbol>
+    <symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M7.2 16.8L16.8 7.2M8.4 7.2h8.4v8.4"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4.2 12h15.2M13.2 5.8l6.2 6.2-6.2 6.2"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6.2 9.2L12 15l5.8-5.8"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.3M12 19.1v2.3M21.4 12h-2.3M4.9 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"/></symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 2.4v19.2"/><path d="M16.6 6.6H10a3.1 3.1 0 0 0 0 6.2h4a3.1 3.1 0 0 1 0 6.2H6.8"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M3.2 16.4v-3.1l1.9-4.4a2 2 0 0 1 1.8-1.2h10.2a2 2 0 0 1 1.8 1.2l1.9 4.4v3.1"/><path d="M3.2 16.4h17.6"/><path d="M5.4 13.3h13.2"/><circle cx="7.4" cy="18" r="1.7"/><circle cx="16.6" cy="18" r="1.7"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.8V12l3.4 2.1"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.6L21.2 19.4H2.8z"/><path d="M12 9.8v4.1"/><path d="M12 16.7v.1"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M5.9 5.9l12.2 12.2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/></symbol>
+    <symbol id="i-caret-up" viewBox="0 0 24 24"><path d="M12 8.2l5.4 8.4H6.6z"/></symbol>
+    <symbol id="i-caret-down" viewBox="0 0 24 24"><path d="M12 16.6L6.6 8.2h10.8z"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 6.8L4.4 11.4 9 16"/><path d="M4.4 11.4h10.4a4.6 4.6 0 0 1 0 9.2h-2.2"/></symbol>
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 2.6l8.4 4.7v9.4L12 21.4l-8.4-4.7V7.3z"/><path d="M3.6 7.3L12 12l8.4-4.7M12 12v9.4"/></symbol>
+    <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 3.4L20.6 12 12 20.6 3.4 12z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M21.6 12h-2.2M4.6 12H2.4M18.8 5.2l-1.5 1.5M6.7 17.3l-1.5 1.5M18.8 18.8l-1.5-1.5M6.7 6.7L5.2 5.2"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7.4 15.6a4.4 4.4 0 0 1 .5-8.8 6 6 0 0 1 11.2 2.1 3.5 3.5 0 0 1-.7 6.7z"/><path d="M8.6 18.4l-1 2.6M12.5 18.4l-1 2.6M16.4 18.4l-1 2.6"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2.8v18.4M4.2 7.4l15.6 9.2M19.8 7.4L4.2 16.6"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.4 18a4.4 4.4 0 0 1 .5-8.8 6 6 0 0 1 11.2 2.1 3.5 3.5 0 0 1-.7 6.7z"/></symbol>
+  </defs>
+</svg>
+<script>
+  // Icon helper for markup built in template literals.
+  const ic = (n, c = '') => `<svg class="ico ${c}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
+</script>
+
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
   <video class="intro-bg" autoplay muted loop playsinline preload="auto"
@@ -878,9 +1026,9 @@
       <div class="h-sub">Location Gallery</div>
     </div>
   </button>
-  <button class="header-btn" id="swOpenBtn" title="Weekly sales & weather">📊</button>
-  <button class="header-btn" id="incOpenBtn" title="Videos">🎥</button>
-  <button class="slideshow-btn" id="ssStartBtn">▶ Slideshow</button>
+  <button class="header-btn" id="swOpenBtn" title="Weekly sales &amp; weather"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></button>
+  <button class="header-btn" id="incOpenBtn" title="Videos"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg></button>
+  <button class="slideshow-btn" id="ssStartBtn"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-play"></use></svg>Slideshow</button>
 </header>
 
 <!-- ══ HERO SECTION ════════════════════════════════════ -->
@@ -914,16 +1062,16 @@
 
   <div class="hero-note">
     Location numbers reflect WLR's history — some numbers represent locations that have been converted or closed over the years.
-    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations ↓</a>
+    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations <svg class="ico" aria-hidden="true"><use href="#i-arrow-down"></use></svg></a>
   </div>
 </div>
 
 <!-- ══ CONTROLS ════════════════════════════════════════ -->
 <div class="controls">
   <div class="search-wrap">
-    <span class="icon">🔍</span>
+    <span class="icon"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg></span>
     <input type="search" id="search" placeholder="Search by name, city, or number…" autocomplete="off" autocorrect="off">
-    <button class="search-clear" id="searchClear" title="Clear">✕</button>
+    <button class="search-clear" id="searchClear" title="Clear"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="filter-row" id="filterRow">
     <button class="filter-btn active" data-type="ALL">All</button>
@@ -937,7 +1085,7 @@
     <button class="sort-btn active" data-sort="num">By #</button>
     <button class="sort-btn" data-sort="date">By Date</button>
     <button class="sort-btn" data-sort="state">By State</button>
-    <button class="sort-btn" data-sort="rating">★ Top Rated</button>
+    <button class="sort-btn" data-sort="rating"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-star"></use></svg>Top Rated</button>
     <select class="state-select" id="stateSelect">
       <option value="">All States</option>
       <option value="MD">MD</option>
@@ -945,9 +1093,9 @@
       <option value="WV">WV</option>
     </select>
     <div class="view-toggle" id="viewToggle">
-      <button class="view-btn active" data-view="grid" title="Grid view">▦ Grid</button>
-      <button class="view-btn" data-view="map" title="Map view">🗺️ Map</button>
-      <button class="view-btn" data-view="timeline" title="Growth timeline">📈 Growth</button>
+      <button class="view-btn active" data-view="grid" title="Grid view"><svg class="ico" aria-hidden="true"><use href="#i-grid"></use></svg>Grid</button>
+      <button class="view-btn" data-view="map" title="Map view"><svg class="ico" aria-hidden="true"><use href="#i-map"></use></svg>Map</button>
+      <button class="view-btn" data-view="timeline" title="Growth timeline"><svg class="ico" aria-hidden="true"><use href="#i-trend"></use></svg>Growth</button>
     </div>
   </div>
 </div>
@@ -957,13 +1105,13 @@
 <div class="timeline-wrap" id="timelineWrap"></div>
 <div class="grid" id="grid"></div>
 <div class="no-results" id="noResults">
-  <div class="no-results-icon">🔍</div>
+  <div class="no-results-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg></div>
   <p>No locations found.</p>
 </div>
 
 <!-- ══ LIGHTBOX ════════════════════════════════════════ -->
 <div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <button class="lightbox-close" id="lightboxClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   <button class="lb-arrow" id="lbPrev">‹</button>
   <img id="lightboxImg" src="" alt="">
   <div class="lb-dots" id="lbDots"></div>
@@ -978,7 +1126,7 @@
     <img id="ssPhoto" src="" alt="">
     <div class="ss-info" id="ssInfo"></div>
   </div>
-  <button class="ss-close-btn" id="ssClose">✕</button>
+  <button class="ss-close-btn" id="ssClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   <div class="ss-controls">
     <button class="ss-btn" id="ssPrev">‹</button>
     <div style="flex:1;text-align:center">
@@ -1000,13 +1148,13 @@
       <div class="team-title" id="teamPanelTitle"></div>
       <div class="team-subtitle" id="teamPanelSubtitle"></div>
     </div>
-    <button class="team-close" id="teamClose">✕</button>
+    <button class="team-close" id="teamClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="team-body" id="teamPanelBody"></div>
 </div>
 
 <!-- ══ SCROLL TOP / FOOTER ══════════════════════════════ -->
-<button class="scroll-top" id="scrollTop">↑</button>
+<button class="scroll-top" id="scrollTop"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"></use></svg></button>
 
 <footer>
   <div class="legend">
@@ -1015,7 +1163,7 @@
     <div class="legend-item"><div class="legend-dot" style="background:var(--tar-c)"></div>TAR</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--tase-c)"></div>TASe</div>
     <div class="legend-item" style="margin-left:8px">
-      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none">⚙️</a>
+      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none"><svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg></a>
     </div>
   </div>
 </footer>
@@ -1023,8 +1171,8 @@
 <!-- ══ VIDEOS ═══════════════════════════════════════════════ -->
 <div class="inc-overlay" id="incOverlay">
   <div class="inc-head">
-    <div class="inc-title">🎥 Videos</div>
-    <button class="inc-close" id="incClose" title="Close">✕</button>
+    <div class="inc-title"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg>Videos</div>
+    <button class="inc-close" id="incClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="inc-grid" id="incGrid"></div>
   <div class="inc-empty" id="incEmpty">No videos yet.</div>
@@ -1032,7 +1180,7 @@
 <div class="inc-player" id="incPlayer">
   <div class="inc-player-bar">
     <span class="inc-player-title" id="incPlayerTitle"></span>
-    <button class="inc-player-close" id="incPlayerClose" title="Close">✕</button>
+    <button class="inc-player-close" id="incPlayerClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="inc-player-body" id="incPlayerBody"></div>
 </div>
@@ -1040,8 +1188,8 @@
 <!-- ══ WEEKLY SALES & WEATHER ═══════════════════════════════ -->
 <div class="sw-overlay" id="swOverlay">
   <div class="sw-head">
-    <div class="sw-title">📊 Weekly Sales <span>&amp; Weather</span></div>
-    <button class="inc-close" id="swClose" title="Close">✕</button>
+    <div class="sw-title"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg>Weekly Sales <span>&amp; Weather</span></div>
+    <button class="inc-close" id="swClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="sw-scroll" id="swBody"><div class="sw-loading">Loading sales &amp; weather…</div></div>
 </div>
@@ -1266,7 +1414,7 @@ function hoursBlockHtml(num) {
         <span class="hrs-dot ${st.open ? 'is-open' : 'is-closed'}"></span>
         <span class="hrs-state ${st.open ? 'is-open' : 'is-closed'}">${st.open ? 'Open' : 'Closed'}</span>
         <span class="hrs-detail">${st.detail}</span>
-        <span class="hrs-caret">▾</span>
+        <span class="hrs-caret">${ic('chevron-down')}</span>
       </button>
       <div class="hrs-week">${week}</div>
     </div>`;
@@ -1293,7 +1441,7 @@ function photoErr(el) {
 
 function callBtnHtml(num) {
   const H = HOURS[num]; if (!H || !H.p) return '';
-  return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">📞 Call</a>`;
+  return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">${ic('phone')}Call</a>`;
 }
 
 // Live Google rating chip — links to the location's Google Maps page via its
@@ -1304,10 +1452,10 @@ function ratingHtml(num, compact) {
   const url = R.id
     ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(R.id)}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(R.name || ('WLR location ' + num))}`;
-  const go = compact ? '' : `<span class="rate-go">↗</span>`;
+  const go = compact ? '' : `<span class="rate-go">${ic('arrow-ur')}</span>`;
   return `<a class="loc-rating${compact ? ' compact' : ''}" href="${url}" target="_blank" rel="noopener"
     onclick="event.stopPropagation()" title="${R.r}★ from ${(R.n||0).toLocaleString()} Google reviews — open in Google Maps">
-    <span class="rate-star">★</span><span class="rate-num">${R.r.toFixed(1)}</span>${count}${go}</a>`;
+    <span class="rate-star">${ic('star','ico--fill')}</span><span class="rate-num">${R.r.toFixed(1)}</span>${count}${go}</a>`;
 }
 
 // ── ANIMATION HELPERS ──────────────────────────────────────
@@ -1422,24 +1570,24 @@ function buildCard(baseLoc) {
       : `<span class="years-badge yb-old">${yrs} yrs</span>`;
 
   const statusMap = {
-    'Coming Soon':         { icon:'🔜', color:'var(--tase-c)' },
-    'Temporarily Closed':  { icon:'🚧', color:'#fca044' },
-    'Permanently Closed':  { icon:'🚫', color:'rgba(255,80,80,0.85)' },
+    'Coming Soon':         { icon:'clock', color:'var(--tase-c)' },
+    'Temporarily Closed':  { icon:'alert', color:'#fca044' },
+    'Permanently Closed':  { icon:'ban',   color:'rgba(255,80,80,0.85)' },
   };
   const statusInfo = statusMap[loc.status] || null;
   const statusBadge = statusInfo
-    ? `<span class="loc-status" style="color:${statusInfo.color}">${statusInfo.icon} ${loc.status}</span>`
+    ? `<span class="loc-status" style="color:${statusInfo.color}">${ic(statusInfo.icon)}${loc.status}</span>`
     : '';
 
   const opened = loc.opened
     ? `<span class="loc-opened">Est. ${loc.opened}</span>`
     : `<span class="loc-opened" style="color:var(--tase-c)">Coming Soon${loc.target ? ` · Target ${esc(loc.target)}` : ''}</span>`;
 
-  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">📍 Directions</a>`;
+  const mapsBtn  = `<a class="loc-maps" href="${mapsUrl(loc)}" target="_blank" onclick="event.stopPropagation()">${ic('pin')}Directions</a>`;
   const callBtn  = callBtnHtml(loc.num);
-  const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">3D Tour</a>` : '';
-  const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">📷 Live Cam</a>` : '';
-  const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">👤 Team</button>` : '';
+  const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">${ic('cube')}3D Tour</a>` : '';
+  const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">${ic('camera')}Live Cam</a>` : '';
+  const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">${ic('user')}Team</button>` : '';
   const hoursHtml = hoursBlockHtml(loc.num);
 
   const slots = [
@@ -1467,7 +1615,7 @@ function buildCard(baseLoc) {
              ${onErr}
              onload="photoOk(this)">
         <div class="ph" style="display:none">
-          <div class="ph-icon">📷</div>
+          <div class="ph-icon">${ic('camera')}</div>
           <div class="ph-text">${s.label}</div>
         </div>
         <div class="photo-label">${s.label}</div>
@@ -1475,8 +1623,8 @@ function buildCard(baseLoc) {
       </div>`;
   }).join('');
 
-  const addrLine  = loc.addr  ? `<div class="loc-addr">📍 ${esc(loc.addr)}</div>` : '';
-  const phoneLine = loc.phone ? `<div class="loc-phone">📞 ${esc(loc.phone)}</div>` : '';
+  const addrLine  = loc.addr  ? `<div class="loc-addr">${ic('pin')}${esc(loc.addr)}</div>` : '';
+  const phoneLine = loc.phone ? `<div class="loc-phone">${ic('phone')}${esc(loc.phone)}</div>` : '';
   const notesLine = loc.notes ? `<div class="loc-notes">${esc(loc.notes)}</div>` : '';
 
   return `
@@ -1497,7 +1645,7 @@ function buildCard(baseLoc) {
           ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
           ${opened}
           ${hoursHtml}
-          <div class="loc-meta" style="flex-wrap:nowrap">${mapsBtn}${callBtn}${tourBtn}${camBtn}${teamBtn}</div>
+          <div class="loc-meta">${mapsBtn}${callBtn}${tourBtn}${camBtn}${teamBtn}</div>
           ${notesLine}
         </div>
       </div>
@@ -1563,7 +1711,7 @@ function render() {
       if (ph && ph.style.display !== 'none') return;
       const num  = parseInt(slot.dataset.num);
       const slot2 = slot.dataset.slot;
-      openLightboxForLoc(num, slot2);
+      openLightboxForLoc(num, slot2, img);
     });
   });
 
@@ -1604,9 +1752,51 @@ function render() {
 }
 
 // ══ LIGHTBOX ══════════════════════════════════════════════
-let lbPhotos = [], lbIdx = 0;
+let lbPhotos = [], lbIdx = 0, lbNum = null;
+const LB_SLOTS = ['ext','int'];
 
-function openLightboxForLoc(num, startSlot) {
+const vtSupported = () =>
+  typeof document.startViewTransition === 'function' &&
+  !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Find the grid thumbnail that corresponds to a lightbox slide, so the photo
+   can morph back to the exact tile it came from. Returns null when the grid
+   isn't showing that tile (different view, filtered out, re-rendered). */
+function lbThumbFor(num, slotKey) {
+  const slot = document.querySelector(
+    `.photo-slot[data-num="${num}"][data-slot="${slotKey}"]`);
+  const img  = slot && slot.querySelector('img');
+  return (img && img.offsetParent !== null) ? img : null;
+}
+
+/* Morph OUT of a thumbnail: the tile carries the shared name for the "before"
+   snapshot, then hands it to #lightboxImg for the "after" snapshot. Exactly
+   one element may hold the name in each state, hence the handover inside the
+   callback. */
+function lbMorphFrom(thumb, update) {
+  if (!vtSupported() || !thumb) { update(); return; }
+  thumb.style.viewTransitionName = 'lb-photo';
+  const clear = () => { thumb.style.viewTransitionName = ''; };
+  let t;
+  try {
+    t = document.startViewTransition(() => { clear(); update(); });
+  } catch (e) { clear(); update(); return; }
+  t.finished.catch(() => {}).finally(clear);
+}
+
+/* Morph BACK into a thumbnail: #lightboxImg owns the "before" snapshot, the
+   tile takes the name for the "after" one. */
+function lbMorphTo(thumb, update) {
+  if (!vtSupported() || !thumb) { update(); return; }
+  const clear = () => { thumb.style.viewTransitionName = ''; };
+  let t;
+  try {
+    t = document.startViewTransition(() => { update(); thumb.style.viewTransitionName = 'lb-photo'; });
+  } catch (e) { clear(); update(); return; }
+  t.finished.catch(() => {}).finally(clear);
+}
+
+function openLightboxForLoc(num, startSlot, sourceImg) {
   const baseLoc = locations.find(l => l.num === num);
   if (!baseLoc) return;
   const loc = { ...baseLoc, ...getLocInfo(num) };
@@ -1623,20 +1813,26 @@ function openLightboxForLoc(num, startSlot) {
   // Filter to only photos that are actually loaded (either local or file that might exist)
   // We open with whatever slot was clicked
   lbPhotos = photos;
+  lbNum    = num;
   lbIdx    = slots.indexOf(startSlot);
   if (lbIdx < 0) lbIdx = 0;
-  showLightboxSlide();
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
+
+  const thumb = sourceImg || lbThumbFor(num, LB_SLOTS[lbIdx]);
+  lbMorphFrom(thumb, () => {
+    // No slide-in on open — the morph is the entrance.
+    showLightboxSlide(false);
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
 }
 
-function showLightboxSlide() {
+function showLightboxSlide(animate = true) {
   const p   = lbPhotos[lbIdx];
   const img = document.getElementById('lightboxImg');
   img.classList.remove('slide-in');
   void img.offsetWidth; // restart animation
   img.src = p.src;
-  img.classList.add('slide-in');
+  if (animate) img.classList.add('slide-in');
   img.onload  = () => { img.style.opacity = '1'; };
   img.onerror = () => { img.style.opacity = '0.3'; };
   document.getElementById('lightboxCaption').textContent = p.caption;
@@ -1653,9 +1849,17 @@ function showLightboxSlide() {
 }
 
 function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.getElementById('lightboxImg').src = '';
-  document.body.style.overflow = '';
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;   // nothing to morph back to
+  const thumb = lbNum === null ? null : lbThumbFor(lbNum, LB_SLOTS[lbIdx]);
+  lbMorphTo(thumb, () => {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+  // src is cleared after the snapshot has been taken, not during it
+  const img = document.getElementById('lightboxImg');
+  const drop = () => { if (!lb.classList.contains('open')) img.src = ''; };
+  vtSupported() ? setTimeout(drop, 400) : drop();
 }
 
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
@@ -1865,7 +2069,7 @@ function initMap() {
     options: { position: 'topright' },
     onAdd() {
       const div = L.DomUtil.create('div', 'cs-toggle');
-      div.innerHTML = `<label><input type="checkbox" ${showComingSoon ? 'checked' : ''}><span>🔴 Coming Soon (${soonCount})</span></label>`;
+      div.innerHTML = `<label><input type="checkbox" ${showComingSoon ? 'checked' : ''}><span><i class="soon-dot"></i>Coming Soon (${soonCount})</span></label>`;
       L.DomEvent.disableClickPropagation(div);
       div.querySelector('input').addEventListener('change', e => {
         showComingSoon = e.target.checked;
@@ -1896,8 +2100,8 @@ function pinPopupHtml(loc) {
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · ${est}</div>
       ${statusLine}
       <div class="mp-actions">
-        <a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">📍 Directions</a>
-        <button class="mp-view" onclick="showCardFromMap(${loc.num})">Photos →</button>
+        <a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">${ic('pin')}Directions</a>
+        <button class="mp-view" onclick="showCardFromMap(${loc.num})">Photos ${ic('arrow-right')}</button>
       </div>
     </div>`;
 }
@@ -1915,10 +2119,10 @@ function matchesComingSoon(baseLoc) {
 function comingSoonPopupHtml(loc) {
   const dn  = loc.numOverride || loc.num;
   const dir = loc.addr
-    ? `<div class="mp-actions"><a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">📍 Directions</a></div>`
+    ? `<div class="mp-actions"><a class="mp-dir" href="${mapsUrl(loc)}" target="_blank">${ic('pin')}Directions</a></div>`
     : '';
   const approxNote = loc.approx
-    ? `<div class="mp-approx">◇ Approximate — exact address pending</div>`
+    ? `<div class="mp-approx">${ic('diamond')}Approximate — exact address pending</div>`
     : '';
   return `
     <div class="mp-img"><img src="images/loc-${pad(dn)}/01.jpg" alt="${esc(loc.name)} — Coming Soon"
@@ -1926,7 +2130,7 @@ function comingSoonPopupHtml(loc) {
     <div class="mp-body">
       <div class="mp-name">#${pad(dn)} | ${esc(loc.name)}</div>
       <div class="mp-city">${esc(loc.city)}, ${esc(loc.state)} · <span class="mp-soon">Coming Soon</span></div>
-      ${loc.target ? `<div class="mp-target">🎯 Target ${esc(loc.target)}</div>` : ''}
+      ${loc.target ? `<div class="mp-target">${ic('target')}Target ${esc(loc.target)}</div>` : ''}
       ${approxNote}
       ${dir}
     </div>`;
@@ -2026,9 +2230,9 @@ function timelineData() {
 function renderTimeline() {
   const wrap = document.getElementById('timelineWrap');
   const toggle = `<div class="tl-metric">
-    <button class="tlm-btn ${growthMetric==='rev'?'active':''}" data-metric="rev">💵 Revenue</button>
-    <button class="tlm-btn ${growthMetric==='cars'?'active':''}" data-metric="cars">🚗 Cars Serviced</button>
-    <button class="tlm-btn ${growthMetric==='loc'?'active':''}" data-metric="loc">📍 Locations</button>
+    <button class="tlm-btn ${growthMetric==='rev'?'active':''}" data-metric="rev">${ic('dollar')}Revenue</button>
+    <button class="tlm-btn ${growthMetric==='cars'?'active':''}" data-metric="cars">${ic('car')}Cars Serviced</button>
+    <button class="tlm-btn ${growthMetric==='loc'?'active':''}" data-metric="loc">${ic('pin')}Locations</button>
   </div>`;
   wrap.innerHTML = toggle + (growthMetric === 'loc' ? renderLocationsChart() : renderSeriesChart(growthMetric));
   wrap.querySelectorAll('.tlm-btn').forEach(b => b.addEventListener('click', () => {
@@ -2310,10 +2514,10 @@ function renderIncidents() {
     const p = parseVideo(v.url);
     let locTxt = '';
     if (v.loc) { const l = locations.find(x => x.num == v.loc); locTxt = l ? `#${pad(l.num)} ${esc(l.name)}` : `#${esc(String(v.loc))}`; }
-    const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="" onerror="this.remove()">` : `<div class="inc-poster">🎥</div>`;
+    const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="" onerror="this.remove()">` : `<div class="inc-poster">${ic('video')}</div>`;
     const vimeoAttr = p.kind === 'vimeo' ? ` data-vimeo="${esc(p.id)}" data-vhash="${esc(p.hash || '')}"` : '';
     return `<button class="inc-card" data-id="${esc(v.id || v.url)}">
-      <div class="inc-thumb"${vimeoAttr}>${thumb}<div class="inc-play">▶</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
+      <div class="inc-thumb"${vimeoAttr}>${thumb}<div class="inc-play">${ic('play','ico--fill')}</div>${v._local ? '<div class="inc-draft">Draft</div>' : ''}</div>
       <div class="inc-meta">
         <div class="inc-vtitle">${esc(v.title || 'Untitled')}</div>
         <div class="inc-vsub">${v.date ? esc(v.date) : ''}${locTxt ? `${v.date ? ' · ' : ''}<span class="inc-vloc">${locTxt}</span>` : ''}</div>
@@ -2373,10 +2577,10 @@ const SHOW_SALES = true;
 
 const SW = { state: null, weather: null, fetchedAt: 0, metric: 'total', weeks: 52 };
 const SW_CAT = {
-  hot:      { icon: '☀️', color: '#f5a623', label: 'Hot' },
-  rain:     { icon: '🌧️', color: '#4a9fe0', label: 'Rain' },
-  snow:     { icon: '❄️', color: '#9fd3ff', label: 'Snow' },
-  moderate: { icon: '⛅', color: '#6bbf6b', label: 'Mild' },
+  hot:      { icon: 'sun',   color: '#f5a623', label: 'Hot' },
+  rain:     { icon: 'rain',  color: '#4a9fe0', label: 'Rain' },
+  snow:     { icon: 'snow',  color: '#9fd3ff', label: 'Snow' },
+  moderate: { icon: 'cloud', color: '#6bbf6b', label: 'Mild' },
 };
 function swCat(c) { return SW_CAT[c] || { icon: '·', color: '#5a6472', label: '—' }; }
 const SW_MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2447,21 +2651,21 @@ function renderSales() {
   const bigVal = mv(sel);
   const metricLbl = SW.metric === 'wash' ? 'Car wash · Spa + Express' : (SW.metric === 'seg' ? 'Total · all segments' : 'Total sales');
   const wow = prev ? ((bigVal - mv(prev)) / mv(prev) * 100) : null;
-  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${wow >= 0 ? '▲' : '▼'} ${Math.abs(wow).toFixed(1)}% vs prior wk</span>`;
+  const wowHtml = wow === null ? '' : `<span class="sw-wow ${wow >= 0 ? 'up' : 'down'}">${ic(wow >= 0 ? 'caret-up' : 'caret-down', 'ico--fill')}${Math.abs(wow).toFixed(1)}% vs prior wk</span>`;
   const yoyEntry = swYearAgo(all, sel.date);
   const yoy = yoyEntry ? ((bigVal - mv(yoyEntry)) / mv(yoyEntry) * 100) : null;
-  const yoyHtml = yoy === null ? '' : `<span class="sw-wow ${yoy >= 0 ? 'up' : 'down'}">${yoy >= 0 ? '▲' : '▼'} ${Math.abs(yoy).toFixed(1)}% vs last yr</span>`;
+  const yoyHtml = yoy === null ? '' : `<span class="sw-wow ${yoy >= 0 ? 'up' : 'down'}">${ic(yoy >= 0 ? 'caret-up' : 'caret-down', 'ico--fill')}${Math.abs(yoy).toFixed(1)}% vs last yr</span>`;
   const hero = `
     <div class="sw-hero">
       <div class="sw-hero-main">
-        <div class="sw-hero-wk">${isLatest ? 'Latest pageout' : 'Pageout'} · week of ${swWeekLabel(sel.date, true)}${isLatest ? '' : ` <button class="sw-reset" id="swReset">↩ Latest</button>`}</div>
+        <div class="sw-hero-wk">${isLatest ? 'Latest pageout' : 'Pageout'} · week of ${swWeekLabel(sel.date, true)}${isLatest ? '' : ` <button class="sw-reset" id="swReset">${ic('undo')}Latest</button>`}</div>
         <div class="sw-hero-metric">${metricLbl}</div>
         <div class="sw-hero-total">$${Math.round(bigVal).toLocaleString()}</div>
         <div class="sw-deltas">${wowHtml}${yoyHtml}</div>
         <div class="sw-segs">${SW_SEG.map(([lbl, k, c]) => `<div class="sw-seg${SW.metric === 'wash' ? ((k === 'spa' || k === 'express') ? '' : ' off') : ''}"><span class="sw-seg-dot" style="background:${c}"></span><span class="sw-seg-lbl">${lbl}</span><span class="sw-seg-val">${fmtMoney(sel[k] || 0)}</span></div>`).join('')}</div>
       </div>
       <div class="sw-hero-wx" style="border-color:${cat.color}66">
-        <div class="sw-wx-icon">${cat.icon}</div>
+        <div class="sw-wx-icon">${ic(cat.icon)}</div>
         <div class="sw-wx-cat" style="color:${cat.color}">${lw ? cat.label : 'Weather pending'}</div>
         ${lw ? `<div class="sw-wx-det">${Math.round(lw.avgHigh)}° / ${Math.round(lw.avgLow)}°<br>${lw.precipIn}" precip${lw.snowIn > 0 ? ` · ${lw.snowIn}" snow` : ''}</div>` : ''}
       </div>
@@ -2475,7 +2679,7 @@ function renderSales() {
 
   const legend = SW.metric === 'seg'
     ? `<div class="sw-legend">${SW_SEG.map(([l, , c]) => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${c}"></span>${l}</span>`).join('')}</div>`
-    : `<div class="sw-legend">${Object.values(SW_CAT).map(v => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${v.color}"></span>${v.icon} ${v.label}</span>`).join('')}</div>`;
+    : `<div class="sw-legend">${Object.values(SW_CAT).map(v => `<span class="sw-leg"><span class="sw-leg-sw" style="background:${v.color}"></span>${ic(v.icon)}${v.label}</span>`).join('')}</div>`;
 
   const upd = SW.weather && SW.weather.updated;
   const sc = body.scrollTop;
