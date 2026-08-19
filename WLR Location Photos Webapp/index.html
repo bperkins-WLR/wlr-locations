@@ -15,6 +15,21 @@
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
   <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
   <title>WLR Automotive Group — Locations</title>
+
+  <!-- ══ LINK PREVIEW ════════════════════════════════════
+       Controls how the app renders when the URL is texted or pasted into
+       Teams/Slack. og:image must be absolute, so it is fully qualified. -->
+  <meta name="description" content="Photos, hours, Google ratings and the team for every WLR Automotive Group location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WLR Automotive Group">
+  <meta property="og:title" content="WLR Automotive Group — Location Gallery">
+  <meta property="og:description" content="Photos, hours, Google ratings and the team for every location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:url" content="https://wlr-locations.vercel.app/">
+  <meta property="og:image" content="https://wlr-locations.vercel.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A WLR Auto Spa Express at sunset, with the WLR Automotive Group brand lockups.">
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     :root {
       --deep:   #0d3268;
@@ -1058,7 +1073,7 @@
 <div class="controls">
   <div class="search-wrap">
     <span class="icon"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg></span>
-    <input type="search" id="search" placeholder="Search by name, city, or number…" autocomplete="off" autocorrect="off">
+    <input type="search" id="search" placeholder="Search by name, city, number, or manager…" autocomplete="off" autocorrect="off">
     <button class="search-clear" id="searchClear" title="Clear"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   </div>
   <div class="filter-row" id="filterRow">
@@ -1686,12 +1701,30 @@ function getSorted() {
     ((RATINGS[b.num]?.n ?? 0)  - (RATINGS[a.num]?.n ?? 0)));
   return list;
 }
+/* Every person on a location's roster, flattened for searching. Rosters are
+   resynced from the management listing docs, so searching a name is often
+   how you find the store rather than the other way round. */
+function teamNames(num) {
+  const m = MGMT[num];
+  if (!m) return '';
+  return [m.mp, m.dm, m.lm, ...(m.am || []), ...(m.sup || [])]
+    .filter(n => n && n !== 'Open')
+    // Rosters carry nicknames as Samantha "Sam" Taylor. Index both the full
+    // string and the nickname-free one, so "sam taylor" and "samantha taylor"
+    // each find her.
+    .flatMap(n => n.includes('"')
+      ? [n.replace(/"/g, ''), n.replace(/\s*"[^"]*"\s*/g, ' ')]
+      : [n])
+    .join(' ');
+}
+
 function matches(baseLoc) {
   if (activeFilter !== 'ALL' && baseLoc.type !== activeFilter) return false;
   if (activeState && baseLoc.state !== activeState) return false;
   if (searchQuery) {
     const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
-    return `${loc.num} ${loc.name} ${loc.city} ${loc.state} ${loc.phone||''} ${loc.notes||''}`.toLowerCase().includes(searchQuery.toLowerCase());
+    const hay = `${loc.num} ${loc.name} ${loc.city} ${loc.state} ${loc.phone||''} ${loc.notes||''} ${teamNames(baseLoc.num)}`;
+    return hay.toLowerCase().includes(searchQuery.toLowerCase());
   }
   return true;
 }
@@ -2132,7 +2165,7 @@ function initMap() {
 
   const tour = document.createElement('div');
   tour.className = 'maplibregl-ctrl';
-  tour.innerHTML = `<button class="tour-btn" id="tourBtn">${ic('play','ico--fill')}<span>Tour locations</span></button>`;
+  tour.innerHTML = `<button class="tour-btn" id="tourBtn" title="Fly through the locations currently shown">${ic('play','ico--fill')}<span>Tour locations</span></button>`;
   tour.addEventListener('click', e => e.stopPropagation());
   tour.querySelector('button').addEventListener('click', toggleMapTour);
   mapInstance.addControl(htmlControl(tour), 'top-left');   // bottom-left collides with attribution
@@ -2464,11 +2497,13 @@ function toggleMapTour() { mapTour.running ? stopMapTour() : startMapTour(); }
 
 function startMapTour() {
   if (!mapInstance || !markerLayer.length) return;
-  // Tour the same set the map is showing, in location-number order.
-  mapTour = {
-    running: true, i: 0, timer: null,
-    stops: [...mapMarkers.keys()].sort((a, b) => a - b),
-  };
+  // Tour only open locations — whatever the current filter is showing — in
+  // location-number order. Coming-soon sites are renderings rather than real
+  // storefronts, and including all 45 made the loop run four minutes.
+  const soon = new Set(locations.filter(l => l.hidden).map(l => l.num));
+  const stops = [...mapMarkers.keys()].filter(n => !soon.has(n)).sort((a, b) => a - b);
+  if (!stops.length) return;
+  mapTour = { running: true, i: 0, timer: null, stops };
   setTourBtn(true);
   ['dragstart', 'wheel', 'touchstart'].forEach(ev =>
     mapInstance.once(ev, stopMapTour));
