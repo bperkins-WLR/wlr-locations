@@ -12,10 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+  <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
   <title>WLR Automotive Group — Locations</title>
   <style>
     :root {
@@ -106,6 +104,22 @@
     .h-title    { font-size: 17px; font-weight: 800; line-height: 1.1; flex: 1; }
     .h-title span { color: var(--yellow); }
     .h-sub      { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    /* Narrow phones: "WLR Automotive Group" was wrapping to three lines and
+       the subtitle to two, so the sticky header ate ~190px — a quarter of a
+       375px viewport — on every view. Drop the decorative subtitle, tighten
+       the wordmark, and let Slideshow fall back to its icon (the accessible
+       name stays on the button's title attribute). */
+    @media (max-width: 460px) {
+      header { gap: var(--s-2); padding-left: var(--s-3); padding-right: var(--s-3); }
+      .h-logo-img { height: 30px; }
+      .h-logo-fb  { height: 30px; width: 36px; font-size: 11px; }
+      .h-title    { font-size: 14px; line-height: 1.15; }
+      .h-sub      { display: none; }
+      .header-btn { width: 32px; height: 30px; margin-right: var(--s-1); }
+      .slideshow-btn { padding: var(--s-2); }
+      .slideshow-btn .sb-label { display: none; }
+    }
     .slideshow-btn {
       flex-shrink: 0; display: inline-flex; align-items: center; gap: var(--s-2);
       padding: var(--s-2) var(--s-3); border-radius: var(--r-md);
@@ -290,13 +304,28 @@
     .mp-approx { margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.55); font-style: italic; }
     .mp-target { margin-top: 5px; font-size: 11px; font-weight: 800; color: var(--yellow); }
 
-    .leaflet-popup-content-wrapper {
-      background: #0d0d0d; color: var(--text); border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 8px 30px rgba(0,0,0,0.65);
-      overflow: hidden;
+    .maplibregl-popup-content {
+      background: #0d0d0d; color: var(--text); border-radius: var(--r-lg);
+      border: 1px solid rgba(255,255,255,0.18); box-shadow: var(--e-3);
+      overflow: hidden; padding: 0; width: 228px;
+      font-family: 'Work Sans', sans-serif; line-height: 1.35;
     }
-    .leaflet-popup-tip { background: #0d0d0d; }
-    .leaflet-popup-content { margin: 0; width: 228px !important; font-family: 'Work Sans', sans-serif; line-height: 1.35; }
+    .maplibregl-popup-tip { border-top-color: #0d0d0d !important; border-bottom-color: #0d0d0d !important; }
+    .maplibregl-ctrl-group { background: rgba(13,13,13,0.92) !important; border: 1px solid rgba(255,255,255,0.18); }
+    .maplibregl-ctrl-group button + button { border-top-color: rgba(255,255,255,0.14) !important; }
+    .maplibregl-ctrl-group button span { filter: invert(1); }
+    .maplibregl-ctrl-attrib { background: rgba(0,0,0,0.6) !important; }
+    .maplibregl-ctrl-attrib a { color: rgba(255,255,255,0.7) !important; }
+
+    /* Fly-through control */
+    .tour-btn {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      background: rgba(13,13,13,0.92); border: 1px solid rgba(255,255,255,0.22);
+      border-radius: var(--r-md); padding: var(--s-2) var(--s-3); cursor: pointer;
+      font-family: inherit; font-size: var(--f-xs); font-weight: var(--w-bold);
+      color: #fff; box-shadow: var(--e-2); white-space: nowrap;
+    }
+    .tour-btn.running { background: var(--yellow); color: var(--deep); border-color: transparent; }
     .mp-img { width: 100%; height: 110px; overflow: hidden; background: #000; }
     .mp-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .mp-body { padding: 10px 12px 12px; }
@@ -583,6 +612,7 @@
     }
     @keyframes lbIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
 
+    .lightbox picture { display: contents; }
     .lightbox img {
       max-width: 100%; max-height: calc(100vh - 110px);
       width: auto; height: auto;
@@ -945,51 +975,9 @@
 </head>
 <body>
 
-<!-- ══ ICON SPRITE ═════════════════════════════════════
-     Every icon in the UI resolves from here via <use href="#i-name">.
-     Stroked, 24x24, inheriting currentColor. -->
-<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
-  <defs>
-    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M6.5 21v-8"/><path d="M12 21V4.5"/><path d="M17.5 21v-11"/></symbol>
-    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 11l6-3.6v9.2l-6-3.6z"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8l12 7.2-12 7.2z"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M20.5 20.5l-4.9-4.9"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"/></symbol>
-    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.72 5.66 6.18.88-4.48 4.3 1.07 6.14L12 17.3l-5.49 2.88 1.07-6.14L3.1 9.74l6.18-.88z"/></symbol>
-    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.2" y="3.2" width="7.4" height="7.4" rx="1.8"/><rect x="13.4" y="3.2" width="7.4" height="7.4" rx="1.8"/><rect x="3.2" y="13.4" width="7.4" height="7.4" rx="1.8"/><rect x="13.4" y="13.4" width="7.4" height="7.4" rx="1.8"/></symbol>
-    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.2L3.4 6.6v13.2L9 17.4l6 2.4 5.6-2.4V4.2L15 6.6z"/><path d="M9 4.2v13.2M15 6.6v13.2"/></symbol>
-    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3.2 17.2l6-6 4 4 7.4-7.4"/><path d="M14.4 7.8h6.2V14"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.4 3.2h3.1l1.6 4.4-2.1 1.5a13.4 13.4 0 0 0 5.9 5.9l1.5-2.1 4.4 1.6v3.1a2 2 0 0 1-2.2 2A17.6 17.6 0 0 1 4.4 5.4a2 2 0 0 1 2-2.2z"/></symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.2s6.8-6.3 6.8-11.1a6.8 6.8 0 1 0-13.6 0C5.2 14.9 12 21.2 12 21.2z"/><circle cx="12" cy="9.9" r="2.5"/></symbol>
-    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M2.8 8.6h3.4L7.6 6.2h8.8l1.4 2.4h3.4a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H2.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.8" r="3.5"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0"/></symbol>
-    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4.6M5.8 10.8L12 4.6l6.2 6.2"/></symbol>
-    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4v15.4M18.2 13.2L12 19.4l-6.2-6.2"/></symbol>
-    <symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M7.2 16.8L16.8 7.2M8.4 7.2h8.4v8.4"/></symbol>
-    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4.2 12h15.2M13.2 5.8l6.2 6.2-6.2 6.2"/></symbol>
-    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6.2 9.2L12 15l5.8-5.8"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.3M12 19.1v2.3M21.4 12h-2.3M4.9 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"/></symbol>
-    <symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 2.4v19.2"/><path d="M16.6 6.6H10a3.1 3.1 0 0 0 0 6.2h4a3.1 3.1 0 0 1 0 6.2H6.8"/></symbol>
-    <symbol id="i-car" viewBox="0 0 24 24"><path d="M3.2 16.4v-3.1l1.9-4.4a2 2 0 0 1 1.8-1.2h10.2a2 2 0 0 1 1.8 1.2l1.9 4.4v3.1"/><path d="M3.2 16.4h17.6"/><path d="M5.4 13.3h13.2"/><circle cx="7.4" cy="18" r="1.7"/><circle cx="16.6" cy="18" r="1.7"/></symbol>
-    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.8V12l3.4 2.1"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.6L21.2 19.4H2.8z"/><path d="M12 9.8v4.1"/><path d="M12 16.7v.1"/></symbol>
-    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M5.9 5.9l12.2 12.2"/></symbol>
-    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/></symbol>
-    <symbol id="i-caret-up" viewBox="0 0 24 24"><path d="M12 8.2l5.4 8.4H6.6z"/></symbol>
-    <symbol id="i-caret-down" viewBox="0 0 24 24"><path d="M12 16.6L6.6 8.2h10.8z"/></symbol>
-    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 6.8L4.4 11.4 9 16"/><path d="M4.4 11.4h10.4a4.6 4.6 0 0 1 0 9.2h-2.2"/></symbol>
-    <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 2.6l8.4 4.7v9.4L12 21.4l-8.4-4.7V7.3z"/><path d="M3.6 7.3L12 12l8.4-4.7M12 12v9.4"/></symbol>
-    <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 3.4L20.6 12 12 20.6 3.4 12z"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M21.6 12h-2.2M4.6 12H2.4M18.8 5.2l-1.5 1.5M6.7 17.3l-1.5 1.5M18.8 18.8l-1.5-1.5M6.7 6.7L5.2 5.2"/></symbol>
-    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7.4 15.6a4.4 4.4 0 0 1 .5-8.8 6 6 0 0 1 11.2 2.1 3.5 3.5 0 0 1-.7 6.7z"/><path d="M8.6 18.4l-1 2.6M12.5 18.4l-1 2.6M16.4 18.4l-1 2.6"/></symbol>
-    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2.8v18.4M4.2 7.4l15.6 9.2M19.8 7.4L4.2 16.6"/></symbol>
-    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.4 18a4.4 4.4 0 0 1 .5-8.8 6 6 0 0 1 11.2 2.1 3.5 3.5 0 0 1-.7 6.7z"/></symbol>
-  </defs>
-</svg>
-<script>
-  // Icon helper for markup built in template literals.
-  const ic = (n, c = '') => `<svg class="ico ${c}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
-</script>
+<!-- ══ ICONS ═══════════════════════════════════════
+     Sprite + ic() helper, shared with admin.html. -->
+<script src="icons.js"></script>
 
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
@@ -1028,7 +1016,7 @@
   </button>
   <button class="header-btn" id="swOpenBtn" title="Weekly sales &amp; weather"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></button>
   <button class="header-btn" id="incOpenBtn" title="Videos"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg></button>
-  <button class="slideshow-btn" id="ssStartBtn"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-play"></use></svg>Slideshow</button>
+  <button class="slideshow-btn" id="ssStartBtn" title="Play slideshow" aria-label="Play slideshow"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-play"></use></svg><span class="sb-label">Slideshow</span></button>
 </header>
 
 <!-- ══ HERO SECTION ════════════════════════════════════ -->
@@ -1113,7 +1101,11 @@
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightboxClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
   <button class="lb-arrow" id="lbPrev">‹</button>
-  <img id="lightboxImg" src="" alt="">
+  <picture>
+    <source id="lbAvif" type="image/avif" media="(max-width: 900px)" sizes="100vw">
+    <source id="lbWebp" type="image/webp" media="(max-width: 900px)" sizes="100vw">
+    <img id="lightboxImg" src="" alt="">
+  </picture>
   <div class="lb-dots" id="lbDots"></div>
   <button class="lb-arrow" id="lbNext">›</button>
   <div class="lightbox-caption" id="lightboxCaption"></div>
@@ -1133,7 +1125,7 @@
       <div class="ss-counter" id="ssCounter"></div>
       <div class="ss-photo-label" id="ssPhotoLabel"></div>
     </div>
-    <button class="ss-btn" id="ssPause">⏸</button>
+    <button class="ss-btn" id="ssPause" title="Pause"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-pause"></use></svg></button>
     <div style="width:10px"></div>
     <button class="ss-btn" id="ssNext">›</button>
   </div>
@@ -1422,20 +1414,39 @@ function hoursBlockHtml(num) {
 
 // A stalled image (weak signal) used to leave a permanent "no photo" tile until
 // reload. Retry once before giving up.
+/* Rendered width of one card photo across the grid's breakpoints — two photos
+   per card, one card column under 560px, two under 1100px, then a fixed max. */
+const PHOTO_SIZES = '(max-width: 560px) 46vw, (max-width: 1100px) 23vw, 220px';
+
+/* AVIF/WebP tiers for a bundled location photo. The 1920px JPEG stays the
+   <img> src, so it remains the floor for anything that supports neither. */
+function photoSources(jpgPath) {
+  const base = jpgPath.replace(/\.jpg$/i, '');
+  return `<source type="image/avif" srcset="${base}-480.avif 480w, ${base}-960.avif 960w" sizes="${PHOTO_SIZES}">` +
+         `<source type="image/webp" srcset="${base}-480.webp 480w, ${base}-960.webp 960w" sizes="${PHOTO_SIZES}">`;
+}
+
 function photoOk(el) {
   el.style.display = '';
-  const ph = el.parentElement && el.parentElement.querySelector('.ph');
+  // .ph is a sibling of <picture>, not of the <img>, so walk to the slot.
+  const slot = el.closest('.photo-slot');
+  const ph = slot && slot.querySelector('.ph');
   if (ph) ph.style.display = 'none';
 }
 function photoErr(el) {
   if (!el.dataset.retried) {
     el.dataset.retried = '1';
+    // Drop the modern <source> tiers so the retry lands on the JPEG floor —
+    // setting .src alone would not dislodge an already-chosen AVIF/WebP.
+    const pic = el.closest('picture');
+    if (pic) pic.querySelectorAll('source').forEach(n => n.remove());
     const base = el.src.split('?')[0];
     setTimeout(() => { el.src = base + '?r=1'; }, 800);
     return;
   }
   el.style.display = 'none';
-  const ph = el.parentElement && el.parentElement.querySelector('.ph');
+  const slot = el.closest('.photo-slot');
+  const ph = slot && slot.querySelector('.ph');
   if (ph) ph.style.display = 'flex';
 }
 
@@ -1608,12 +1619,16 @@ function buildCard(baseLoc) {
       : comingSoon
         ? `onerror="this.onerror=null; this.src='images/tase-Coming soon.JPG';"`
         : `onerror="photoErr(this)"`;
+    // Admin-supplied photos are arbitrary blobs with no generated variants,
+    // so only the bundled files get the responsive treatment.
+    const sources = isLocal ? '' : photoSources(fileSrc);
     return `
       <div class="photo-slot has-photo" data-num="${loc.num}" data-slot="${s.key}">
+        <picture>${sources}
         <img src="${src}" alt="${loc.name} ${s.label}"
              loading="lazy" decoding="async"
              ${onErr}
-             onload="photoOk(this)">
+             onload="photoOk(this)"></picture>
         <div class="ph" style="display:none">
           <div class="ph-icon">${ic('camera')}</div>
           <div class="ph-text">${s.label}</div>
@@ -1655,7 +1670,9 @@ function buildCard(baseLoc) {
 
 // ══ STATE ══════════════════════════════════════════════════
 let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
-let currentView = 'grid', mapInstance = null, markerLayer = null, lastPinKey = '';
+let currentView = 'grid', mapInstance = null, markerLayer = [], lastPinKey = '';
+const mapMarkers = new Map();                       // loc number -> marker
+let mapTour = { running: false, i: 0, stops: [], timer: null };
 let showComingSoon = true; // red "coming soon" pins on the map (map-only, never in grid)
 let RATINGS = {};          // num -> { r:rating, n:reviewCount } from ratings.json (refreshed daily)
 
@@ -1826,11 +1843,28 @@ function openLightboxForLoc(num, startSlot, sourceImg) {
   });
 }
 
+/* Point the lightbox's modern-format sources at a bundled photo, or clear
+   them for admin-supplied images that have no generated variants. */
+function setLbSources(src) {
+  const bundled = /^images\/loc-\d+\/0[12]\.jpg$/i.test(src);
+  const base = src.replace(/\.jpg$/i, '');
+  [['lbAvif','avif'], ['lbWebp','webp']].forEach(([id, ext]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (bundled) el.srcset = `${base}-480.${ext} 480w, ${base}-960.${ext} 960w`;
+    else el.removeAttribute('srcset');
+  });
+}
+
 function showLightboxSlide(animate = true) {
   const p   = lbPhotos[lbIdx];
   const img = document.getElementById('lightboxImg');
   img.classList.remove('slide-in');
   void img.offsetWidth; // restart animation
+  // Phones take the 960px AVIF/WebP (~64KB) instead of the 1920px JPEG
+  // (~470KB); above 900px the media query drops out and the JPEG — still the
+  // highest-resolution asset we ship — is used unchanged.
+  setLbSources(p.src);
   img.src = p.src;
   if (animate) img.classList.add('slide-in');
   img.onload  = () => { img.style.opacity = '1'; };
@@ -1908,7 +1942,7 @@ function startSlideshow() {
   if (ssLocs.length === 0) return;
   ssLocIdx  = 0; ssSlotIdx = 0; ssPaused = false;
   document.getElementById('slideshow').classList.add('open');
-  document.getElementById('ssPause').textContent = '⏸';
+  document.getElementById('ssPause').innerHTML = ic('pause', 'ico--fill');
   document.body.style.overflow = 'hidden';
   showSSSlide();
   startSSTimer();
@@ -1991,7 +2025,7 @@ document.getElementById('ssNext').addEventListener('click', () => { clearTimeout
 document.getElementById('ssPrev').addEventListener('click', ssGoBack);
 document.getElementById('ssPause').addEventListener('click', () => {
   ssPaused = !ssPaused;
-  document.getElementById('ssPause').textContent = ssPaused ? '▞' : '⏸';
+  document.getElementById('ssPause').innerHTML = ic(ssPaused ? 'play' : 'pause', 'ico--fill');
   if (ssPaused) {
     clearTimeout(ssTimer);
     document.getElementById('ssProgressFill').style.transition = 'none';
@@ -2055,32 +2089,76 @@ searchClear.addEventListener('click', () => {
 });
 
 // ══ MAP VIEW ══════════════════════════════════════════════
+/* COORDS is stored [lat, lng] (the order Leaflet used); MapLibre wants
+   [lng, lat], so every read goes through here rather than being swapped
+   at each call site. */
+function ll(num) { const c = COORDS[num]; return [c[1], c[0]]; }
+
+/* Minimal control shim: MapLibre only requires onAdd/onRemove. */
+function htmlControl(el) {
+  return { onAdd() { return el; }, onRemove() { el.remove(); } };
+}
+
 function initMap() {
-  mapInstance = L.map('map', { zoomControl: true });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 19,
-  }).addTo(mapInstance);
-  markerLayer = L.layerGroup().addTo(mapInstance);
+  mapInstance = new maplibregl.Map({
+    container: 'map',
+    // CARTO's vector basemap — same cartography as the old raster tiles, but
+    // with real geometry, so buildings can be extruded and the camera tilted.
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: [-77.0, 39.3], zoom: 7.2, pitch: 50, bearing: -14,
+    antialias: true, attributionControl: { compact: true },
+  });
+  mapInstance.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-left');
+  mapInstance.dragRotate.enable();
+  mapInstance.touchZoomRotate.enableRotation();
+
+  mapInstance.on('load', () => {
+    add3dBuildings();
+    mapInstance.resize();
+    updateMapMarkers();
+  });
 
   // Coming-soon toggle (top-right). Count = future sites that have coordinates.
   const soonCount = locations.filter(l => l.hidden && COORDS[l.num]).length;
-  const CsControl = L.Control.extend({
-    options: { position: 'topright' },
-    onAdd() {
-      const div = L.DomUtil.create('div', 'cs-toggle');
-      div.innerHTML = `<label><input type="checkbox" ${showComingSoon ? 'checked' : ''}><span><i class="soon-dot"></i>Coming Soon (${soonCount})</span></label>`;
-      L.DomEvent.disableClickPropagation(div);
-      div.querySelector('input').addEventListener('change', e => {
-        showComingSoon = e.target.checked;
-        updateMapMarkers();
-      });
-      return div;
-    }
+  const cs = document.createElement('div');
+  cs.className = 'cs-toggle maplibregl-ctrl';
+  cs.innerHTML = `<label><input type="checkbox" ${showComingSoon ? 'checked' : ''}><span><i class="soon-dot"></i>Coming Soon (${soonCount})</span></label>`;
+  cs.addEventListener('click', e => e.stopPropagation());
+  cs.querySelector('input').addEventListener('change', e => {
+    showComingSoon = e.target.checked;
+    updateMapMarkers();
   });
-  mapInstance.addControl(new CsControl());
+  mapInstance.addControl(htmlControl(cs), 'top-right');
 
-  mapInstance.setView([39.3, -77.0], 8); // Mid-Atlantic
+  const tour = document.createElement('div');
+  tour.className = 'maplibregl-ctrl';
+  tour.innerHTML = `<button class="tour-btn" id="tourBtn">${ic('play','ico--fill')}<span>Tour locations</span></button>`;
+  tour.addEventListener('click', e => e.stopPropagation());
+  tour.querySelector('button').addEventListener('click', toggleMapTour);
+  mapInstance.addControl(htmlControl(tour), 'top-left');   // bottom-left collides with attribution
+}
+
+/* Extrude the basemap's building footprints. CARTO's tiles carry
+   render_height/render_min_height; the coalesce keeps flat-but-present
+   buildings visible if a tile omits them. */
+function add3dBuildings() {
+  if (mapInstance.getLayer('wlr-3d-buildings')) return;
+  const labelLayer = mapInstance.getStyle().layers.find(l => l.type === 'symbol');
+  mapInstance.addLayer({
+    id: 'wlr-3d-buildings',
+    source: 'carto', 'source-layer': 'building',
+    type: 'fill-extrusion', minzoom: 13,
+    paint: {
+      'fill-extrusion-color': [
+        'interpolate', ['linear'], ['zoom'],
+        13, '#1b2b45',
+        17, '#2c4066'
+      ],
+      'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 12],
+      'fill-extrusion-base':   ['coalesce', ['get', 'render_min_height'], 0],
+      'fill-extrusion-opacity': 0.85,
+    }
+  }, labelLayer && labelLayer.id);   // keep place labels on top
 }
 
 function pinPopupHtml(loc) {
@@ -2138,22 +2216,30 @@ function comingSoonPopupHtml(loc) {
 
 function makePin(loc, cls, popupHtml) {
   const dn = loc.numOverride || loc.num;
-  const icon = L.divIcon({
-    className: '',
-    html: `<div class="map-pin ${cls}"><span>${pad(dn)}</span></div>`,
-    iconSize: [28, 36], iconAnchor: [14, 36], popupAnchor: [0, -34],
-  });
-  return L.marker(COORDS[loc.num], { icon }).bindPopup(popupHtml, { closeButton: false });
+  // MapLibre positions the element it is handed; .map-pin sets position:
+  // relative, which would override that, so give it a plain wrapper to drive
+  // and leave the pin's own styling untouched.
+  const el = document.createElement('div');
+  el.innerHTML = `<div class="map-pin ${cls}"><span>${pad(dn)}</span></div>`;
+  return new maplibregl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat(ll(loc.num))
+    .setPopup(new maplibregl.Popup({ closeButton: false, offset: 34, maxWidth: '250px' })
+      .setHTML(popupHtml));
 }
 
 function updateMapMarkers() {
+  // Markers are DOM overlays and need no style; only add3dBuildings does, and
+  // that is gated on the map's own 'load' event.
   if (!mapInstance) return;
-  markerLayer.clearLayers();
+  markerLayer.forEach(m => m.remove());
+  markerLayer = [];
+  mapMarkers.clear();
 
   const live = getSorted().filter(l => isLocVisible(l) && matches(l) && COORDS[l.num]);
   live.forEach(baseLoc => {
     const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
-    makePin(loc, `pin-${loc.type}`, pinPopupHtml(loc)).addTo(markerLayer);
+    const m = makePin(loc, `pin-${loc.type}`, pinPopupHtml(loc)).addTo(mapInstance);
+    markerLayer.push(m); mapMarkers.set(loc.num, m);
   });
 
   // Coming-soon overlay: map-only future sites, never added to the grid
@@ -2162,14 +2248,17 @@ function updateMapMarkers() {
     : [];
   soon.forEach(baseLoc => {
     const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
-    makePin(loc, loc.approx ? 'pin-SOON pin-approx' : 'pin-SOON', comingSoonPopupHtml(loc)).addTo(markerLayer);
+    const m = makePin(loc, loc.approx ? 'pin-SOON pin-approx' : 'pin-SOON', comingSoonPopupHtml(loc)).addTo(mapInstance);
+    markerLayer.push(m); mapMarkers.set(loc.num, m);
   });
 
   // Refit only when the shown set changes, so panning isn't hijacked
   const shown = [...live, ...soon];
   const key = shown.map(l => (l.hidden ? 's' : '') + l.num).join(',');
-  if (shown.length && key !== lastPinKey) {
-    mapInstance.fitBounds(L.latLngBounds(shown.map(l => COORDS[l.num])), { padding: [36, 36], maxZoom: 12 });
+  if (shown.length && key !== lastPinKey && !mapTour.running) {
+    const b = new maplibregl.LngLatBounds();
+    shown.forEach(l => b.extend(ll(l.num)));
+    mapInstance.fitBounds(b, { padding: 48, maxZoom: 12, pitch: 45, duration: 700 });
   }
   lastPinKey = key;
 }
@@ -2357,11 +2446,71 @@ function setView(view) {
   document.getElementById('noResults').style.display = view === 'grid' ? '' : 'none';
   document.getElementById('mapWrap').classList.toggle('show', view === 'map');
   document.getElementById('timelineWrap').classList.toggle('show', view === 'timeline');
-  if (view === 'map' && typeof L !== 'undefined') {
-    if (!mapInstance) initMap();
-    requestAnimationFrame(() => { mapInstance.invalidateSize(); updateMapMarkers(); });
+  if (view !== 'map') stopMapTour();
+  if (view === 'map' && typeof maplibregl !== 'undefined') {
+    if (!mapInstance) initMap();          // updateMapMarkers runs on 'load'
+    else requestAnimationFrame(() => { mapInstance.resize(); updateMapMarkers(); });
   }
   if (view === 'timeline') renderTimeline();
+}
+
+/* ══ MAP FLY-THROUGH ═══════════════════════════════════════
+   Chains flyTo across the pins currently on the map, banking the camera a
+   little on each hop and opening that location's popup on arrival. Any
+   manual interaction cancels it, so it never fights the user for control. */
+const TOUR_HOLD_MS = 2200;
+
+function toggleMapTour() { mapTour.running ? stopMapTour() : startMapTour(); }
+
+function startMapTour() {
+  if (!mapInstance || !markerLayer.length) return;
+  // Tour the same set the map is showing, in location-number order.
+  mapTour = {
+    running: true, i: 0, timer: null,
+    stops: [...mapMarkers.keys()].sort((a, b) => a - b),
+  };
+  setTourBtn(true);
+  ['dragstart', 'wheel', 'touchstart'].forEach(ev =>
+    mapInstance.once(ev, stopMapTour));
+  tourHop();
+}
+
+function stopMapTour() {
+  if (!mapTour.running) return;
+  clearTimeout(mapTour.timer);
+  mapTour.running = false;
+  setTourBtn(false);
+}
+
+function setTourBtn(on) {
+  const b = document.getElementById('tourBtn');
+  if (!b) return;
+  b.classList.toggle('running', on);
+  b.innerHTML = ic(on ? 'pause' : 'play', 'ico--fill') +
+                `<span>${on ? 'Stop tour' : 'Tour locations'}</span>`;
+}
+
+function tourHop() {
+  if (!mapTour.running) return;
+  const num = mapTour.stops[mapTour.i % mapTour.stops.length];
+  mapInstance.flyTo({
+    center: ll(num), zoom: 16.4, pitch: 62,
+    bearing: (mapTour.i * 41) % 360,      // a new angle each stop
+    // maxDuration keeps cross-state hops from dragging; without it the
+    // default easing made a Frederick -> York leg take ~10s.
+    speed: 1.4, curve: 1.35, maxDuration: 3800, essential: true,
+  });
+  mapInstance.once('moveend', () => {
+    if (!mapTour.running) return;
+    const m = mapMarkers.get(num);
+    if (m && !m.getPopup().isOpen()) m.togglePopup();
+    mapTour.timer = setTimeout(() => {
+      if (!mapTour.running) return;
+      if (m && m.getPopup().isOpen()) m.togglePopup();
+      mapTour.i++;
+      tourHop();
+    }, TOUR_HOLD_MS);
+  });
 }
 
 function showCardFromMap(num) {

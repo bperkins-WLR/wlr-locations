@@ -6,6 +6,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>WLR Admin — Photo & Info Manager</title>
   <style>
+    /* ══ ICONS ═══════════════════════════════════════════
+       Matches the gallery: stroked, inherits currentColor and font-size. */
+    .ico {
+      width: 1.15em; height: 1.15em; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.9;
+      stroke-linecap: round; stroke-linejoin: round;
+      vertical-align: -0.18em; overflow: visible;
+    }
+    .ico--fill { fill: currentColor; stroke: none; }
+    .h-btn, .f-btn, .back-btn, .modal-title, .modal-save, .save-btn,
+    .delete-loc-btn, .golive-btn, .unpublish-btn, .stat-item,
+    .a-addr, .edit-toggle, .toast {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .slot-icon, .photo-check, .a-status { display: flex; align-items: center; justify-content: center; }
     :root {
       --blue:   #1a55a2;
       --deep:   #0d3268;
@@ -251,6 +266,10 @@
 </head>
 <body>
 
+<!-- ══ ICONS ═══════════════════════════════════════════
+     Same sprite + ic() helper the gallery uses. -->
+<script src="icons.js"></script>
+
 <!-- ── PASSWORD GATE ─────────────────────────────────────── -->
 <div id="gate">
   <div class="gate-box">
@@ -260,7 +279,7 @@
     <input class="gate-input" type="password" id="pwInput" placeholder="Enter password" maxlength="20">
     <button class="gate-btn" id="pwBtn">Unlock ›</button>
     <div class="gate-error" id="pwError">Incorrect password. Try again.</div>
-    <a href="index.html" style="display:block;margin-top:16px;font-size:12px;color:rgba(255,255,255,0.45);text-decoration:none;">← Back to Gallery</a>
+    <a href="index.html" style="display:block;margin-top:16px;font-size:12px;color:rgba(255,255,255,0.45);text-decoration:none;"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>Back to Gallery</a>
   </div>
 </div>
 
@@ -275,9 +294,9 @@
     </div>
     <div class="h-actions">
       <button class="h-btn yellow" id="addLocBtn">＋ New Location</button>
-      <button class="h-btn" id="videosBtn">🎥 Videos</button>
-      <a href="index.html" class="h-btn">← Gallery</a>
-      <button class="h-btn" id="logoutBtn">Lock 🔒</button>
+      <button class="h-btn" id="videosBtn"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg>Videos</button>
+      <a href="index.html" class="h-btn"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>Gallery</a>
+      <button class="h-btn" id="logoutBtn"><svg class="ico" aria-hidden="true"><use href="#i-lock"></use></svg>Lock</button>
     </div>
   </header>
 
@@ -289,14 +308,14 @@
     <button class="f-btn" data-type="TAS">TAS</button>
     <button class="f-btn" data-type="TAR">TAR</button>
     <button class="f-btn" data-type="TASE">TASe</button>
-    <button class="f-btn" data-type="MISSING">📷 Missing</button>
-    <button class="f-btn" data-type="EDITED">✏️ Edited</button>
+    <button class="f-btn" data-type="MISSING"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg>Missing</button>
+    <button class="f-btn" data-type="EDITED"><svg class="ico" aria-hidden="true"><use href="#i-pencil"></use></svg>Edited</button>
   </div>
 
   <div id="adminGrid"></div>
 
   <footer>
-    <a href="index.html" class="back-btn">← View Gallery</a>
+    <a href="index.html" class="back-btn"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>View Gallery</a>
     <div class="footer-count" id="footerCount"></div>
     <button class="danger-btn" id="clearAllBtn">Clear All</button>
   </footer>
@@ -306,7 +325,7 @@
 <!-- ── NEW LOCATION MODAL ─────────────────────────────────── -->
 <div class="modal-bg" id="newLocModal">
   <div class="modal-box">
-    <div class="modal-title">➕ Add <span>New Location</span></div>
+    <div class="modal-title"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add <span>New Location</span></div>
 
     <div class="field-row">
       <label class="field-label">Location Number</label>
@@ -346,13 +365,13 @@
     <div class="field-row">
       <label class="field-label">Status</label>
       <select class="status-select" id="nl-status">
-        <option value="Coming Soon">🔜 Coming Soon</option>
-        <option value="Open">✅ Open</option>
+        <option value="Coming Soon">Coming Soon</option>
+        <option value="Open">Open</option>
       </select>
     </div>
 
     <div class="modal-actions">
-      <button class="modal-save" id="nlSaveBtn">➕ Add Location</button>
+      <button class="modal-save" id="nlSaveBtn"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add Location</button>
       <button class="modal-cancel" id="nlCancelBtn">Cancel</button>
     </div>
   </div>
@@ -361,7 +380,7 @@
 <!-- ── VIDEOS MODAL ───────────────────────────────────────── -->
 <div class="modal-bg" id="videosModal">
   <div class="modal-box">
-    <div class="modal-title">🎥 <span>Videos</span></div>
+    <div class="modal-title"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg><span>Videos</span></div>
 
     <div class="field-row">
       <label class="field-label">Video Link</label>
@@ -383,14 +402,14 @@
     </div>
 
     <div class="modal-actions">
-      <button class="modal-save" id="vidAddBtn">➕ Add Video</button>
+      <button class="modal-save" id="vidAddBtn"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add Video</button>
       <button class="modal-cancel" id="vidCancelBtn">Close</button>
     </div>
 
     <div id="vidList" style="margin-top:18px"></div>
 
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1)">
-      <button class="h-btn yellow" id="vidPublishBtn" style="width:100%;justify-content:center">📋 Copy publish code</button>
+      <button class="h-btn yellow" id="vidPublishBtn" style="width:100%;justify-content:center"><svg class="ico" aria-hidden="true"><use href="#i-copy"></use></svg>Copy publish code</button>
       <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:9px;line-height:1.5">
         Videos save on this device and show in the gallery here. To publish for <b>everyone</b>, tap “Copy publish code” and send it to your developer (or paste it into <code>incidents.json</code>).
       </div>
@@ -617,7 +636,7 @@ function renderAdmin() {
     <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div>${totalPhotos} photos</div>
     <div class="stat-item"><div class="stat-dot" style="background:rgba(255,255,255,0.2)"></div>${totalMissing} missing</div>
     <div class="stat-item"><div class="stat-dot" style="background:var(--yellow)"></div>${totalEdited} edited</div>
-    <div class="stat-item">📍 ${allLocs.length} locations${customCount ? ` <span style="color:var(--tase-c)">(+${customCount} new)</span>` : ''}</div>
+    <div class="stat-item">${ic('pin')}${allLocs.length} locations${customCount ? ` <span style="color:var(--tase-c)">(+${customCount} new)</span>` : ''}</div>
   `;
   document.getElementById('footerCount').textContent = `${totalPhotos}/${allLocs.length*2} photos`;
 
@@ -651,11 +670,11 @@ function renderAdmin() {
              onclick="triggerUpload(${base.num},'${s}')">
           ${photo ? `<img src="${photo}" alt="${label}">` : ''}
           <div class="slot-overlay" ${photo?'style="display:none"':''}>
-            <div class="slot-icon">📷</div>
+            <div class="slot-icon">${ic('camera')}</div>
             <div class="slot-label">${label}</div>
             <div class="slot-tap">Tap to add</div>
           </div>
-          ${photo?'<div class="photo-check">✓</div>':''}
+          ${photo?`<div class="photo-check">${ic('check')}</div>`:''}
           <div class="photo-actions">
             <button class="pa-btn pa-change" onclick="event.stopPropagation();triggerUpload(${base.num},'${s}')">Change</button>
             <button class="pa-btn pa-delete" onclick="event.stopPropagation();deletePhoto(${base.num},'${s}')">Delete</button>
@@ -674,26 +693,26 @@ function renderAdmin() {
             <div class="a-num-val">${displayNum}</div>
           </div>
           <div class="a-info">
-            <div class="a-name">${escHtml(loc.name)}${edited ? ' <span style="color:var(--yellow);font-size:10px">✏️</span>' : ''}${isCustom ? '<span class="custom-badge">NEW</span>' : ''}${isHidden && !isPublished ? '<span class="hidden-badge">HIDDEN</span>' : ''}${isHidden && isPublished ? '<span class="custom-badge" style="background:rgba(90,240,240,0.2);color:var(--tase-c)">LIVE ✓</span>' : ''}</div>
+            <div class="a-name">${escHtml(loc.name)}${edited ? ` <span style="color:var(--yellow);font-size:10px">${ic('pencil')}</span>` : ''}${isCustom ? '<span class="custom-badge">NEW</span>' : ''}${isHidden && !isPublished ? '<span class="hidden-badge">HIDDEN</span>' : ''}${isHidden && isPublished ? `<span class="custom-badge" style="background:rgba(90,240,240,0.2);color:var(--tase-c)">LIVE ${ic('check')}</span>` : ''}</div>
             <div class="a-city">${escHtml(loc.city)}, ${escHtml(loc.state)}</div>
-            ${loc.addr ? `<div class="a-addr">📍 ${escHtml(loc.addr)}</div>` : ''}
-            ${info.phone ? `<div class="a-addr">📞 ${escHtml(info.phone)}</div>` : ''}
+            ${loc.addr ? `<div class="a-addr">${ic('pin')}${escHtml(loc.addr)}</div>` : ''}
+            ${info.phone ? `<div class="a-addr">${ic('phone')}${escHtml(info.phone)}</div>` : ''}
           </div>
           <div style="text-align:center">
             <div class="a-badge b-${base.type}">${tLabel}</div>
-            <div class="a-status">${allDone?'✅':extDone||intDone?'🟡':'⬜'}</div>
+            <div class="a-status">${ic(allDone ? 'check-circle' : (extDone||intDone) ? 'clock' : 'square')}</div>
           </div>
         </div>
 
         <div class="a-photos">${slotHTML}</div>
 
-        ${isCustom ? `<button class="delete-loc-btn" onclick="removeCustomLoc(${base.num})">🗑 Remove This Location</button>` : ''}
-        ${isHidden && !isPublished ? `<button class="golive-btn" onclick="publishLoc(${base.num})">🚀 Go Live — Publish to Gallery</button>` : ''}
-        ${isHidden && isPublished  ? `<button class="unpublish-btn" onclick="unpublishLoc(${base.num})">👁 Hide from Gallery Again</button>` : ''}
+        ${isCustom ? `<button class="delete-loc-btn" onclick="removeCustomLoc(${base.num})">${ic('trash')}Remove This Location</button>` : ''}
+        ${isHidden && !isPublished ? `<button class="golive-btn" onclick="publishLoc(${base.num})">${ic('upload')}Go Live — Publish to Gallery</button>` : ''}
+        ${isHidden && isPublished  ? `<button class="unpublish-btn" onclick="unpublishLoc(${base.num})">${ic('eye-off')}Hide from Gallery Again</button>` : ''}
 
         <button class="edit-toggle ${edited?'has-edits':''}" id="toggleBtn-${base.num}" onclick="toggleEdit(${base.num})">
-          ✏️ ${edited ? 'Edit Info (custom data saved)' : 'Edit Location Info'}
-          <span class="edit-arrow">▾</span>
+          ${ic('pencil')}${edited ? 'Edit Info (custom data saved)' : 'Edit Location Info'}
+          <span class="edit-arrow">${ic('chevron-down')}</span>
         </button>
 
         <div class="edit-form" id="editForm-${base.num}">
@@ -745,10 +764,10 @@ function renderAdmin() {
           <div class="field-row">
             <label class="field-label">Status</label>
             <select class="status-select" id="f-status-${base.num}">
-              <option value="Open"         ${(info.status||'Open')==='Open'        ? 'selected':''}>✅ Open</option>
-              <option value="Coming Soon"  ${(info.status||'')==='Coming Soon'     ? 'selected':''}>🔜 Coming Soon</option>
-              <option value="Temporarily Closed" ${(info.status||'')==='Temporarily Closed'?'selected':''}>🔶 Temporarily Closed</option>
-              <option value="Permanently Closed" ${(info.status||'')==='Permanently Closed'?'selected':''}>🔴 Permanently Closed</option>
+              <option value="Open"         ${(info.status||'Open')==='Open'        ? 'selected':''}>Open</option>
+              <option value="Coming Soon"  ${(info.status||'')==='Coming Soon'     ? 'selected':''}>Coming Soon</option>
+              <option value="Temporarily Closed" ${(info.status||'')==='Temporarily Closed'?'selected':''}>Temporarily Closed</option>
+              <option value="Permanently Closed" ${(info.status||'')==='Permanently Closed'?'selected':''}>Permanently Closed</option>
             </select>
           </div>
 
@@ -759,7 +778,7 @@ function renderAdmin() {
           </div>
 
           <div class="edit-actions">
-            <button class="save-btn" onclick="saveInfo(${base.num})">💾 Save Changes</button>
+            <button class="save-btn" onclick="saveInfo(${base.num})">${ic('save')}Save Changes</button>
             <button class="reset-btn" onclick="resetInfo(${base.num})">Reset</button>
           </div>
 
@@ -816,7 +835,7 @@ function saveInfo(num) {
   } else {
     setInfo(num, obj);
   }
-  showToast(`✓ Location #${num} info saved!`);
+  showToast(`Location #${num} info saved`, 'check');
   renderAdmin();
 }
 
@@ -838,10 +857,10 @@ function handleFile(input, num, slot) {
   compressImage(file, async data => {
     try {
       await setPhoto(num, slot, data);
-      showToast(`✓ ${slot==='ext'?'Exterior':'Interior'} photo saved for #${num}`);
+      showToast(`${slot==='ext'?'Exterior':'Interior'} photo saved for #${num}`, 'check');
       renderAdmin();
     } catch(e) {
-      showToast('⚠️ Error saving photo — try again');
+      showToast('Error saving photo — try again', 'alert');
     }
     input.value = '';
   });
@@ -878,9 +897,11 @@ document.getElementById('filterBar').addEventListener('click', e => {
 
 // ── TOAST ────────────────────────────────────────────────────
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, icon) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.innerHTML = icon ? ic(icon) : '';
+  t.appendChild(document.createTextNode(msg));   // message stays text, not markup
+  t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
@@ -983,12 +1004,12 @@ document.getElementById('nlSaveBtn').addEventListener('click', () => {
   const status = document.getElementById('nl-status').value;
 
   if (!num || !name || !city || !state) {
-    showToast('⚠️ Please fill in Number, Name, City and State');
+    showToast('Please fill in Number, Name, City and State', 'alert');
     return;
   }
   const allNums = getAllLocs().map(l => l.num);
   if (allNums.includes(num)) {
-    showToast(`⚠️ Location #${num} already exists`);
+    showToast(`Location #${num} already exists`, 'alert');
     return;
   }
 
@@ -1001,7 +1022,7 @@ document.getElementById('nlSaveBtn').addEventListener('click', () => {
   addCustomLoc(newLoc);
   document.getElementById('newLocModal').classList.remove('open');
   clearNewLocForm();
-  showToast(`✅ Location #${num} — ${name} added!`);
+  showToast(`Location #${num} — ${name} added`, 'check-circle');
   renderAdmin();
 });
 
@@ -1009,7 +1030,7 @@ function publishLoc(num) {
   const info = getInfo(num);
   info.published = true;
   setInfo(num, info);
-  showToast(`🚀 Location #${num} is now LIVE in the gallery!`);
+  showToast(`Location #${num} is now live in the gallery`, 'upload');
   renderAdmin();
 }
 function unpublishLoc(num) {
