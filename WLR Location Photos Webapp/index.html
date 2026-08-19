@@ -341,6 +341,7 @@
       color: #fff; box-shadow: var(--e-2); white-space: nowrap;
     }
     .tour-btn.running { background: var(--yellow); color: var(--deep); border-color: transparent; }
+    .map-tools { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
     .mp-img { width: 100%; height: 110px; overflow: hidden; background: #000; }
     .mp-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .mp-body { padding: 10px 12px 12px; }
@@ -1712,6 +1713,7 @@ function buildCard(baseLoc) {
 let activeFilter = 'ALL', activeSort = 'num', searchQuery = '', activeState = '';
 let currentView = 'grid', mapInstance = null, markerLayer = [], lastPinKey = '';
 const mapMarkers = new Map();                       // loc number -> marker
+let mapShown = [];                                  // locations currently pinned
 let mapTour = { running: false, i: 0, stops: [], timer: null };
 let showComingSoon = true; // red "coming soon" pins on the map (map-only, never in grid)
 let RATINGS = {};          // num -> { r:rating, n:reviewCount } from ratings.json (refreshed daily)
@@ -1976,7 +1978,17 @@ document.getElementById('lbNext').addEventListener('click', () => { if(lbIdx<lbP
   lb.addEventListener('click', e => { if(e.target === lb) closeLightbox(); });
 })();
 document.addEventListener('keydown', e => {
-  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  // Map shortcuts, only while the map is the visible view and nothing is
+  // typed into a field. Escape also backs out of a zoomed-in location.
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+  const lbOpen = document.getElementById('lightbox').classList.contains('open');
+  if (!lbOpen && !typing && currentView === 'map' && (e.key === '0' || e.key === 'Escape')) {
+    e.preventDefault();
+    fitMapToPins();
+    return;
+  }
+
+  if (!lbOpen) return;
   if (e.key==='Escape')      closeLightbox();
   if (e.key==='ArrowRight' && lbIdx < lbPhotos.length-1) { lbIdx++; showLightboxSlide(); }
   if (e.key==='ArrowLeft'  && lbIdx > 0)                  { lbIdx--; showLightboxSlide(); }
@@ -2171,10 +2183,13 @@ function initMap() {
   mapInstance.touchZoomRotate.enableRotation();
 
   mapInstance.on('load', () => {
-    add3dBuildings();
+    add3dBuildings();               // needs the style; the rest does not
     mapInstance.resize();
     updateMapMarkers();
   });
+  // Pins are DOM overlays, so draw them immediately rather than waiting on the
+  // basemap. A slow or failed tile fetch should not leave the map looking empty.
+  updateMapMarkers();
 
   // Coming-soon toggle (top-right). Count = future sites that have coordinates.
   const soonCount = locations.filter(l => l.hidden && COORDS[l.num]).length;
@@ -2188,12 +2203,15 @@ function initMap() {
   });
   mapInstance.addControl(htmlControl(cs), 'top-right');
 
-  const tour = document.createElement('div');
-  tour.className = 'maplibregl-ctrl';
-  tour.innerHTML = `<button class="tour-btn" id="tourBtn" title="Fly through the locations currently shown">${ic('play','ico--fill')}<span>Tour locations</span></button>`;
-  tour.addEventListener('click', e => e.stopPropagation());
-  tour.querySelector('button').addEventListener('click', toggleMapTour);
-  mapInstance.addControl(htmlControl(tour), 'top-left');   // bottom-left collides with attribution
+  const tools = document.createElement('div');
+  tools.className = 'maplibregl-ctrl map-tools';
+  tools.innerHTML =
+    `<button class="tour-btn" id="tourBtn" title="Fly through the locations currently shown">${ic('play','ico--fill')}<span>Tour locations</span></button>` +
+    `<button class="tour-btn" id="fitBtn" title="Show all locations (press 0)">${ic('fit')}<span>Show all</span></button>`;
+  tools.addEventListener('click', e => e.stopPropagation());
+  tools.querySelector('#tourBtn').addEventListener('click', toggleMapTour);
+  tools.querySelector('#fitBtn').addEventListener('click', () => fitMapToPins());
+  mapInstance.addControl(htmlControl(tools), 'top-left');   // bottom-left collides with attribution
 }
 
 /* Extrude the basemap's building footprints. CARTO's tiles carry
@@ -2272,6 +2290,23 @@ function comingSoonPopupHtml(loc) {
     </div>`;
 }
 
+/* Frame every pin currently on the map — the "show me everything" view.
+   Also the reset after flying into a single location or running the tour. */
+function fitMapToPins(duration = 900) {
+  if (!mapInstance || !mapShown.length) return;
+  stopMapTour();
+  mapInstance.getContainer().querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+  const b = new maplibregl.LngLatBounds();
+  mapShown.forEach(l => b.extend(ll(l.num)));
+  mapInstance.fitBounds(b, {
+    padding: 48, maxZoom: 12,
+    pitch: 45, bearing: -14,          // back to the default framing, not wherever the tour left it
+    // Camera animations do not advance while the map is not rendering, so
+    // snap instead of easing if the style has not resolved yet.
+    duration: mapInstance.isStyleLoaded() ? duration : 0,
+  });
+}
+
 function makePin(loc, cls, popupHtml) {
   const dn = loc.numOverride || loc.num;
   // MapLibre positions the element it is handed; .map-pin sets position:
@@ -2313,11 +2348,8 @@ function updateMapMarkers() {
   // Refit only when the shown set changes, so panning isn't hijacked
   const shown = [...live, ...soon];
   const key = shown.map(l => (l.hidden ? 's' : '') + l.num).join(',');
-  if (shown.length && key !== lastPinKey && !mapTour.running) {
-    const b = new maplibregl.LngLatBounds();
-    shown.forEach(l => b.extend(ll(l.num)));
-    mapInstance.fitBounds(b, { padding: 48, maxZoom: 12, pitch: 45, duration: 700 });
-  }
+  mapShown = shown;
+  if (shown.length && key !== lastPinKey && !mapTour.running) fitMapToPins(700);
   lastPinKey = key;
 }
 
@@ -3000,7 +3032,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-08-19 14:32';
+const BUILD = '2026-08-19 15:06';
 
 (() => {
   const el = document.getElementById('buildStamp');
