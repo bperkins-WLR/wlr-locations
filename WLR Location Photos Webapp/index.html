@@ -1253,37 +1253,37 @@
 <script>
 // ══ DATA ══════════════════════════════════════════════════
 const locations = [
-  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP" },
-  { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000",    ts:20000901, addr:"", render3d:"https://my.matterport.com/show/?m=MLW9rLGqcbs" },
-  { num:  3, name:"Columbia",               type:"TLC",  city:"Columbia",        state:"MD", opened:"June 1990",         ts:19900601, addr:"" },
-  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995",          ts:19950501, addr:"", render3d:"https://my.matterport.com/show/?m=qnr2UL3QC8D" },
-  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998",         ts:19980601, addr:"" },
-  { num:  6, name:"Frederick Auto Spa",     type:"TAS",  city:"Frederick",       state:"MD", opened:"December 2003",     ts:20031201, addr:"", render3d:"https://my.matterport.com/show/?m=3yPoA8UP24q" },
-  { num:  7, name:"Arundel Mills",           type:"TLC",  city:"Arundel Mills",   state:"MD", opened:"July 2020",         ts:20200701, addr:"", render3d:"https://my.matterport.com/show/?m=hPA3o1R1VSu" },
-  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004",     ts:20040201, addr:"" },
-  { num:  9, name:"Germantown",             type:"TLC",  city:"Germantown",      state:"MD", opened:"March 2005",        ts:20050301, addr:"", render3d:"https://my.matterport.com/show/?m=9iZMvGzWgXr" },
-  { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=epV8TadAFMN" },
-  { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=e2MiWFq9RGG" },
-  { num: 12, name:"Jefferson Street",       type:"TLC",  city:"Frederick",       state:"MD", opened:"July 2006",         ts:20060701, addr:"", render3d:"https://my.matterport.com/show/?m=TcwUF3VtomK" },
-  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007",      ts:20070101, addr:"" },
-  { num: 14, name:"Gambrills",              type:"TAS",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"", render3d:"https://my.matterport.com/show/?m=6V2c8wKRigk" },
-  { num: 15, name:"Laurel",                 type:"TLC",  city:"Laurel",          state:"MD", opened:"January 2008",      ts:20080101, addr:"", render3d:"https://my.matterport.com/show/?m=wiYN1jCYHqp" },
-  { num: 16, name:"Shrewsbury",             type:"TLC",  city:"Shrewsbury",      state:"PA", opened:"August 2007",       ts:20070801, addr:"", render3d:"https://my.matterport.com/show/?m=NgVDg6Upqpu" },
-  { num: 17, name:"West York",              type:"TLC",  city:"York",            state:"PA", opened:"December 2007",     ts:20071201, addr:"", render3d:"https://my.matterport.com/show/?m=FeZxaocj5S5" },
-  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013",    ts:20130901, addr:"" },
-  { num: 19, name:"North Bel Air",           type:"TASE", city:"Bel Air",         state:"MD", opened:"December 2016",     ts:20161201, addr:"" },
-  { num: 21, name:"Route 85",               type:"TASE", city:"Frederick",       state:"MD", opened:"July 2019",         ts:20190701, addr:"", render3d:"https://my.matterport.com/show/?m=JnddbfPPLzV" },
-  { num: 22, name:"Lanham",                 type:"TLC",  city:"Lanham",          state:"MD", opened:"December 2018",     ts:20181201, addr:"", render3d:"https://my.matterport.com/show/?m=7YZmUbEoW6g" },
-  { num: 23, name:"Route 26",               type:"TASE", city:"Frederick",       state:"MD", opened:"January 2021",      ts:20210101, addr:"", render3d:"https://my.matterport.com/show/?m=qQnfWMTXamK" },
-  { num: 24, name:"West York",              type:"TASE", city:"West York",       state:"PA", opened:"September 2021",    ts:20210901, addr:"", render3d:"https://my.matterport.com/show/?m=xj4ksn7N7EP" },
-  { num: 25, name:"Ritchie Station",        type:"TASE", city:"Capitol Heights", state:"MD", opened:"December 2021",     ts:20211201, addr:"" },
-  { num: 26, name:"Halethorpe",             type:"TASE", city:"Halethorpe",      state:"MD", opened:"January 2024",      ts:20240101, addr:"" },
-  { num: 27, name:"Odenton",                type:"TASE", city:"Odenton",         state:"MD", opened:"June 2022",         ts:20220601, addr:"" },
-  { num: 28, name:"Martinsburg",            type:"TASE", city:"Martinsburg",     state:"WV", opened:"October 2023",      ts:20231001, addr:"", render3d:"https://my.matterport.com/show/?m=Jed9u6AZUbS" },
-  { num: 31, name:"Arundel Mills",          type:"TASE", city:"Hanover",         state:"MD", opened:"May 2023",          ts:20230501, addr:"", render3d:"https://my.matterport.com/show/?m=SKtqzQLJaVW" },
-  { num: 32, name:"West Hagerstown",        type:"TASE", city:"Hagerstown",      state:"MD", opened:"October 2022",      ts:20221001, addr:"", render3d:"https://my.matterport.com/show/?m=TgogTei79Nn" },
-  { num: 35, name:"Dundalk",                type:"TASE", city:"Dundalk",         state:"MD", opened:"November 17, 2025", ts:20251117, addr:"", render3d:"https://my.matterport.com/show/?m=PPxhyrfqCZg" },
-  { num: 20, name:"East York",              type:"TASE", city:"York",             state:"PA", opened:"", ts:20991231, addr:"1715 Whiteford Rd, York, PA 17402", target:"September 2026",  cam:"https://app.truelook.cloud/link?code=eJR8Tu4OyH-nKKLiHyMu5g&type=sharing_link" },
+  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP" },
+  { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000",    ts:20000901, addr:"5715 Buckeystown Pike, Frederick, MD 21704", render3d:"https://my.matterport.com/show/?m=MLW9rLGqcbs" },
+  { num:  3, name:"Columbia",               type:"TLC",  city:"Columbia",        state:"MD", opened:"June 1990",         ts:19900601, addr:"9225 Berger Road, Columbia, MD 21046" },
+  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995",          ts:19950501, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=qnr2UL3QC8D" },
+  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998",         ts:19980601, addr:"10007 Fields Road, Gaithersburg, MD 20878" },
+  { num:  6, name:"Frederick Auto Spa",     type:"TAS",  city:"Frederick",       state:"MD", opened:"December 2003",     ts:20031201, addr:"1509 Garrett Dr, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=3yPoA8UP24q" },
+  { num:  7, name:"Arundel Mills",           type:"TLC",  city:"Arundel Mills",   state:"MD", opened:"July 2020",         ts:20200701, addr:"7691 Arundel Mills Blvd, Hanover, MD 21076", render3d:"https://my.matterport.com/show/?m=hPA3o1R1VSu" },
+  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004",     ts:20040201, addr:"20440 Germantown Road, Germantown, MD 20876" },
+  { num:  9, name:"Germantown",             type:"TLC",  city:"Germantown",      state:"MD", opened:"March 2005",        ts:20050301, addr:"11612 Middlebrook Road, Germantown, MD 20876", render3d:"https://my.matterport.com/show/?m=9iZMvGzWgXr" },
+  { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"672 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=epV8TadAFMN" },
+  { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"676 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=e2MiWFq9RGG" },
+  { num: 12, name:"Jefferson Street",       type:"TLC",  city:"Frederick",       state:"MD", opened:"July 2006",         ts:20060701, addr:"421 South Jefferson Street, Frederick, MD 21701", render3d:"https://my.matterport.com/show/?m=TcwUF3VtomK" },
+  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007",      ts:20070101, addr:"19550 A, Frederick Road, Germantown, MD 20876" },
+  { num: 14, name:"Gambrills",              type:"TAS",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"680 State Route 3 North, Gambrills, MD 21054", render3d:"https://my.matterport.com/show/?m=6V2c8wKRigk" },
+  { num: 15, name:"Laurel",                 type:"TLC",  city:"Laurel",          state:"MD", opened:"January 2008",      ts:20080101, addr:"13559 Baltimore Avenue, Laurel, MD 20707", render3d:"https://my.matterport.com/show/?m=wiYN1jCYHqp" },
+  { num: 16, name:"Shrewsbury",             type:"TLC",  city:"Shrewsbury",      state:"PA", opened:"August 2007",       ts:20070801, addr:"16327 Caprice Court, New Freedom, PA 17349", render3d:"https://my.matterport.com/show/?m=NgVDg6Upqpu" },
+  { num: 17, name:"West York",              type:"TLC",  city:"York",            state:"PA", opened:"December 2007",     ts:20071201, addr:"1195 Loucks Road, York, PA 17404", render3d:"https://my.matterport.com/show/?m=FeZxaocj5S5" },
+  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013",    ts:20130901, addr:"2266 Solomons Island Road, Huntingtown, MD 20639" },
+  { num: 19, name:"North Bel Air",           type:"TASE", city:"Bel Air",         state:"MD", opened:"December 2016",     ts:20161201, addr:"1615 East Churchville Road, Bel Air, MD 21015" },
+  { num: 21, name:"Route 85",               type:"TASE", city:"Frederick",       state:"MD", opened:"July 2019",         ts:20190701, addr:"5718 Buckeystown Pike, Frederick, MD 21704", render3d:"https://my.matterport.com/show/?m=JnddbfPPLzV" },
+  { num: 22, name:"Lanham",                 type:"TLC",  city:"Lanham",          state:"MD", opened:"December 2018",     ts:20181201, addr:"7740 Annapolis Road, Lanham, MD 20706", render3d:"https://my.matterport.com/show/?m=7YZmUbEoW6g" },
+  { num: 23, name:"Route 26",               type:"TASE", city:"Frederick",       state:"MD", opened:"January 2021",      ts:20210101, addr:"2415 Monocacy Blvd, Frederick, MD 21701", render3d:"https://my.matterport.com/show/?m=qQnfWMTXamK" },
+  { num: 24, name:"West York",              type:"TASE", city:"West York",       state:"PA", opened:"September 2021",    ts:20210901, addr:"2140 York Crossing Drive, York, PA 17408", render3d:"https://my.matterport.com/show/?m=xj4ksn7N7EP" },
+  { num: 25, name:"Ritchie Station",        type:"TASE", city:"Capitol Heights", state:"MD", opened:"December 2021",     ts:20211201, addr:"1610 Ritchie Station Court, Capitol Heights, MD 20743" },
+  { num: 26, name:"Halethorpe",             type:"TASE", city:"Halethorpe",      state:"MD", opened:"January 2024",      ts:20240101, addr:"3504 Washington Blvd, Halethorpe, MD 21227" },
+  { num: 27, name:"Odenton",                type:"TASE", city:"Odenton",         state:"MD", opened:"June 2022",         ts:20220601, addr:"1524 Annapolis Road, Odenton, MD 21113" },
+  { num: 28, name:"Martinsburg",            type:"TASE", city:"Martinsburg",     state:"WV", opened:"October 2023",      ts:20231001, addr:"960 Foxcroft Avenue, Martinsburg, WV 25401", render3d:"https://my.matterport.com/show/?m=Jed9u6AZUbS" },
+  { num: 31, name:"Arundel Mills",          type:"TASE", city:"Hanover",         state:"MD", opened:"May 2023",          ts:20230501, addr:"7682 Arundel Mills Blvd, Hanover, MD 21076", render3d:"https://my.matterport.com/show/?m=SKtqzQLJaVW" },
+  { num: 32, name:"West Hagerstown",        type:"TASE", city:"Hagerstown",      state:"MD", opened:"October 2022",      ts:20221001, addr:"1620 Wesel Boulevard, Hagerstown, MD 21740", render3d:"https://my.matterport.com/show/?m=TgogTei79Nn" },
+  { num: 35, name:"Dundalk",                type:"TASE", city:"Dundalk",         state:"MD", opened:"November 17, 2025", ts:20251117, addr:"1412 Merritt Blvd, Dundalk, MD 21222", render3d:"https://my.matterport.com/show/?m=PPxhyrfqCZg" },
+  { num: 20, name:"East York",              type:"TASE", city:"York",             state:"PA", opened:"", ts:20991231, addr:"1715 Whiteford Rd., York, PA 17402", target:"September 2026",  cam:"https://app.truelook.cloud/link?code=eJR8Tu4OyH-nKKLiHyMu5g&type=sharing_link" },
   { num: 29, name:"Middle River",          type:"TASE", city:"Middle River",     state:"MD", opened:"", ts:20991231, addr:"", target:"May 2027",         approx:true, hidden:true },
   { num: 30, name:"South Laurel",          type:"TASE", city:"Laurel",           state:"MD", opened:"", ts:20991231, addr:"13401 Mid Atlantic Blvd, Laurel, MD 20708", target:"March 2027",  hidden:true },
   { num: 33, name:"Ellicott City",         type:"TASE", city:"Ellicott City",    state:"MD", opened:"", ts:20991231, addr:"8532 Baltimore National Pike, Ellicott City, MD 21043", target:"June 2026", cam:"https://app.truelook.cloud/link?code=xb0XT2acpeP8jSc0AqZ4Fg&type=sharing_link" },
@@ -1292,7 +1292,7 @@ const locations = [
   { num: 37, name:"Elkridge",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 38, name:"East Bel Air",          type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"710 Baltimore Pike, Bel Air, MD 21014", target:"August 2027",   hidden:true },
   { num: 39, name:"Reisterstown Rd Plaza", type:"TASE", city:"Baltimore",         state:"MD", opened:"", ts:20991231, addr:"Reisterstown Road Plaza, Baltimore, MD 21215", target:"June 2027", hidden:true },
-  { num: 40, name:"Columbia",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"8181 Lark Brown Rd, Elkridge, MD 21075", target:"November 2027", hidden:true },
+  { num: 40, name:"Columbia",              type:"TASE", city:"Elkridge",         state:"MD", opened:"", ts:20991231, addr:"8181 Lark Brown Rd., Elkridge, MD 21075", target:"November 2027", hidden:true },
   { num: 41, name:"Bel Air Village",       type:"TASE", city:"Bel Air",          state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 42, name:"Capitol Heights",       type:"TASE", city:"Capitol Heights",  state:"MD", opened:"", ts:20991231, addr:"",                                          approx:true, hidden:true },
   { num: 43, name:"Beltway Plaza",         type:"TASE", city:"Greenbelt",        state:"MD", opened:"", ts:20991231, addr:"6000 Greenbelt Rd, Greenbelt, MD 20770",                     hidden:true },
@@ -1613,13 +1613,13 @@ function yearsOpen(ts) {
    coordinates, then to a name search for sites with neither. */
 function dirDest(loc) {
   if (loc.addr) {
-    // Some stored addresses already carry city/state/zip; appending them again
-    // produced "1715 Whiteford Rd, York, PA 17402, York, PA".
-    let a = loc.addr.trim().replace(/[,\s]+$/, '');
-    const has = t => t && new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(a);
-    if (!has(loc.city))  a += `, ${loc.city}`;
-    if (!has(loc.state)) a += `, ${loc.state}`;
-    return a;
+    const a = loc.addr.trim().replace(/[,\s]+$/, '');
+    // A stored address that already carries a state is a complete postal
+    // address — use it verbatim. Appending the branch's city broke sites whose
+    // postal town differs from their name (#16 Shrewsbury sits in New Freedom,
+    // #24 West York in York).
+    if (/,\s*[A-Z]{2}\b/.test(a)) return a;
+    return `${a}, ${loc.city}, ${loc.state}`;
   }
   const c = COORDS[loc.num];
   if (c && !loc.approx) return `${c[0]},${c[1]}`;
@@ -3138,7 +3138,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-08-19 15:22';
+const BUILD = '2026-08-19 15:32';
 
 (() => {
   const el = document.getElementById('buildStamp');
