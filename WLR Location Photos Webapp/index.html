@@ -500,7 +500,20 @@
     .tl-xlabel { fill: rgba(255,255,255,0.5); font-size: 11px; text-anchor: middle; font-family: 'Work Sans', sans-serif; }
     .tl-end { fill: #fff; font-size: 15px; font-weight: 900; text-anchor: middle; font-family: 'Work Sans', sans-serif; }
     .tl-hit { fill: transparent; }
-    .tl-hit:hover { fill: rgba(255,255,255,0.07); }
+    .tl-hit:hover, .tl-hit.on { fill: rgba(255,255,255,0.07); }
+    /* Readout for the growth charts. A native <title> only appears on hover,
+       which does not exist on a phone — this works for pointer and touch. */
+    .tl-chart-wrap { position: relative; }
+    .tl-tip {
+      position: absolute; z-index: 5; pointer-events: none;
+      transform: translate(-50%, -100%);
+      background: rgba(8,20,40,0.97); color: var(--text);
+      border: 1px solid rgba(255,255,255,0.22); border-radius: var(--r-sm);
+      padding: var(--s-1) var(--s-2); box-shadow: var(--e-2);
+      font-size: var(--f-xs); font-weight: var(--w-bold); white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .tl-tip[hidden] { display: none; }
     .tl-foot { text-align: center; font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 8px; }
     .tl-empty { text-align: center; color: rgba(255,255,255,0.5); padding: 40px; }
 
@@ -745,6 +758,16 @@
     .legend { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); }
     .legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    /* Build stamp — deliberately quiet. Its job is to answer "which version is
+       this phone on?" without drawing the eye during a demo. */
+    .build-stamp {
+      display: block; margin: 3px auto 0; padding: 2px 6px;
+      background: none; border: none; font-family: inherit;
+      font-size: 9px; letter-spacing: 0.4px; color: rgba(255,255,255,0.25);
+      cursor: pointer; -webkit-appearance: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .build-stamp:active { color: rgba(255,255,255,0.6); }
 
     .scroll-top {
       position: fixed; bottom: 56px; right: 16px;
@@ -1173,6 +1196,8 @@
       <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none"><svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg></a>
     </div>
   </div>
+  <button class="build-stamp" id="buildStamp" title="Which build this device is running. Tap to force a fresh copy.">
+  </button>
 </footer>
 
 <!-- ══ VIDEOS ═══════════════════════════════════════════════ -->
@@ -2360,6 +2385,48 @@ function renderTimeline() {
   wrap.querySelectorAll('.tlm-btn').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.metric !== growthMetric) { growthMetric = b.dataset.metric; renderTimeline(); }
   }));
+  wireChartTips(wrap);
+}
+
+/* Show a year's value on hover (pointer) or tap (touch). Scoped to the growth
+   charts; the sales chart has its own click-to-select behaviour. */
+function wireChartTips(root) {
+  root.querySelectorAll('.tl-chart-wrap').forEach(box => {
+    const tip = box.querySelector('.tl-tip');
+    if (!tip) return;
+    let active = null;
+    const hide = () => {
+      tip.hidden = true;
+      if (active) active.classList.remove('on');
+      active = null;
+    };
+    const show = hit => {
+      const hb = hit.getBoundingClientRect(), bb = box.getBoundingClientRect();
+      if (active) active.classList.remove('on');
+      active = hit; hit.classList.add('on');
+      tip.textContent = hit.dataset.tip || '';
+      tip.hidden = false;
+      // clamp so the tip never hangs off either edge of the chart
+      const half = tip.offsetWidth / 2;
+      const x = Math.min(Math.max(hb.left - bb.left + hb.width / 2, half + 2), bb.width - half - 2);
+      tip.style.left = x + 'px';
+      tip.style.top  = Math.max(tip.offsetHeight + 4, hb.top - bb.top + 34) + 'px';
+    };
+    box.querySelectorAll('.tl-hit').forEach(hit => {
+      hit.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') show(hit); });
+      hit.addEventListener('pointerdown',  () => show(hit));   // tap and click-drag
+    });
+    box.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hide(); });
+  });
+  // a tap anywhere else dismisses it
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest || !e.target.closest('.tl-chart-wrap')) {
+      root.querySelectorAll('.tl-tip').forEach(t => {
+        t.hidden = true;
+        t.parentElement.querySelectorAll('.tl-hit.on').forEach(h => h.classList.remove('on'));
+      });
+    }
+  });
 }
 
 // Single-series bar chart for Revenue / Cars Serviced (company-wide; ignores brand/state filters)
@@ -2381,7 +2448,8 @@ function renderSeriesChart(metric) {
   years.forEach((yr, i) => {
     const v = vals[i], yT = yOf(v), yB = yOf(0), proj = yr === 2026, covid = yr === 2020 && metric === 'rev';
     cols += `<rect x="${(xOf(i) + colW * 0.12).toFixed(1)}" y="${yT.toFixed(1)}" width="${(colW * 0.76).toFixed(1)}" height="${(yB - yT).toFixed(1)}" fill="${meta.color}" rx="0.5"${proj ? ' opacity="0.5"' : ''}/>`;
-    cols += `<rect class="tl-hit" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${yr}${proj ? ' (projected)' : ''}${covid ? ' (COVID)' : ''}: ${meta.fmt(v)}</title></rect>`;
+    const tip = `${yr}${proj ? ' (projected)' : ''}${covid ? ' (COVID)' : ''}: ${meta.fmt(v)}`;
+    cols += `<rect class="tl-hit" data-tip="${tip}" aria-label="${tip}" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"></rect>`;
   });
   let xlab = '';
   years.forEach((yr, i) => {
@@ -2402,10 +2470,13 @@ function renderSeriesChart(metric) {
         <div class="tl-stat"><span class="tl-num">${span + 1}</span><span class="tl-lab">Years</span></div>
       </div>
     </div>
-    <svg class="tl-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="WLR ${meta.label} by year">
-      ${grid}${cols}${xlab}${endLabel}
-    </svg>
-    <div class="tl-foot">${meta.note} Hover a year for the value.</div>`;
+    <div class="tl-chart-wrap">
+      <svg class="tl-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="WLR ${meta.label} by year">
+        ${grid}${cols}${xlab}${endLabel}
+      </svg>
+      <div class="tl-tip" hidden></div>
+    </div>
+    <div class="tl-foot">${meta.note} Tap or hover a year for the value.</div>`;
 }
 
 function renderLocationsChart() {
@@ -2436,7 +2507,8 @@ function renderLocationsChart() {
       base += v;
     });
     const tot = d.brands.reduce((s, b) => s + d.cum[b][i], 0);
-    cols += `<rect class="tl-hit" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"><title>${yr}: ${tot} location${tot === 1 ? '' : 's'} open</title></rect>`;
+    const tip = `${yr}: ${tot} location${tot === 1 ? '' : 's'} open`;
+    cols += `<rect class="tl-hit" data-tip="${tip}" aria-label="${tip}" x="${xOf(i).toFixed(1)}" y="${py0}" width="${colW.toFixed(1)}" height="${plotH}"></rect>`;
   });
 
   let xlab = '';
@@ -2463,10 +2535,13 @@ function renderLocationsChart() {
       </div>
     </div>
     <div class="tl-legend">${legend}</div>
-    <svg class="tl-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cumulative WLR locations open by year, ${d.firstYear} to ${NOW_YEAR}">
-      ${grid}${cols}${xlab}${endLabel}
-    </svg>
-    <div class="tl-foot">Cumulative locations open each year${d.busiestCount > 1 ? ` · busiest year ${d.busiestYear} (${d.busiestCount} opened)` : ''}. Hover a year for the count.</div>`;
+    <div class="tl-chart-wrap">
+      <svg class="tl-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="Cumulative WLR locations open by year, ${d.firstYear} to ${NOW_YEAR}">
+        ${grid}${cols}${xlab}${endLabel}
+      </svg>
+      <div class="tl-tip" hidden></div>
+    </div>
+    <div class="tl-foot">Cumulative locations open each year${d.busiestCount > 1 ? ` · busiest year ${d.busiestYear} (${d.busiestCount} opened)` : ''}. Tap or hover a year for the count.</div>`;
 }
 
 function setView(view) {
@@ -2922,6 +2997,23 @@ if (SHOW_SALES) {
   document.getElementById('swOpenBtn').remove();
 }
 document.getElementById('swClose').addEventListener('click', closeSales);
+
+// ══ BUILD STAMP ════════════════════════════════════════════
+// Written by tools/stamp-build.py at ship time; do not edit by hand.
+const BUILD = '2026-08-19 14:32';
+
+(() => {
+  const el = document.getElementById('buildStamp');
+  if (!el) return;
+  el.textContent = `BUILD ${BUILD}`;
+  // Tapping reloads past any cached copy — the fix for a home-screen install
+  // that resumed a suspended page instead of fetching a fresh one.
+  el.addEventListener('click', () => {
+    const u = new URL(location.href);
+    u.searchParams.set('v', Date.now());
+    location.replace(u);
+  });
+})();
 
 // ══ HOME BUTTON (header logo) ══════════════════════════════
 // Closes whatever is open and returns to the default grid view.
