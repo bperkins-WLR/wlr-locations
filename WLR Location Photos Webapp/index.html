@@ -497,6 +497,8 @@
 
     /* ══ HOURS ═══════════════════════════════════════════ */
     .loc-hours { margin-top: 5px; }
+    .hw-hol { border-top: 1px solid rgba(255,255,255,0.12); margin-top: 3px; padding-top: 4px; }
+    .hw-hol .hw-day { color: var(--yellow); }
     .hrs-toggle { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; padding: 3px 8px; font-size: 10px; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; -webkit-appearance: none; }
     .hrs-toggle:active { background: rgba(255,255,255,0.12); }
     .hrs-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
@@ -1464,16 +1466,86 @@ function fmtHr(h) {
   return min ? `${hr}:${String(min).padStart(2,'0')} ${ap}` : `${hr} ${ap}`;
 }
 
+/* ══ HOLIDAY SCHEDULE ═══════════════════════════════════════
+   Company-wide, confirmed by Brice in September 2026: closed all day on the
+   seven holidays below, and closing at 4pm on the two eves. Dates are derived
+   per year rather than listed, so this never needs maintaining — Easter,
+   Memorial Day, Labor Day and Thanksgiving all move.
+
+   Before this existed the app read open/closed purely off the weekly
+   schedule, so it showed every location Open on Thanksgiving. */
+function easterSunday(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  return new Date(y, month - 1, ((h + l - 7 * m + 114) % 31) + 1);
+}
+function nthDow(y, month, dow, n) {          // n-th <dow> of the month
+  const first = new Date(y, month, 1);
+  return new Date(y, month, 1 + ((dow - first.getDay() + 7) % 7) + (n - 1) * 7);
+}
+function lastDow(y, month, dow) {            // last <dow> of the month
+  const last = new Date(y, month + 1, 0);
+  return new Date(y, month, last.getDate() - ((last.getDay() - dow + 7) % 7));
+}
+const dayKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+const HOLIDAY_CACHE = {};
+function holidayCalendar(y) {
+  if (HOLIDAY_CACHE[y]) return HOLIDAY_CACHE[y];
+  const cal = {};
+  const put = (d, v) => { cal[dayKey(d)] = v; };
+  put(new Date(y, 0, 1),    { name: "New Year's Day",  closed: true });
+  put(easterSunday(y),      { name: 'Easter',          closed: true });
+  put(lastDow(y, 4, 1),     { name: 'Memorial Day',    closed: true });
+  put(new Date(y, 6, 4),    { name: 'July 4th',        closed: true });
+  put(nthDow(y, 8, 1, 1),   { name: 'Labor Day',       closed: true });
+  put(nthDow(y, 10, 4, 4),  { name: 'Thanksgiving',    closed: true });
+  put(new Date(y, 11, 25),  { name: 'Christmas',       closed: true });
+  put(new Date(y, 11, 24),  { name: 'Christmas Eve',   closeAt: 16 });
+  put(new Date(y, 11, 31),  { name: "New Year's Eve",  closeAt: 16 });
+  return (HOLIDAY_CACHE[y] = cal);
+}
+function holidayOn(d) { return holidayCalendar(d.getFullYear())[dayKey(d)] || null; }
+
+/* Holidays falling in the next `days` days, for the expanded hours panel. */
+function upcomingHolidays(days = 14) {
+  const out = [], n = nowET();
+  for (let i = 0; i <= days; i++) {
+    const d = new Date(n); d.setDate(d.getDate() + i);
+    const h = holidayOn(d);
+    if (h) out.push({ ...h, when: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `${DAY_ABBR[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}` });
+  }
+  return out;
+}
+
 // Live open/closed status for a location number (null if no hours on file)
 function hoursStatus(num) {
   const H = HOURS[num]; if (!H) return null;
   const n = nowET(), day = n.getDay(), cur = n.getHours() + n.getMinutes() / 60;
-  const today = H.d[day];
-  if (today && cur >= today[0] && cur < today[1]) return { open: true, detail: `Closes ${fmtHr(today[1])}` };
+
+  const hol = holidayOn(n);
+  if (hol && hol.closed) return { open: false, detail: `Closed for ${hol.name}`, holiday: hol.name };
+
+  // An eve closes early, so cap today's closing time rather than replacing it.
+  let today = H.d[day];
+  if (today && hol && hol.closeAt) today = [today[0], Math.min(today[1], hol.closeAt)];
+
+  if (today && cur >= today[0] && cur < today[1]) {
+    return { open: true, detail: `Closes ${fmtHr(today[1])}`, holiday: hol ? hol.name : null };
+  }
   if (today && cur < today[0]) return { open: false, detail: `Opens ${fmtHr(today[0])}` };
-  for (let i = 1; i <= 7; i++) {
-    const d = (day + i) % 7, slot = H.d[d];
-    if (slot) return { open: false, detail: `Opens ${fmtHr(slot[0])} ${i === 1 ? 'tomorrow' : DAY_ABBR[d]}` };
+
+  // Look ahead by real dates, skipping any day the company is closed.
+  for (let i = 1; i <= 8; i++) {
+    const dt = new Date(n); dt.setDate(dt.getDate() + i);
+    const h2 = holidayOn(dt);
+    if (h2 && h2.closed) continue;
+    const slot = H.d[dt.getDay()];
+    if (slot) return { open: false, detail: `Opens ${fmtHr(slot[0])} ${i === 1 ? 'tomorrow' : DAY_ABBR[dt.getDay()]}` };
   }
   return { open: false, detail: 'Closed' };
 }
@@ -1497,7 +1569,9 @@ function formatWeek(num) {
 function hoursBlockHtml(num) {
   const st = hoursStatus(num); if (!st) return '';
   const week = formatWeek(num).map(r =>
-    `<div class="hw-row"><span class="hw-day">${r.label}</span><span class="hw-time${r.time==='Closed'?' hw-closed':''}">${r.time}</span></div>`).join('');
+    `<div class="hw-row"><span class="hw-day">${r.label}</span><span class="hw-time${r.time==='Closed'?' hw-closed':''}">${r.time}</span></div>`).join('')
+    + upcomingHolidays().map(h =>
+    `<div class="hw-row hw-hol"><span class="hw-day">${esc(h.name)}</span><span class="hw-time${h.closed?' hw-closed':''}">${h.closed ? 'Closed' : `Closes ${fmtHr(h.closeAt)}`}</span></div>`).join('');
   return `
     <div class="loc-hours">
       <button class="hrs-toggle" onclick="event.stopPropagation(); this.parentElement.classList.toggle('open')">
@@ -3286,7 +3360,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-09-10 13:37';
+const BUILD = '2026-09-10 13:42';
 
 (() => {
   const el = document.getElementById('buildStamp');
