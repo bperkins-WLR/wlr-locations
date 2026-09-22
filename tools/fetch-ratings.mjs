@@ -61,6 +61,7 @@ const LOCS = [
   [28, 'TASE', '960 Foxcroft Avenue, Martinsburg, WV'],
   [31, 'TASE', '7682 Arundel Mills Blvd, Hanover, MD'],
   [32, 'TASE', '1620 Wesel Boulevard, Hagerstown, MD'],
+  [33, 'TASE', '8532 Baltimore National Pike, Ellicott City, MD'],
   [35, 'TASE', '1412 Merritt Blvd, Dundalk, MD'],
 ];
 
