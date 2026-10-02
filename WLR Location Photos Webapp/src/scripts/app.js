@@ -1993,5 +1993,7 @@ function goHome() {
 }
 document.getElementById('homeBtn').addEventListener('click', goHome);
 
-// Called from inline on*="" attributes in generated markup, which only see globals.
-Object.assign(window, { photoOk, photoErr, showCardFromMap });
+// Called from inline on*="" attributes in generated markup, which only see
+// globals. Every function named in an onclick/onload/onerror string has to be
+// listed here — a module's functions are not globals.
+Object.assign(window, { photoOk, photoErr, showCardFromMap, openDirMenu, openTeam, shareLoc });
