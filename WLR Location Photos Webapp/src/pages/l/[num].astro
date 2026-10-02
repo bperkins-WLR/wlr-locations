@@ -1,0 +1,51 @@
+---
+/* l/NN.html — a location's share link. This is a static site, so nothing can
+   inject per-location tags for index.html?loc=N; instead each location gets
+   this stub with its own og: tags (name, brand, city, its og/NN.jpg card), which
+   forwards straight into the app. Crawlers read the tags without following the
+   redirect; people land on the location. Replaces tools/build-location-pages.py. */
+import { locations } from '../../data/locations.js';
+import { TYPE_FULL } from '../../data/brands.js';
+import { photoFor } from '../../lib/location-photos.js';
+
+export function getStaticPaths() {
+  return locations.map(loc => ({
+    params: { num: String(loc.numOverride || loc.num).padStart(2, '0') },
+    props: { loc },
+  }));
+}
+
+const { loc } = Astro.props;
+const { num } = Astro.params;
+const site = String(Astro.site).replace(/\/$/, '');
+const title = `#${num} ${loc.name} — WLR Automotive Group`;
+const status = loc.hidden ? 'Coming soon' : (TYPE_FULL[loc.type] || '');
+const desc = `${status} · ${loc.city}, ${loc.state}. Photos, hours, ratings and team.`;
+const img = photoFor(loc.numOverride || loc.num, '01') ? `${site}/og/${num}.jpg` : `${site}/og-image.jpg`;
+const appRel = `../index.html?loc=${loc.num}`;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<link rel="canonical" href={`${site}/index.html?loc=${loc.num}`}>
+<meta name="description" content={desc}>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WLR Automotive Group">
+<meta property="og:title" content={title}>
+<meta property="og:description" content={desc}>
+<meta property="og:url" content={`${site}/l/${num}.html`}>
+<meta property="og:image" content={img}>
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Crawlers stop at the tags above; people are forwarded into the app. -->
+<meta http-equiv="refresh" content={`0; url=${appRel}`}>
+<script is:inline set:html={`location.replace(${JSON.stringify(appRel)});`}></script>
+</head>
+<body style="margin:0;background:#0d3268;color:#fff;font-family:system-ui,sans-serif">
+<p style="padding:24px">Opening {loc.name}… <a href={appRel} style="color:#FADC00">Continue</a></p>
+</body>
+</html>
