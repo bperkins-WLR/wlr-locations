@@ -1300,12 +1300,12 @@ const locations = [
   { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"672 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=epV8TadAFMN" },
   { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"676 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=e2MiWFq9RGG" },
   { num: 12, name:"Jefferson Street",       type:"TLC",  city:"Frederick",       state:"MD", opened:"July 2006",         ts:20060701, addr:"421 South Jefferson Street, Frederick, MD 21701", render3d:"https://my.matterport.com/show/?m=TcwUF3VtomK" },
-  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007",      ts:20070101, addr:"19550 A, Frederick Road, Germantown, MD 20876" },
+  { num: 13, name:"Route 355",              type:"TLC",  city:"Germantown",      state:"MD", opened:"January 2007",      ts:20070101, addr:"19550 A, Frederick Road, Germantown, MD 20876", status:"Permanently Closed" },
   { num: 14, name:"Gambrills",              type:"TAS",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"680 State Route 3 North, Gambrills, MD 21054", render3d:"https://my.matterport.com/show/?m=6V2c8wKRigk" },
   { num: 15, name:"Laurel",                 type:"TLC",  city:"Laurel",          state:"MD", opened:"January 2008",      ts:20080101, addr:"13559 Baltimore Avenue, Laurel, MD 20707", render3d:"https://my.matterport.com/show/?m=wiYN1jCYHqp" },
   { num: 16, name:"Shrewsbury",             type:"TLC",  city:"Shrewsbury",      state:"PA", opened:"August 2007",       ts:20070801, addr:"16327 Caprice Court, New Freedom, PA 17349", render3d:"https://my.matterport.com/show/?m=NgVDg6Upqpu" },
   { num: 17, name:"West York",              type:"TLC",  city:"York",            state:"PA", opened:"December 2007",     ts:20071201, addr:"1195 Loucks Road, York, PA 17404", render3d:"https://my.matterport.com/show/?m=FeZxaocj5S5" },
-  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013",    ts:20130901, addr:"2266 Solomons Island Road, Huntingtown, MD 20639" },
+  { num: 18, name:"Huntingtown",            type:"TAS",  city:"Huntingtown",     state:"MD", opened:"September 2013",    ts:20130901, addr:"2266 Solomons Island Road, Huntingtown, MD 20639", status:"Permanently Closed" },
   { num: 19, name:"North Bel Air",           type:"TASE", city:"Bel Air",         state:"MD", opened:"December 2016",     ts:20161201, addr:"1615 East Churchville Road, Bel Air, MD 21015" },
   { num: 21, name:"Route 85",               type:"TASE", city:"Frederick",       state:"MD", opened:"July 2019",         ts:20190701, addr:"5718 Buckeystown Pike, Frederick, MD 21704", render3d:"https://my.matterport.com/show/?m=JnddbfPPLzV" },
   { num: 22, name:"Lanham",                 type:"TLC",  city:"Lanham",          state:"MD", opened:"December 2018",     ts:20181201, addr:"7740 Annapolis Road, Lanham, MD 20706", render3d:"https://my.matterport.com/show/?m=7YZmUbEoW6g" },
@@ -1524,6 +1524,7 @@ function upcomingHolidays(days = 14) {
 
 // Live open/closed status for a location number (null if no hours on file)
 function hoursStatus(num) {
+  if (isPermClosed(num)) return null;
   const H = HOURS[num]; if (!H) return null;
   const n = nowET(), day = n.getDay(), cur = n.getHours() + n.getMinutes() / 60;
 
@@ -1623,6 +1624,7 @@ function photoErr(el) {
 }
 
 function callBtnHtml(num) {
+  if (isPermClosed(num)) return '';
   const H = HOURS[num]; if (!H || !H.p) return '';
   return `<a class="loc-call" href="tel:${H.p.replace(/[^0-9]/g,'')}" onclick="event.stopPropagation()">${ic('phone')}Call</a>`;
 }
@@ -1708,6 +1710,13 @@ function getLocInfo(num) {
 function isLocVisible(baseLoc) {
   if (!baseLoc.hidden) return true;
   return getLocInfo(baseLoc.num).published === true;
+}
+
+/* Closed sites stay on the grid for the record, but drop out of anything that
+   implies they're operating: live hours, Call, the location count and the tour. */
+function isPermClosed(num) {
+  const base = locations.find(l => l.num === num);
+  return !!base && ({ ...base, ...getLocInfo(num) }).status === 'Permanently Closed';
 }
 
 function yearsOpen(ts) {
@@ -1914,7 +1923,7 @@ function animateNum(el, target, dur) {
 window.addEventListener('load', () => {
   const yrs = NOW_YEAR - 1987;
   document.getElementById('statYears').textContent = yrs;
-  animateNum(document.getElementById('statLocs'),   locations.filter(isLocVisible).length, 800);
+  animateNum(document.getElementById('statLocs'),   locations.filter(l => isLocVisible(l) && !isPermClosed(l.num)).length, 800);
   animateNum(document.getElementById('statYears'),  yrs, 1200);
   animateNum(document.getElementById('statStates'), 3, 600);
 });
@@ -2561,7 +2570,9 @@ function pinPopupHtml(loc) {
     || (comingSoon ? 'images/tase-Coming soon.JPG' : `images/loc-${pad(dn)}/01.jpg`);
   const est = loc.opened ? `Est. ${esc(loc.opened)}` : 'Coming Soon';
   const st = hoursStatus(loc.num);
-  const statusLine = st
+  const statusLine = isPermClosed(loc.num)
+    ? `<div class="mp-hours" style="color:rgba(255,80,80,0.9);font-weight:700">Permanently closed</div>`
+    : st
     ? `<div class="mp-hours"><span class="hrs-dot ${st.open ? 'is-open' : 'is-closed'}"></span><span class="hrs-word ${st.open ? 'is-open' : 'is-closed'}">${st.open ? 'Open' : 'Closed'}</span> · ${st.detail}</div>`
     : '';
   return `
@@ -2926,7 +2937,7 @@ function startMapTour() {
   // location-number order. Coming-soon sites are renderings rather than real
   // storefronts, and including all 45 made the loop run four minutes.
   const soon = new Set(locations.filter(l => l.hidden).map(l => l.num));
-  const stops = [...mapMarkers.keys()].filter(n => !soon.has(n)).sort((a, b) => a - b);
+  const stops = [...mapMarkers.keys()].filter(n => !soon.has(n) && !isPermClosed(n)).sort((a, b) => a - b);
   if (!stops.length) return;
   mapTour = { running: true, i: 0, timer: null, stops };
   setTourBtn(true);
@@ -3066,7 +3077,7 @@ document.getElementById('teamClose').addEventListener('click', closeTeam);
 
   // Count up once the stats have faded in
   setTimeout(() => {
-    animateNum(document.getElementById('introLocs'),   locations.filter(isLocVisible).length, 1100);
+    animateNum(document.getElementById('introLocs'),   locations.filter(l => isLocVisible(l) && !isPermClosed(l.num)).length, 1100);
     animateNum(document.getElementById('introYears'),  NOW_YEAR - 1987, 1100);
     animateNum(document.getElementById('introStates'), 3, 900);
   }, 950);
@@ -3360,7 +3371,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-10-01 16:58';
+const BUILD = '2026-10-02 13:34';
 
 (() => {
   const el = document.getElementById('buildStamp');
