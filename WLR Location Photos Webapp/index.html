@@ -1075,7 +1075,7 @@
 
 <!-- ══ ICONS ═══════════════════════════════════════
      Sprite + ic() helper, shared with admin.html. -->
-<script src="icons.js?v=202610021514"></script>
+<script src="icons.js?v=202610021542"></script>
 
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
@@ -1664,12 +1664,16 @@ function callBtnHtml(num) {
 
 // Live Google rating chip — links to the location's Google Maps page via its
 // Place ID (captured in ratings.json). Empty until ratings.json is populated.
+// Uses Google's documented Maps URL (api=1 + query_place_id): the old
+// /maps/place/?q=place_id:… form only worked on the website — the Google Maps
+// iPhone app took it as typed text and handed it to Google search.
 function ratingHtml(num, compact) {
   const R = RATINGS[num]; if (!R || typeof R.r !== 'number') return '';
   const count = R.n ? `<span class="rate-count">(${R.n.toLocaleString()})</span>` : '';
-  const url = R.id
-    ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(R.id)}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(R.name || ('WLR location ' + num))}`;
+  const loc = locations.find(l => l.num === num);
+  const query = [R.name || 'WLR Automotive Group', loc && dirDest(loc)].filter(Boolean).join(', ');
+  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` +
+              (R.id ? `&query_place_id=${encodeURIComponent(R.id)}` : '');
   const go = compact ? '' : `<span class="rate-go">${ic('arrow-ur')}</span>`;
   return `<a class="loc-rating${compact ? ' compact' : ''}" href="${url}" target="_blank" rel="noopener"
     onclick="event.stopPropagation()" title="${R.r}★ from ${(R.n||0).toLocaleString()} Google reviews — open in Google Maps">
@@ -3404,7 +3408,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-10-02 15:14';
+const BUILD = '2026-10-02 15:42';
 
 (() => {
   const el = document.getElementById('buildStamp');
