@@ -1,5 +1,30 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { validateAll, formatReport } from './src/data/validate.js';
+
+/* Check the data files (src/data/) before anything is built. Errors stop the
+   build — so a broken edit fails on Vercel and the live site keeps the last
+   good version — and warnings are listed in the log. `npm run check-data`
+   runs the same check on its own. */
+const dataCheck = {
+  name: 'wlr-data-check',
+  hooks: {
+    /** @param {{ command: string, logger: import('astro').AstroIntegrationLogger }} opts */
+    'astro:config:setup': ({ command, logger }) => {
+      const result = validateAll();
+      const report = formatReport(result);
+      if (result.errors.length && command === 'build') {
+        // Throwing a bare message (no stack) keeps the log readable.
+        const e = new Error(`\n\n${report}\n\nThe build was stopped, so nothing was deployed. Fix the file(s) named above and push again.\n`);
+        e.stack = e.message;
+        throw e;
+      }
+      if (result.errors.length) logger.error(report);
+      else if (result.warnings.length) logger.warn(report);
+      else logger.info(report);
+    },
+  },
+};
 
 export default defineConfig({
   site: 'https://wlr-locations.vercel.app',
@@ -7,4 +32,5 @@ export default defineConfig({
   // already shared or saved to a home screen keeps working unchanged.
   build: { format: 'file' },
   trailingSlash: 'never',
+  integrations: [dataCheck],
 });
