@@ -1,0 +1,106 @@
+/* Site-wide styles: design tokens, reset, the icon utilities and base type,
+   plus the two elements scripts append straight to <body> (toast, directions
+   menu). Each component's own rules live in its .astro file, and are emitted
+   after this file. */
+:root {
+  --deep:   #0d3268;
+  --mid:    #0f3d82;
+  --yellow: #FADC00;
+  --bord:   rgba(255,255,255,0.14);
+  --text:   #ffffff;
+  --muted:  rgba(255,255,255,0.55);
+  --tlc-c:  #FADC00;
+  --tas-c:  #0C4D8F;
+  --tar-c:  #1a1a1a;
+  --tase-c: #0C4D8F;
+
+  /* ── Design tokens ──────────────────────────────────────────
+     One scale for each dimension. Component rules should pull from
+     these rather than inventing one-off pixel values.            */
+  --s-1: 4px;   --s-2: 8px;   --s-3: 12px;  --s-4: 16px;
+  --s-5: 24px;  --s-6: 32px;  --s-7: 48px;
+
+  --r-sm: 6px;  --r-md: 10px; --r-lg: 16px; --r-full: 999px;
+
+  --f-2xs: 10px; --f-xs: 11px; --f-sm: 13px; --f-md: 15px;
+  --f-lg: 18px;  --f-xl: 24px; --f-2xl: 32px; --f-3xl: 40px;
+
+  --w-normal: 400; --w-med: 500; --w-semi: 600; --w-bold: 700; --w-black: 900;
+
+  --e-1: 0 1px 2px rgba(0,0,0,.30);
+  --e-2: 0 4px 14px rgba(0,0,0,.38);
+  --e-3: 0 12px 34px rgba(0,0,0,.48);
+
+  --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms;
+  --ease: cubic-bezier(.2,.7,.3,1);
+
+  --ico-size: 1.15em; --ico-stroke: 1.9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+/* ══ ICONS ═══════════════════════════════════════════
+   Single stroked set drawn from the #i-* sprite below. Icons inherit
+   currentColor and sit on the text baseline, so a button only ever has
+   to set its own colour and font-size. */
+.ico {
+  width: var(--ico-size); height: var(--ico-size); flex: none;
+  fill: none; stroke: currentColor; stroke-width: var(--ico-stroke);
+  stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -0.18em; overflow: visible;
+}
+.ico--fill { fill: currentColor; stroke: none; }
+.soon-dot { width: 9px; height: 9px; border-radius: 50%; background: #e33; display: inline-block; flex: none; margin-right: var(--s-2); vertical-align: 0.02em; }
+.loc-addr, .loc-phone, .mp-approx, .mp-target, .sw-leg, .inc-title, .sw-title,
+.no-results-icon, .hrs-caret, .rate-go, .rate-star, .ph-icon,
+.mp-dir, .mp-view, .loc-status { display: inline-flex; align-items: center; gap: var(--s-1); }
+.sw-wx-icon, .inc-poster, .inc-play { display: flex; align-items: center; justify-content: center; }
+.sw-wow { display: inline-flex; align-items: center; gap: var(--s-1); }
+/* Numerals must not reflow as values change */
+.hero-stat-num, .rate-num, .sw-hero-val, .tl-stat-num { font-variant-numeric: tabular-nums; }
+body {
+  font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--deep);
+  color: var(--text);
+  min-height: 100vh;
+  overscroll-behavior: none;
+}
+
+/* ══ TOAST ═══════════════════════════════════════════
+   Created on demand and appended to <body> — the share confirmation, and the
+   tap-to-update pill (.toast.update) from the auto-update check. */
+.toast {
+  position: fixed; left: 50%; bottom: 76px; transform: translate(-50%, 12px);
+  z-index: 1300; pointer-events: none; opacity: 0;
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  background: rgba(8,20,40,0.97); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.22); border-radius: var(--r-full);
+  padding: var(--s-2) var(--s-4); box-shadow: var(--e-3);
+  font-size: var(--f-sm); font-weight: var(--w-semi);
+  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.update { pointer-events: auto; cursor: pointer; white-space: nowrap; font: inherit; font-size: var(--f-sm); font-weight: var(--w-semi); }
+
+/* ══ DIRECTIONS MENU ═════════════════════════════════
+   Directions app picker. Fixed to the viewport rather than nested in the
+   card or map popup, so the map popup's overflow:hidden cannot clip it. */
+.dir-menu {
+  position: fixed; z-index: 1200; min-width: 176px;
+  background: #0d1a30; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--r-md); box-shadow: var(--e-3);
+  padding: var(--s-1); overflow: hidden;
+}
+.dir-menu[hidden] { display: none; }
+.dir-menu a {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-2) var(--s-3); border-radius: var(--r-sm);
+  color: var(--text); text-decoration: none;
+  font-size: var(--f-sm); font-weight: var(--w-semi); white-space: nowrap;
+}
+.dir-menu a:active { background: rgba(255,255,255,0.14); }
+@media (hover: hover) { .dir-menu a:hover { background: rgba(255,255,255,0.10); } }
+.dir-menu-head {
+  padding: var(--s-1) var(--s-3) var(--s-2);
+  font-size: var(--f-2xs); letter-spacing: 0.6px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}

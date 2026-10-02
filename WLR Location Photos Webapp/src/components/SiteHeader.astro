@@ -1,0 +1,83 @@
+---
+// Sticky header: home button, sales, videos and slideshow.
+---
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header>
+  <button class="h-home" id="homeBtn" title="Back to the gallery">
+    <img class="h-logo-img" src="images/logo-wlr.PNG" alt="WLR"
+         onerror="this.style.display='none'; document.getElementById('hFB').style.display='flex';">
+    <div class="h-logo-fb" id="hFB" style="display:none">WLR</div>
+    <div class="h-home-text">
+      <div class="h-title"><span>WLR</span> Automotive Group</div>
+      <div class="h-sub">Location Gallery</div>
+    </div>
+  </button>
+  <button class="header-btn" id="swOpenBtn" title="Weekly sales &amp; weather"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></button>
+  <button class="header-btn" id="incOpenBtn" title="Videos"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg></button>
+  <button class="slideshow-btn" id="ssStartBtn" title="Play slideshow" aria-label="Play slideshow"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-play"></use></svg><span class="sb-label">Slideshow</span></button>
+</header>
+
+<style is:global>
+/* ══ HEADER ══════════════════════════════════════════ */
+header {
+  background: linear-gradient(160deg, #0a2755 0%, #1248a0 100%);
+  padding: max(env(safe-area-inset-top), 10px) 14px 8px;
+  border-bottom: 3px solid var(--yellow);
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 3px 18px rgba(0,0,0,.45);
+  display: flex; align-items: center; gap: 10px;
+}
+/* Logo + title act as a "home" button — resets to the default grid view */
+.h-home {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  background: none; border: none; padding: 5px 7px; margin: -5px -7px;
+  border-radius: 11px; cursor: pointer; text-align: left;
+  font-family: inherit; color: inherit; -webkit-appearance: none;
+  transition: background 0.15s;
+}
+.h-home:active { background: rgba(255,255,255,0.16); }
+@media (hover: hover) { .h-home:hover { background: rgba(255,255,255,0.09); } }
+.h-home-text { flex: 1; min-width: 0; }
+.h-logo-img { height: 38px; width: auto; object-fit: contain; flex-shrink: 0; }
+.h-logo-fb  { height: 38px; width: 46px; background: var(--yellow); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--deep); flex-shrink: 0; }
+.h-title    { font-size: 17px; font-weight: 800; line-height: 1.1; flex: 1; }
+.h-title span { color: var(--yellow); }
+.h-sub      { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* Narrow phones: "WLR Automotive Group" was wrapping to three lines and
+   the subtitle to two, so the sticky header ate ~190px — a quarter of a
+   375px viewport — on every view. Drop the decorative subtitle, tighten
+   the wordmark, and let Slideshow fall back to its icon (the accessible
+   name stays on the button's title attribute). */
+/* Note: the .header-btn size and .slideshow-btn padding lines in this block
+   never apply — the base rules for those buttons come after it with the same
+   specificity, so they win. Kept in this order so that moving the styles
+   into components changed nothing on screen. */
+@media (max-width: 460px) {
+  header { gap: var(--s-2); padding-left: var(--s-3); padding-right: var(--s-3); }
+  .h-logo-img { height: 30px; }
+  .h-logo-fb  { height: 30px; width: 36px; font-size: 11px; }
+  .h-title    { font-size: 14px; line-height: 1.15; }
+  .h-sub      { display: none; }
+  .header-btn { width: 32px; height: 30px; margin-right: var(--s-1); }
+  .slideshow-btn { padding: var(--s-2); }
+  .slideshow-btn .sb-label { display: none; }
+}
+.slideshow-btn {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-2) var(--s-3); border-radius: var(--r-md);
+  background: var(--yellow); border: none; color: var(--deep);
+  font-size: 12px; font-weight: var(--w-bold); cursor: pointer; letter-spacing: 0.3px;
+  transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+.slideshow-btn:active { opacity: 0.8; }
+.header-btn {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 32px; border-radius: var(--r-md);
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text); font-size: var(--f-md); cursor: pointer;
+  margin-right: var(--s-2); line-height: 1;
+  transition: background var(--t-fast) var(--ease);
+}
+.header-btn:active { background: rgba(255,255,255,0.22); }
+</style>

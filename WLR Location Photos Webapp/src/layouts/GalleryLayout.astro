@@ -1,0 +1,51 @@
+---
+// Document shell for the gallery page: <head> (PWA, fonts, MapLibre, link
+// preview, BUILD stamp) and the global stylesheet. Page content goes in <slot />.
+import '../styles/global.css';
+
+// Build stamp in Eastern time (the whole company is on ET). It is written into
+// the HTML as `const BUILD = '…';` because the auto-update check — including the
+// copy already running on phones from before Astro — reads it from the page.
+const BUILD = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+}).format(new Date());
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WLR Locations">
+  <meta name="theme-color" content="#0d3268">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+  <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+  <title>WLR Automotive Group — Locations</title>
+
+  <!-- ══ LINK PREVIEW ════════════════════════════════════
+       Controls how the app renders when the URL is texted or pasted into
+       Teams/Slack. og:image must be absolute, so it is fully qualified. -->
+  <meta name="description" content="Photos, hours, Google ratings and the team for every WLR Automotive Group location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WLR Automotive Group">
+  <meta property="og:title" content="WLR Automotive Group — Location Gallery">
+  <meta property="og:description" content="Photos, hours, Google ratings and the team for every location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:url" content="https://wlr-locations.vercel.app/">
+  <meta property="og:image" content="https://wlr-locations.vercel.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A WLR Auto Spa Express at sunset, with the WLR Automotive Group brand lockups.">
+  <meta name="twitter:card" content="summary_large_image">
+  <script is:inline set:html={`const BUILD = '${BUILD}';`}></script>
+</head>
+<body>
+<slot />
+</body>
+</html>

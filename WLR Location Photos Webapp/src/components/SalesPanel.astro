@@ -1,0 +1,52 @@
+---
+// Weekly sales & weather overlay; scripts/sales.js fetches and renders it.
+---
+<!-- ══ WEEKLY SALES & WEATHER ═══════════════════════════════ -->
+<div class="sw-overlay" id="swOverlay">
+  <div class="sw-head">
+    <div class="sw-title"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg>Weekly Sales <span>&amp; Weather</span></div>
+    <button class="inc-close" id="swClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="sw-scroll" id="swBody"><div class="sw-loading">Loading sales &amp; weather…</div></div>
+</div>
+
+<style is:global>
+/* ══ SALES & WEATHER ═════════════════════════════════ */
+.sw-overlay { display: none; position: fixed; inset: 0; z-index: 955; background: linear-gradient(160deg, #0c2c5a 0%, #071a38 100%); flex-direction: column; }
+.sw-overlay.open { display: flex; }
+.sw-head { display: flex; align-items: center; gap: 10px; padding: max(env(safe-area-inset-top),12px) 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.sw-title { font-size: 18px; font-weight: 800; color: #fff; flex: 1; }
+.sw-title span { color: rgba(255,255,255,0.55); }
+.sw-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; max-width: 1080px; width: 100%; margin: 0 auto; }
+.sw-loading { text-align: center; color: rgba(255,255,255,0.55); padding: 50px 20px; font-size: 14px; }
+.sw-hero { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.sw-hero-main { flex: 1; min-width: 240px; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
+.sw-hero-wk { font-size: 11px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1.2px; }
+.sw-hero-metric { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+.sw-hero-total { font-size: 33px; font-weight: 900; color: var(--yellow); line-height: 1.1; margin: 3px 0 3px; }
+.sw-deltas { display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 11px; }
+.sw-wow { font-size: 13px; font-weight: 800; }
+.sw-wow.up { color: #4ade80; } .sw-wow.down { color: #f87171; }
+.sw-reset { margin-left: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: #fff; border-radius: 5px; padding: 1px 8px; font-size: 10px; font-weight: 800; cursor: pointer; font-family: inherit; vertical-align: middle; }
+.sw-reset:active { background: rgba(255,255,255,0.22); }
+.sw-chart .tl-hit { cursor: pointer; }
+.sw-segs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
+.sw-seg { display: flex; align-items: center; gap: 6px; font-size: 12px; transition: opacity 0.15s; }
+.sw-seg.off { opacity: 0.4; }
+.sw-seg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.sw-seg-lbl { color: rgba(255,255,255,0.6); flex: 1; }
+.sw-seg-val { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sw-hero-wx { width: 156px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.22); border: 1.5px solid var(--bord); border-radius: 14px; padding: 12px; text-align: center; }
+.sw-wx-icon { font-size: 34px; line-height: 1; }
+.sw-wx-cat { font-size: 14px; font-weight: 800; margin-top: 5px; }
+.sw-wx-det { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px; line-height: 1.45; }
+.sw-toggles { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.sw-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.sw-tab { padding: 6px 13px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+.sw-tab.active { background: var(--yellow); color: var(--deep); border-color: transparent; }
+.sw-chart { width: 100%; height: auto; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; }
+.sw-legend { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.sw-leg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 700; }
+.sw-leg-sw { width: 11px; height: 11px; border-radius: 3px; }
+.sw-foot { text-align: center; font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 10px; line-height: 1.5; }
+</style>
