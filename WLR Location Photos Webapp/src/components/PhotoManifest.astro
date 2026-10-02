@@ -1,0 +1,32 @@
+---
+/* Hands src/scripts/photos.js the built URL of every bundled location photo.
+
+   For each photo Astro emits the original 1920px JPEG unchanged plus 480w and
+   960w AVIF and WebP copies, all under content-hashed /_astro/ names: replacing
+   a photo changes its URLs, so phones and home-screen installs can never keep
+   showing the old one. Widths match what the retired tools/build-images.py
+   produced. Its WebP q78 carries over as-is; its AVIF was Pillow q52, and
+   sharp's scale runs lower: sharp q52 came out ~17% smaller and measurably softer
+   (about 1 dB PSNR down), while q56 matches the old files in size and is equal
+   or marginally sharper — so the photos look as they did.
+
+   Rendered as JSON keyed by the app's legacy path stem:
+     "loc-05/01": { "jpg": url, "avif": [480w url, 960w url], "webp": [...] } */
+import { getImage } from 'astro:assets';
+import { PHOTOS } from '../lib/location-photos.js';
+
+const WIDTHS = [480, 960];
+const FORMATS = { avif: 56, webp: 78 };
+
+const entries = await Promise.all(Object.entries(PHOTOS).map(async ([key, meta]) => {
+  const entry = { jpg: meta.src };   // reading .src is what makes Astro emit the original
+  for (const [format, quality] of Object.entries(FORMATS)) {
+    const imgs = await Promise.all(WIDTHS.map(width => getImage({ src: meta, width, format, quality })));
+    entry[format] = imgs.map(img => img.src);
+  }
+  return [key, entry];
+}));
+
+const json = JSON.stringify(Object.fromEntries(entries)).replace(/</g, '\\u003c');
+---
+<script is:inline type="application/json" id="photo-manifest" set:html={json}></script>
