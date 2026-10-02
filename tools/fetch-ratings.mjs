@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 /*
  * Fetches the live Google rating + review count for each WLR location via the
- * Google Places API (New) and writes them to ratings.json, which the static
+ * Google Places API (New) and writes them to public/ratings.json, which the
  * site reads at load time.
+ *
+ * The list of locations comes from the app's own data file
+ * (WLR Location Photos Webapp/src/data/locations.js) — there is no separate
+ * list here to keep in sync. A store is rated once it has an opening date
+ * (`opened`) and is not `hidden`; coming-soon sites are skipped until they open.
+ * Permanently closed stores stay in, as they always have: their Google listing
+ * and rating still exist and the card still shows them.
  *
  * Requires environment variable GOOGLE_PLACES_API_KEY (a key with the
  * "Places API (New)" enabled and billing active on the Google Cloud project).
@@ -12,60 +19,58 @@
  * Place ID is ever wrong, delete that entry (or fix it) and re-run.
  *
  * Run locally:   GOOGLE_PLACES_API_KEY=xxx node tools/fetch-ratings.mjs
+ * Dry run:       node tools/fetch-ratings.mjs --dry-run
+ *                (no key, no network, writes nothing — prints which locations
+ *                would be rated and the search text a new one would use)
+ *
+ * Plain `node`, no npm install: the data files it imports have no dependencies.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { locations } from '../WLR Location Photos Webapp/src/data/locations.js';
+import { TYPE_FULL } from '../WLR Location Photos Webapp/src/data/brands.js';
+
+// Paths are relative to this file, so it runs from any working directory.
+const here = p => fileURLToPath(new URL(p, import.meta.url));
+const OUT_RATINGS = here('../WLR Location Photos Webapp/public/ratings.json');
+const CACHE_IDS   = here('./place-ids.json');
+const SHOWN_OUT   = 'WLR Location Photos Webapp/public/ratings.json';
+
+const DRY_RUN = process.argv.includes('--dry-run');
+
+// "street, city, ST" for the Text Search query (ZIP dropped). Only used the
+// first time a location is seen — after that its Place ID comes from the cache.
+function searchAddress(loc) {
+  const a = (loc.addr || '').trim().replace(/\s+\d{5}(-\d{4})?$/, '').replace(/[,\s]+$/, '');
+  if (/,\s*[A-Z]{2}$/.test(a)) return a;                     // already ends in a state
+  return [a, loc.city, loc.state].filter(Boolean).join(', ');
+}
+
+// [num, type, "street, city, ST"] for every opened, non-hidden location — the
+// same test the gallery uses for "Coming Soon" (an empty `opened`).
+const LOCS = locations
+  .filter(l => l.opened && !l.hidden)
+  .sort((a, b) => a.num - b.num)
+  .map(l => [l.num, l.type, searchAddress(l)]);
+
+const cache = existsSync(CACHE_IDS) ? JSON.parse(readFileSync(CACHE_IDS, 'utf8')) : {};
+
+if (DRY_RUN) {
+  for (const [num, type, addr] of LOCS) {
+    const how = cache[num] ? `cached ${cache[num]}` : 'NEW — will search';
+    console.log(`#${num}\t${how}\t${TYPE_FULL[type]} ${addr}`);
+  }
+  const fresh = LOCS.filter(([num]) => !cache[num]).length;
+  console.log(`\n${LOCS.length} locations would be rated, ${fresh} needing a first-time search.`);
+  console.log('Dry run: no requests made, nothing written.');
+  process.exit(0);
+}
 
 const KEY = process.env.GOOGLE_PLACES_API_KEY;
 if (!KEY) {
   console.error('ERROR: GOOGLE_PLACES_API_KEY is not set.');
   process.exit(1);
 }
-
-const OUT_RATINGS = 'WLR Location Photos Webapp/ratings.json';
-const CACHE_IDS   = 'tools/place-ids.json';
-
-const BRAND = {
-  TLC: 'The Lube Center', TAS: 'The Auto Spa',
-  TASE: 'The Auto Spa Express', TAR: 'The Auto Repair',
-};
-
-// [num, type, "street, city, ST"] — the open/active locations that have a
-// Google Business listing. Coming-soon sites are intentionally excluded.
-const LOCS = [
-  [1,  'TLC',  '1395 West Patrick Street, Frederick, MD'],
-  [2,  'TLC',  '5715 Buckeystown Pike, Frederick, MD'],
-  [3,  'TLC',  '9225 Berger Road, Columbia, MD'],
-  [4,  'TAR',  '1395 West Patrick Street, Frederick, MD'],
-  [5,  'TLC',  '10007 Fields Road, Gaithersburg, MD'],
-  [6,  'TAS',  '1509 Garrett Dr, Frederick, MD'],
-  [7,  'TLC',  '7691 Arundel Mills Blvd, Hanover, MD'],
-  [8,  'TAS',  '20440 Germantown Road, Germantown, MD'],
-  [9,  'TLC',  '11612 Middlebrook Road, Germantown, MD'],
-  [10, 'TAR',  '672 State Route 3 North, Gambrills, MD'],
-  [11, 'TLC',  '676 State Route 3 North, Gambrills, MD'],
-  [12, 'TLC',  '421 South Jefferson Street, Frederick, MD'],
-  [13, 'TLC',  '19550 Frederick Road, Germantown, MD'],
-  [14, 'TAS',  '680 State Route 3 North, Gambrills, MD'],
-  [15, 'TLC',  '13559 Baltimore Avenue, Laurel, MD'],
-  [16, 'TLC',  '16327 Caprice Court, New Freedom, PA'],
-  [17, 'TLC',  '1195 Loucks Road, York, PA'],
-  [18, 'TAS',  '2266 Solomons Island Road, Huntingtown, MD'],
-  [19, 'TASE', '1615 East Churchville Road, Bel Air, MD'],
-  [21, 'TASE', '5718 Buckeystown Pike, Frederick, MD'],
-  [22, 'TLC',  '7740 Annapolis Road, Lanham, MD'],
-  [23, 'TASE', '2415 Monocacy Blvd, Frederick, MD'],
-  [24, 'TASE', '2140 York Crossing Drive, York, PA'],
-  [25, 'TASE', '1610 Ritchie Station Court, Capitol Heights, MD'],
-  [26, 'TASE', '3504 Washington Blvd, Halethorpe, MD'],
-  [27, 'TASE', '1524 Annapolis Road, Odenton, MD'],
-  [28, 'TASE', '960 Foxcroft Avenue, Martinsburg, WV'],
-  [31, 'TASE', '7682 Arundel Mills Blvd, Hanover, MD'],
-  [32, 'TASE', '1620 Wesel Boulevard, Hagerstown, MD'],
-  [33, 'TASE', '8532 Baltimore National Pike, Ellicott City, MD'],
-  [35, 'TASE', '1412 Merritt Blvd, Dundalk, MD'],
-];
-
-const cache = existsSync(CACHE_IDS) ? JSON.parse(readFileSync(CACHE_IDS, 'utf8')) : {};
 
 async function searchPlace(query) {
   const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
@@ -100,7 +105,7 @@ for (const [num, type, addr] of LOCS) {
     if (cache[num]) {
       p = await placeDetails(cache[num]);
     } else {
-      p = await searchPlace(`${BRAND[type]} ${addr}`);
+      p = await searchPlace(`${TYPE_FULL[type]} ${addr}`);
       if (p) { cache[num] = p.id; }
     }
     if (p && typeof p.rating === 'number') {
@@ -108,7 +113,7 @@ for (const [num, type, addr] of LOCS) {
       console.log(`#${num}  ${p.rating}★ (${p.userRatingCount || 0})  ${p.displayName?.text || ''} — ${p.formattedAddress || ''}`);
       ok++;
     } else {
-      console.warn(`#${num}  no rating found for "${BRAND[type]} ${addr}"`);
+      console.warn(`#${num}  no rating found for "${TYPE_FULL[type]} ${addr}"`);
       miss++;
     }
   } catch (e) {
@@ -135,4 +140,4 @@ if (ok === 0) {
 ratings._updated = new Date().toISOString().slice(0, 10);
 writeFileSync(OUT_RATINGS, JSON.stringify(ratings) + '\n');
 writeFileSync(CACHE_IDS, JSON.stringify(cache, null, 1) + '\n');
-console.log(`\nDone: ${ok} ratings written, ${miss} missing → ${OUT_RATINGS}`);
+console.log(`\nDone: ${ok} ratings written, ${miss} missing → ${SHOWN_OUT}`);

@@ -8,9 +8,16 @@ rendered page (ACF fields are not exposed over REST).
     python3 tools/scrape-addresses.py            # print a table
     python3 tools/scrape-addresses.py --json     # emit JSON
 
-Deliberately does NOT edit index.html. Site store names do not map 1:1 to WLR
-location numbers — "Gaithersburg - Rio Lube Center" is #5 Washingtonian, and
-Gambrills has three co-located businesses — so the mapping is reviewed by hand.
+Read-only: it prints what the public site says and changes nothing here. To
+use it, compare the output against the app's data files and correct them by
+hand:
+    addresses  -> WLR Location Photos Webapp/src/data/locations.js  (addr)
+    phones     -> WLR Location Photos Webapp/src/data/hours.js      (p)
+Site store names do not map 1:1 to WLR location numbers — "Gaithersburg - Rio
+Lube Center" is #5 Washingtonian, and Gambrills has three co-located
+businesses — so the mapping is reviewed by hand. If a location's coordinates
+need to change too, update COORDS in locations.js; the build's data check
+rejects pins that land outside MD/PA/WV/VA/DE.
 """
 import json, re, sys, time, html, urllib.request
 
