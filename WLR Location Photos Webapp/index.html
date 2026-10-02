@@ -430,6 +430,7 @@
       transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.update { pointer-events: auto; cursor: pointer; white-space: nowrap; font: inherit; font-size: var(--f-sm); font-weight: var(--w-semi); }
 
     .loc-name  { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
     .loc-name.has-overflow { cursor: pointer; text-overflow: clip; }
@@ -1074,7 +1075,7 @@
 
 <!-- ══ ICONS ═══════════════════════════════════════
      Sprite + ic() helper, shared with admin.html. -->
-<script src="icons.js"></script>
+<script src="icons.js?v=202610021514"></script>
 
 <!-- ══ INTRO ═══════════════════════════════════════════ -->
 <div class="intro" id="intro" role="presentation" aria-hidden="true">
@@ -3403,7 +3404,7 @@ document.getElementById('swClose').addEventListener('click', closeSales);
 
 // ══ BUILD STAMP ════════════════════════════════════════════
 // Written by tools/stamp-build.py at ship time; do not edit by hand.
-const BUILD = '2026-10-02 15:00';
+const BUILD = '2026-10-02 15:14';
 
 (() => {
   const el = document.getElementById('buildStamp');
@@ -3416,6 +3417,53 @@ const BUILD = '2026-10-02 15:00';
     u.searchParams.set('v', Date.now());
     location.replace(u);
   });
+})();
+
+// ══ AUTO-UPDATE ════════════════════════════════════════════
+// An iPhone home-screen install is never reloaded when it is opened: iOS
+// resumes the suspended page, which can be days old, so deploys never reached
+// it short of deleting and re-adding the icon. Whenever the app comes back on
+// screen, ask the server which BUILD is live and reload if it has moved on —
+// the user has only just opened the app, so nothing is lost. While the app sits
+// open, a periodic check offers a tap-to-update pill rather than yanking the
+// page out from under whoever is using it.
+(() => {
+  let lastCheck = 0, offered = false;
+
+  async function liveBuild() {
+    const r = await fetch(`index.html?build-check=${Date.now()}`, { cache: 'no-store' });
+    if (!r.ok) return null;
+    // ['] rather than ' so stamp-build.py never mistakes this line for the stamp.
+    const m = /const BUILD = ['](\d{4}-\d\d-\d\d \d\d:\d\d)['];/.exec(await r.text());
+    return m && m[1];
+  }
+
+  function offerUpdate() {
+    if (offered) return;
+    offered = true;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toast update';
+    b.innerHTML = `${ic('refresh')} New version — tap to update`;
+    b.addEventListener('click', () => location.reload());
+    document.body.appendChild(b);
+    setTimeout(() => b.classList.add('show'), 20);
+  }
+
+  async function check(resumed) {
+    if (Date.now() - lastCheck < 30000) return;   // iOS fires visibility changes in bursts
+    lastCheck = Date.now();
+    let live;
+    try { live = await liveBuild(); } catch { return; }   // offline: try again next time
+    if (!live || live === BUILD) return;
+    if (resumed) location.reload(); else offerUpdate();
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') check(true);
+  });
+  // Back/forward-cache restores skip visibilitychange on some iOS versions.
+  window.addEventListener('pageshow', e => { if (e.persisted) check(true); });
+  setInterval(() => { if (document.visibilityState === 'visible') check(false); }, 15 * 60 * 1000);
 })();
 
 // ══ HOME BUTTON (header logo) ══════════════════════════════
