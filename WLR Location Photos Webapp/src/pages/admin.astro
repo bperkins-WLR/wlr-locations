@@ -1,0 +1,185 @@
+---
+import IconSprite from '../components/IconSprite.astro';
+import { TYPE_FULL } from '../data/brands.js';
+import { AUTH_KEY, SESSION_TOKEN } from '../scripts/admin-auth.js';
+import '../styles/admin.css';
+
+// Brand picker for a new location: Express first, since nearly every new site
+// is one. Labels come from the shared brand names so they cannot drift.
+const NEW_LOC_TYPES = ['TASE', 'TAS', 'TLC', 'TAR'];
+const typeLabel = (t) => (t === 'TASE' ? 'TASe' : t);
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>WLR Admin — Photo & Info Manager</title>
+</head>
+<body>
+
+<!-- ══ ICONS ═══════════════════════════════════════════
+     Same sprite + ic() helper the gallery uses. -->
+<IconSprite />
+
+<!-- ── PASSWORD GATE ─────────────────────────────────────── -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">WLR</div>
+    <div class="gate-title">Admin Panel</div>
+    <div class="gate-sub">Photos &amp; Location Info Manager</div>
+    <input class="gate-input" type="password" id="pwInput" placeholder="Enter password" maxlength="20">
+    <button class="gate-btn" id="pwBtn">Unlock ›</button>
+    <div class="gate-error" id="pwError">Incorrect password. Try again.</div>
+    <a href="index.html" style="display:block;margin-top:16px;font-size:12px;color:rgba(255,255,255,0.45);text-decoration:none;"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>Back to Gallery</a>
+  </div>
+</div>
+
+<!-- ── MAIN ADMIN ─────────────────────────────────────────── -->
+<div id="adminMain" style="display:none">
+
+  <header>
+    <div class="h-logo">WLR</div>
+    <div class="h-text">
+      <div class="h-title">Admin Panel</div>
+      <div class="h-sub">Photos &amp; Location Info</div>
+    </div>
+    <div class="h-actions">
+      <button class="h-btn yellow" id="addLocBtn">＋ New Location</button>
+      <button class="h-btn" id="videosBtn"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg>Videos</button>
+      <a href="index.html" class="h-btn"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>Gallery</a>
+      <button class="h-btn" id="logoutBtn"><svg class="ico" aria-hidden="true"><use href="#i-lock"></use></svg>Lock</button>
+    </div>
+  </header>
+
+  <div class="stats-bar" id="statsBar">Loading…</div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="f-btn active" data-type="ALL">All</button>
+    <button class="f-btn" data-type="TLC">TLC</button>
+    <button class="f-btn" data-type="TAS">TAS</button>
+    <button class="f-btn" data-type="TAR">TAR</button>
+    <button class="f-btn" data-type="TASE">TASe</button>
+    <button class="f-btn" data-type="MISSING"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg>Missing</button>
+    <button class="f-btn" data-type="EDITED"><svg class="ico" aria-hidden="true"><use href="#i-pencil"></use></svg>Edited</button>
+  </div>
+
+  <div id="adminGrid"></div>
+
+  <footer>
+    <a href="index.html" class="back-btn"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"></use></svg>View Gallery</a>
+    <div class="footer-count" id="footerCount"></div>
+    <button class="danger-btn" id="clearAllBtn">Clear All</button>
+  </footer>
+
+</div>
+<script is:inline set:html={`
+  /* Reveal the panel before first paint when this tab is already unlocked.
+     The module script below runs only after parsing, which would flash the
+     password gate on every reload. */
+  if (sessionStorage.getItem(${JSON.stringify(AUTH_KEY)}) === ${JSON.stringify(SESSION_TOKEN)}) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('adminMain').style.display = 'block';
+  }
+`}></script>
+
+<!-- ── NEW LOCATION MODAL ─────────────────────────────────── -->
+<div class="modal-bg" id="newLocModal">
+  <div class="modal-box">
+    <div class="modal-title"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add <span>New Location</span></div>
+
+    <div class="field-row">
+      <label class="field-label">Location Number</label>
+      <input class="field-input" id="nl-num" type="number" placeholder="e.g. 36" min="1" max="999">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Location Name</label>
+      <input class="field-input" id="nl-name" type="text" placeholder="e.g. Rockville">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Brand Type</label>
+      <select class="status-select" id="nl-type">
+        {NEW_LOC_TYPES.map((t) => <option value={t}>{typeLabel(t)} — {TYPE_FULL[t]}</option>)}
+      </select>
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">City</label>
+        <input class="field-input" id="nl-city" type="text" placeholder="City">
+      </div>
+      <div>
+        <label class="field-label">State</label>
+        <input class="field-input" id="nl-state" type="text" placeholder="MD" maxlength="3">
+      </div>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Opening Date</label>
+      <input class="field-input" id="nl-opened" type="text" placeholder="e.g. March 2025">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Street Address (optional)</label>
+      <input class="field-input" id="nl-addr" type="text" placeholder="e.g. 123 Main St">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Status</label>
+      <select class="status-select" id="nl-status">
+        <option value="Coming Soon">Coming Soon</option>
+        <option value="Open">Open</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-save" id="nlSaveBtn"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add Location</button>
+      <button class="modal-cancel" id="nlCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VIDEOS MODAL ───────────────────────────────────────── -->
+<div class="modal-bg" id="videosModal">
+  <div class="modal-box">
+    <div class="modal-title"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg><span>Videos</span></div>
+
+    <div class="field-row">
+      <label class="field-label">Video Link</label>
+      <input class="field-input" id="vid-url" type="text" placeholder="YouTube, Vimeo, Google Drive, or .mp4 link">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Title</label>
+      <input class="field-input" id="vid-title" type="text" placeholder="e.g. Bay 3 fender bump">
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">Date</label>
+        <input class="field-input" id="vid-date" type="date">
+      </div>
+      <div>
+        <label class="field-label">Location # <span style="font-size:9px;color:var(--tase-c);font-weight:400">(optional)</span></label>
+        <input class="field-input" id="vid-loc" type="number" placeholder="e.g. 2" min="1" max="999">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-save" id="vidAddBtn"><svg class="ico" aria-hidden="true"><use href="#i-plus"></use></svg>Add Video</button>
+      <button class="modal-cancel" id="vidCancelBtn">Close</button>
+    </div>
+
+    <div id="vidList" style="margin-top:18px"></div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="h-btn yellow" id="vidPublishBtn" style="width:100%;justify-content:center"><svg class="ico" aria-hidden="true"><use href="#i-copy"></use></svg>Copy publish code</button>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:9px;line-height:1.5">
+        Videos save on this device and show in the gallery here. To publish for <b>everyone</b>, tap “Copy publish code” and send it to your developer (or paste it into <code>incidents.json</code>).
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  import '../scripts/admin.js';
+</script>
+</body>
+</html>
