@@ -5,9 +5,13 @@ The 1920px JPEGs stay as-is: they remain the large source the lightbox uses on
 big screens, and the final fallback for browsers with neither modern format.
 Re-runnable — variants newer than their source are skipped.
 
+Also rewrites the PHOTO_VER line in index.html with a short content hash of
+each photo, which the app appends to photo URLs (?v=…). Replacing a photo thus
+changes its address, so devices holding the old copy fetch the new one.
+
     python3 tools/build-images.py [--force]
 """
-import sys, os, glob, re
+import sys, os, glob, re, json, hashlib
 from PIL import Image
 
 # Resolve against the deployed app folder so this runs from anywhere.
@@ -43,3 +47,19 @@ for src in srcs:
 print(f"{len(srcs)} sources · {made} variants written, {skipped} up to date")
 print(f"960w AVIF vs 1920w JPEG: {saved_from/1048576:.1f} MB -> {saved_to/1048576:.1f} MB "
       f"({100 - saved_to/saved_from*100:.0f}% smaller)")
+
+# Fingerprint every bundled photo into index.html. Hashing the source JPEG is
+# enough: the variants are derived from it and change exactly when it does.
+ver = {}
+for src in srcs:
+    m = re.search(r"images/(loc-\d+/0[12])\.jpg$", src)
+    if m:
+        with open(src, "rb") as f:
+            ver[m.group(1)] = hashlib.sha256(f.read()).hexdigest()[:8]
+html = open("index.html", encoding="utf-8").read()
+line = "const PHOTO_VER = " + json.dumps(ver, separators=(",", ":")) + ";"
+html, n = re.subn(r"^const PHOTO_VER = .*;$", lambda _: line, html, count=1, flags=re.M)
+if n != 1:
+    sys.exit("index.html: PHOTO_VER line not found")
+open("index.html", "w", encoding="utf-8").write(html)
+print(f"PHOTO_VER: {len(ver)} photos fingerprinted")
