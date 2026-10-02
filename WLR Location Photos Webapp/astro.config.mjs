@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import legacyPhotoVariants from './src/integrations/legacy-photo-variants.js';
 
 export default defineConfig({
   site: 'https://wlr-locations.vercel.app',
@@ -7,4 +8,6 @@ export default defineConfig({
   // already shared or saved to a home screen keeps working unchanged.
   build: { format: 'file' },
   trailingSlash: 'never',
+  // Pre-Astro photo variant URLs for phones still on the old build (transitional).
+  integrations: [legacyPhotoVariants()],
 });
