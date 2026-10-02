@@ -1,0 +1,265 @@
+---
+import IconSprite from '../components/IconSprite.astro';
+import '../styles/app.css';
+
+// Build stamp in Eastern time (the whole company is on ET). It is written into
+// the HTML as `const BUILD = '…';` because the auto-update check — including the
+// copy already running on phones from before Astro — reads it from the page.
+const BUILD = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+}).format(new Date());
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WLR Locations">
+  <meta name="theme-color" content="#0d3268">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+  <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+  <title>WLR Automotive Group — Locations</title>
+
+  <!-- ══ LINK PREVIEW ════════════════════════════════════
+       Controls how the app renders when the URL is texted or pasted into
+       Teams/Slack. og:image must be absolute, so it is fully qualified. -->
+  <meta name="description" content="Photos, hours, Google ratings and the team for every WLR Automotive Group location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WLR Automotive Group">
+  <meta property="og:title" content="WLR Automotive Group — Location Gallery">
+  <meta property="og:description" content="Photos, hours, Google ratings and the team for every location across Maryland, Pennsylvania and West Virginia.">
+  <meta property="og:url" content="https://wlr-locations.vercel.app/">
+  <meta property="og:image" content="https://wlr-locations.vercel.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A WLR Auto Spa Express at sunset, with the WLR Automotive Group brand lockups.">
+  <meta name="twitter:card" content="summary_large_image">
+  <script is:inline set:html={`const BUILD = '${BUILD}';`}></script>
+</head>
+<body>
+
+<!-- ══ ICONS ═══════════════════════════════════════
+     Sprite + ic() helper, shared with admin.html. -->
+<IconSprite />
+
+<!-- ══ INTRO ═══════════════════════════════════════════ -->
+<div class="intro" id="intro" role="presentation" aria-hidden="true">
+  <video class="intro-bg" autoplay muted loop playsinline preload="auto"
+         poster="videos/intro-bubbles-poster.jpg" aria-hidden="true">
+    <source src="videos/intro-bubbles.mp4" type="video/mp4">
+  </video>
+  <div class="intro-inner">
+    <img class="intro-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+         onerror="this.style.display='none'">
+    <div class="intro-tagline">Serving the Mid-Atlantic Since 1987</div>
+    <div class="intro-stats">
+      <div class="intro-stat"><span class="intro-num" id="introLocs">0</span><span class="intro-lab">Locations</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introYears">0</span><span class="intro-lab">Years</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introStates">0</span><span class="intro-lab">States</span></div>
+      <div class="intro-stat"><span class="intro-num">4</span><span class="intro-lab">Brands</span></div>
+    </div>
+  </div>
+  <div class="intro-skip">Tap to skip</div>
+</div>
+<script is:inline>
+  /* Hide before first paint if the intro already played this session (no flash) */
+  try { if (sessionStorage.getItem('wlr_intro_seen')) document.getElementById('intro').classList.add('intro-off'); } catch (e) {}
+</script>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header>
+  <button class="h-home" id="homeBtn" title="Back to the gallery">
+    <img class="h-logo-img" src="images/logo-wlr.PNG" alt="WLR"
+         onerror="this.style.display='none'; document.getElementById('hFB').style.display='flex';">
+    <div class="h-logo-fb" id="hFB" style="display:none">WLR</div>
+    <div class="h-home-text">
+      <div class="h-title"><span>WLR</span> Automotive Group</div>
+      <div class="h-sub">Location Gallery</div>
+    </div>
+  </button>
+  <button class="header-btn" id="swOpenBtn" title="Weekly sales &amp; weather"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></button>
+  <button class="header-btn" id="incOpenBtn" title="Videos"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg></button>
+  <button class="slideshow-btn" id="ssStartBtn" title="Play slideshow" aria-label="Play slideshow"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-play"></use></svg><span class="sb-label">Slideshow</span></button>
+</header>
+
+<!-- ══ HERO SECTION ════════════════════════════════════ -->
+<div class="hero">
+  <img class="hero-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+       onerror="this.style.display='none'; document.getElementById('heroFB').style.display='flex';">
+  <div class="hero-logo-fb" id="heroFB" style="display:none">WLR</div>
+
+  <div class="hero-tagline">Serving the Mid-Atlantic Since 1987</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statLocs">30</span>
+      <span class="hero-stat-label">Locations</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statYears">38</span>
+      <span class="hero-stat-label">Years</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statStates">3</span>
+      <span class="hero-stat-label">States</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">4</span>
+      <span class="hero-stat-label">Brands</span>
+    </div>
+  </div>
+
+  <div class="hero-states">Maryland &nbsp;·&nbsp; Pennsylvania &nbsp;·&nbsp; West Virginia</div>
+
+  <div class="hero-note">
+    Location numbers reflect WLR's history — some numbers represent locations that have been converted or closed over the years.
+    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations <svg class="ico" aria-hidden="true"><use href="#i-arrow-down"></use></svg></a>
+  </div>
+</div>
+
+<!-- ══ CONTROLS ════════════════════════════════════════ -->
+<div class="controls">
+  <div class="search-wrap">
+    <span class="icon"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg></span>
+    <input type="search" id="search" placeholder="Search by name, city, number, or manager…" autocomplete="off" autocorrect="off">
+    <button class="search-clear" id="searchClear" title="Clear"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="filter-btn active" data-type="ALL">All</button>
+    <button class="filter-btn" data-type="TLC">TLC — Lube Centers</button>
+    <button class="filter-btn" data-type="TAS">TAS — Auto Spas</button>
+    <button class="filter-btn" data-type="TAR">TAR — Auto Repair</button>
+    <button class="filter-btn" data-type="TASE">TASe — Expresses</button>
+  </div>
+  <div class="sort-row">
+    <span class="sort-label">Sort:</span>
+    <button class="sort-btn active" data-sort="num">By #</button>
+    <button class="sort-btn" data-sort="date">By Date</button>
+    <button class="sort-btn" data-sort="state">By State</button>
+    <button class="sort-btn" data-sort="rating"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-star"></use></svg>Top Rated</button>
+    <select class="state-select" id="stateSelect">
+      <option value="">All States</option>
+      <option value="MD">MD</option>
+      <option value="PA">PA</option>
+      <option value="WV">WV</option>
+    </select>
+    <div class="view-toggle" id="viewToggle">
+      <button class="view-btn active" data-view="grid" title="Grid view"><svg class="ico" aria-hidden="true"><use href="#i-grid"></use></svg>Grid</button>
+      <button class="view-btn" data-view="map" title="Map view"><svg class="ico" aria-hidden="true"><use href="#i-map"></use></svg>Map</button>
+      <button class="view-btn" data-view="timeline" title="Growth timeline"><svg class="ico" aria-hidden="true"><use href="#i-trend"></use></svg>Growth</button>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+<div class="map-wrap" id="mapWrap"><div id="map"><div class="map-fallback">Loading map…</div></div></div>
+<div class="timeline-wrap" id="timelineWrap"></div>
+<div class="grid" id="grid"></div>
+<div class="no-results" id="noResults">
+  <div class="no-results-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg></div>
+  <p>No locations found.</p>
+</div>
+
+<!-- ══ LIGHTBOX ════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  <button class="lb-arrow" id="lbPrev">‹</button>
+  <picture>
+    <source id="lbAvif" type="image/avif" media="(max-width: 900px)" sizes="100vw">
+    <source id="lbWebp" type="image/webp" media="(max-width: 900px)" sizes="100vw">
+    <img id="lightboxImg" src="" alt="">
+  </picture>
+  <div class="lb-dots" id="lbDots"></div>
+  <button class="lb-arrow" id="lbNext">›</button>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<!-- ══ SLIDESHOW ═══════════════════════════════════════ -->
+<div class="slideshow" id="slideshow">
+  <div class="ss-progress"><div class="ss-progress-fill" id="ssProgressFill"></div></div>
+  <div class="ss-photo-wrap" id="ssPhotoWrap">
+    <img id="ssPhoto" src="" alt="">
+    <div class="ss-info" id="ssInfo"></div>
+  </div>
+  <button class="ss-close-btn" id="ssClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  <div class="ss-controls">
+    <button class="ss-btn" id="ssPrev">‹</button>
+    <div style="flex:1;text-align:center">
+      <div class="ss-counter" id="ssCounter"></div>
+      <div class="ss-photo-label" id="ssPhotoLabel"></div>
+    </div>
+    <button class="ss-btn" id="ssPause" title="Pause"><svg class="ico ico--fill" aria-hidden="true"><use href="#i-pause"></use></svg></button>
+    <div style="width:10px"></div>
+    <button class="ss-btn" id="ssNext">›</button>
+  </div>
+</div>
+
+<!-- ══ TEAM MODAL ══════════════════════════════════════════ -->
+<div class="team-overlay" id="teamOverlay"></div>
+<div class="team-panel" id="teamPanel">
+  <div class="team-handle"></div>
+  <div class="team-header">
+    <div class="team-header-text">
+      <div class="team-title" id="teamPanelTitle"></div>
+      <div class="team-subtitle" id="teamPanelSubtitle"></div>
+    </div>
+    <button class="team-close" id="teamClose"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="team-body" id="teamPanelBody"></div>
+</div>
+
+<!-- ══ SCROLL TOP / FOOTER ══════════════════════════════ -->
+<button class="scroll-top" id="scrollTop"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"></use></svg></button>
+
+<footer>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tlc-c)"></div>TLC</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tas-c)"></div>TAS</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tar-c)"></div>TAR</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tase-c)"></div>TASe</div>
+    <div class="legend-item" style="margin-left:8px">
+      <a href="admin.html" style="color:rgba(255,255,255,0.2);font-size:10px;text-decoration:none"><svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg></a>
+    </div>
+  </div>
+  <button class="build-stamp" id="buildStamp" title="Which build this device is running. Tap to force a fresh copy.">
+  </button>
+</footer>
+
+<!-- ══ VIDEOS ═══════════════════════════════════════════════ -->
+<div class="inc-overlay" id="incOverlay">
+  <div class="inc-head">
+    <div class="inc-title"><svg class="ico" aria-hidden="true"><use href="#i-video"></use></svg>Videos</div>
+    <button class="inc-close" id="incClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="inc-grid" id="incGrid"></div>
+  <div class="inc-empty" id="incEmpty">No videos yet.</div>
+</div>
+<div class="inc-player" id="incPlayer">
+  <div class="inc-player-bar">
+    <span class="inc-player-title" id="incPlayerTitle"></span>
+    <button class="inc-player-close" id="incPlayerClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="inc-player-body" id="incPlayerBody"></div>
+</div>
+
+<!-- ══ WEEKLY SALES & WEATHER ═══════════════════════════════ -->
+<div class="sw-overlay" id="swOverlay">
+  <div class="sw-head">
+    <div class="sw-title"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg>Weekly Sales <span>&amp; Weather</span></div>
+    <button class="inc-close" id="swClose" title="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"></use></svg></button>
+  </div>
+  <div class="sw-scroll" id="swBody"><div class="sw-loading">Loading sales &amp; weather…</div></div>
+</div>
+
+
+<script src="../scripts/app.js"></script>
+</body>
+</html>

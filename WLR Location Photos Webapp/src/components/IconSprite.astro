@@ -1,0 +1,6 @@
+---
+// The shared icon sprite, inlined into the page at build time so icons render
+// with the first paint and can never be served from a stale cached file.
+import { SPRITE } from '../lib/icons.js';
+---
+<Fragment set:html={SPRITE} />
