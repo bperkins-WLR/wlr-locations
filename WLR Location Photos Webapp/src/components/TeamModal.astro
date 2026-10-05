@@ -20,7 +20,9 @@
 .team-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.55); z-index: 800;
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  /* Prefixed first: the CSS minifier drops a standard declaration that is
+     followed by its -webkit- twin, which cost desktop Chrome the blur. */
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
 }
 .team-overlay.open { display: block; }
 .team-panel {

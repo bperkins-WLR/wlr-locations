@@ -36,4 +36,9 @@ export default defineConfig({
   // dataCheck runs first; legacyPhotoVariants keeps pre-Astro photo variant
   // URLs working for phones still on the old build (transitional).
   integrations: [dataCheck, legacyPhotoVariants()],
+  // Tell the CSS minifier which browsers to keep working. Without it, a rule
+  // carrying both backdrop-filter and -webkit-backdrop-filter lost one of them
+  // (desktop Chrome lost the footer blur); iPhones before iOS 18 need the
+  // -webkit- form, which these targets keep.
+  vite: { build: { cssTarget: ['safari15', 'chrome107', 'firefox104'] } },
 });
