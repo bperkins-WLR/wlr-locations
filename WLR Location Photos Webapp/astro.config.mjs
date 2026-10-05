@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import legacyPhotoVariants from './src/integrations/legacy-photo-variants.js';
 import { validateAll, formatReport } from './src/data/validate.js';
 
 /* Check the data files (src/data/) before anything is built. Errors stop the
@@ -32,5 +33,7 @@ export default defineConfig({
   // already shared or saved to a home screen keeps working unchanged.
   build: { format: 'file' },
   trailingSlash: 'never',
-  integrations: [dataCheck],
+  // dataCheck runs first; legacyPhotoVariants keeps pre-Astro photo variant
+  // URLs working for phones still on the old build (transitional).
+  integrations: [dataCheck, legacyPhotoVariants()],
 });

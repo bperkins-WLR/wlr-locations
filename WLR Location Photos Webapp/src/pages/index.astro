@@ -1,5 +1,6 @@
 ---
 import IconSprite from '../components/IconSprite.astro';
+import PhotoManifest from '../components/PhotoManifest.astro';
 import '../styles/app.css';
 
 // Build stamp in Eastern time (the whole company is on ET). It is written into
@@ -260,6 +261,7 @@ const BUILD = new Intl.DateTimeFormat('sv-SE', {
 </div>
 
 
+<PhotoManifest />
 <script src="../scripts/app.js"></script>
 </body>
 </html>

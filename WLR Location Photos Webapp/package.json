@@ -10,6 +10,7 @@
     "check-data": "node src/data/validate.js"
   },
   "dependencies": {
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "sharp": "^0.35.5"
   }
 }
