@@ -12,8 +12,10 @@ import { execFileSync } from 'node:child_process';
 // It is the time of the last commit that changed the app, ignoring the daily
 // ratings.json commit: ratings are fetched live, so a ratings-only deploy must
 // not make every open copy offer "New version — tap to update" each morning.
-// Falls back to the build time when git history isn't available (or the last
-// real change is older than a shallow clone reaches).
+// Falls back to the build time when git isn't available. Vercel clones only
+// recent history, so after a long run of ratings-only days git answers with the
+// oldest commit it has, and the stamp creeps forward once a day until the next
+// real change: harmless (an extra reload), so not worth guarding.
 function lastAppChange() {
   try {
     const iso = execFileSync('git',
