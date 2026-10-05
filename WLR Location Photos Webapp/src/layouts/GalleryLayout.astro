@@ -3,13 +3,29 @@
 // preview, BUILD stamp) and the global stylesheet. Page content goes in <slot />.
 import '../styles/global.css';
 
+import { execFileSync } from 'node:child_process';
+
 // Build stamp in Eastern time (the whole company is on ET). It is written into
 // the HTML as `const BUILD = '…';` because the auto-update check — including the
 // copy already running on phones from before Astro — reads it from the page.
+//
+// It is the time of the last commit that changed the app, ignoring the daily
+// ratings.json commit: ratings are fetched live, so a ratings-only deploy must
+// not make every open copy offer "New version — tap to update" each morning.
+// Falls back to the build time when git history isn't available (or the last
+// real change is older than a shallow clone reaches).
+function lastAppChange() {
+  try {
+    const iso = execFileSync('git',
+      ['log', '-1', '--format=%cI', '--', '.', ':(exclude)public/ratings.json'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return iso ? new Date(iso) : new Date();
+  } catch { return new Date(); }
+}
 const BUILD = new Intl.DateTimeFormat('sv-SE', {
   timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
   hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-}).format(new Date());
+}).format(lastAppChange());
 ---
 <!DOCTYPE html>
 <html lang="en">
