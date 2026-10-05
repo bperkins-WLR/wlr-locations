@@ -23,7 +23,7 @@ part of the site picks the change up on the next deploy.
 | Scheduled roster changes | `src/data/team.js` → `ROSTER_CHANGES` | See below. |
 | "Our Growth Story" chart | `src/data/growth.js` | `year: [cars serviced, annual revenue]`. |
 | Brand names and logos | `src/data/brands.js` | |
-| Location photos | `public/images/loc-NN/` | `01.jpg` exterior, `02.jpg` interior. See `PHOTO-NAMING-GUIDE.txt`. |
+| Location photos | `src/assets/locations/loc-NN/` | `01.jpg` exterior, `02.jpg` interior. See `PHOTO-NAMING-GUIDE.txt` there. Just replace the file — the build makes the phone-sized versions and gives them new addresses, so every phone picks up the new photo. |
 | Admin page | `src/pages/admin.astro` | |
 
 ### Common jobs

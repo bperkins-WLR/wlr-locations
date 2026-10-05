@@ -1,0 +1,79 @@
+---
+// Splash shown once per session. The inline script runs before first paint so
+// a repeat visit never flashes it; scripts/intro.js handles the rest.
+---
+<!-- ══ INTRO ═══════════════════════════════════════════ -->
+<div class="intro" id="intro" role="presentation" aria-hidden="true">
+  <video class="intro-bg" autoplay muted loop playsinline preload="auto"
+         poster="videos/intro-bubbles-poster.jpg" aria-hidden="true">
+    <source src="videos/intro-bubbles.mp4" type="video/mp4">
+  </video>
+  <div class="intro-inner">
+    <img class="intro-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+         onerror="this.style.display='none'">
+    <div class="intro-tagline">Serving the Mid-Atlantic Since 1987</div>
+    <div class="intro-stats">
+      <div class="intro-stat"><span class="intro-num" id="introLocs">0</span><span class="intro-lab">Locations</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introYears">0</span><span class="intro-lab">Years</span></div>
+      <div class="intro-stat"><span class="intro-num" id="introStates">0</span><span class="intro-lab">States</span></div>
+      <div class="intro-stat"><span class="intro-num">4</span><span class="intro-lab">Brands</span></div>
+    </div>
+  </div>
+  <div class="intro-skip">Tap to skip</div>
+</div>
+<script is:inline>
+  /* Hide before first paint if the intro already played this session (no flash) */
+  try { if (sessionStorage.getItem('wlr_intro_seen')) document.getElementById('intro').classList.add('intro-off'); } catch (e) {}
+</script>
+
+<style is:global>
+/* ══ INTRO SPLASH ════════════════════════════════════ */
+/* Fades itself out via CSS, so it can never trap the user if JS fails. */
+.intro {
+  position: fixed; inset: 0; z-index: 3000;
+  background: linear-gradient(160deg, #0a2755 0%, #0d3268 55%, #071a38 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: introOut 0.8s ease 4.5s forwards;
+}
+.intro.intro-off { display: none; }
+@keyframes introOut { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+@keyframes introIn  { to { opacity: 1; transform: none; } }
+/* Abstract bubble loop behind the lockup. If it fails to load the gradient still shows. */
+.intro-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  z-index: 0; opacity: 0;
+  /* same delay + duration as the logo so bubbles and lockup arrive together */
+  animation: introBgIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+}
+@keyframes introBgIn { to { opacity: 0.5; } }
+/* Scrim keeps the logo and numbers readable over the moving bubbles */
+.intro::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(7,26,56,0.55) 0%, rgba(7,26,56,0.84) 68%, rgba(7,26,56,0.95) 100%);
+}
+.intro-inner { text-align: center; padding: 20px; width: 100%; position: relative; z-index: 2; }
+.intro-logo {
+  width: min(86%, 620px); height: auto; display: block; margin: 0 auto;
+  opacity: 0; transform: scale(0.93);
+  animation: introIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+}
+.intro-tagline {
+  margin-top: 20px; font-size: 12.5px; letter-spacing: 2.6px; text-transform: uppercase;
+  color: rgba(255,255,255,0.6); opacity: 0; animation: introIn 0.8s ease 0.65s forwards;
+}
+.intro-stats { display: flex; justify-content: center; margin-top: 26px; opacity: 0; animation: introIn 0.8s ease 1s forwards; }
+.intro-stat { padding: 0 clamp(11px, 4vw, 30px); border-right: 1px solid rgba(255,255,255,0.14); }
+.intro-stat:last-child { border-right: none; }
+.intro-num { display: block; font-size: clamp(30px, 7vw, 46px); font-weight: 900; color: var(--yellow); line-height: 1; font-variant-numeric: tabular-nums; }
+.intro-lab { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.6px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+.intro-skip {
+  position: absolute; bottom: max(env(safe-area-inset-bottom), 24px); z-index: 2;
+  font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); opacity: 0; animation: introIn 0.6s ease 1.7s forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro { animation-delay: 1s; }
+  .intro-logo, .intro-tagline, .intro-stats, .intro-skip { animation-duration: 0.01s; animation-delay: 0s; }
+  .intro-bg { display: none; }
+}
+</style>

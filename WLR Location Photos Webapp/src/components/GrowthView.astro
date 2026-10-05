@@ -1,0 +1,47 @@
+---
+// Container for the growth charts that scripts/growth-chart.js renders.
+---
+<div class="timeline-wrap" id="timelineWrap"></div>
+
+<style is:global>
+/* ══ GROWTH TIMELINE ═════════════════════════════════ */
+.timeline-wrap { display: none; padding: 16px 14px 90px; max-width: 1100px; margin: 0 auto; }
+.timeline-wrap.show { display: block; }
+@media(min-width: 1500px) { .timeline-wrap { max-width: 1280px; } }
+.tl-metric { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tlm-btn { display: inline-flex; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-4); border-radius: var(--r-full); border: 1.5px solid rgba(255,255,255,0.18); background: #000; color: rgba(255,255,255,0.7); font-size: 12.5px; font-weight: 800; cursor: pointer; font-family: inherit; -webkit-appearance: none; transition: all 0.15s; white-space: nowrap; }
+.tlm-btn.active { background: var(--yellow); color: var(--deep); border-color: transparent; }
+.tl-head { text-align: center; margin-bottom: 12px; }
+.tl-head h2 { font-size: 21px; font-weight: 900; color: #fff; letter-spacing: 0.3px; }
+.tl-head h2 span { color: var(--yellow); }
+.tl-stats { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.tl-stat { padding: 4px 18px; border-right: 1px solid rgba(255,255,255,0.12); }
+.tl-stat:last-child { border-right: none; }
+.tl-num { display: block; font-size: 28px; font-weight: 900; color: var(--yellow); line-height: 1; }
+.tl-lab { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.3px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+.tl-legend { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 4px 0 10px; }
+.tl-leg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.78); font-weight: 700; }
+.tl-sw { width: 11px; height: 11px; border-radius: 3px; }
+.tl-chart { width: 100%; height: auto; background: rgba(0,0,0,0.22); border: 1px solid var(--bord); border-radius: 14px; }
+.tl-grid { stroke: rgba(255,255,255,0.08); stroke-width: 1; }
+.tl-ylabel { fill: rgba(255,255,255,0.45); font-size: 11px; text-anchor: end; font-family: 'Work Sans', sans-serif; }
+.tl-xlabel { fill: rgba(255,255,255,0.5); font-size: 11px; text-anchor: middle; font-family: 'Work Sans', sans-serif; }
+.tl-end { fill: #fff; font-size: 15px; font-weight: 900; text-anchor: middle; font-family: 'Work Sans', sans-serif; }
+.tl-hit { fill: transparent; }
+.tl-hit:hover, .tl-hit.on { fill: rgba(255,255,255,0.07); }
+/* Readout for the growth charts. A native <title> only appears on hover,
+   which does not exist on a phone — this works for pointer and touch. */
+.tl-chart-wrap { position: relative; }
+.tl-tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  transform: translate(-50%, -100%);
+  background: rgba(8,20,40,0.97); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.22); border-radius: var(--r-sm);
+  padding: var(--s-1) var(--s-2); box-shadow: var(--e-2);
+  font-size: var(--f-xs); font-weight: var(--w-bold); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.tl-tip[hidden] { display: none; }
+.tl-foot { text-align: center; font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+.tl-empty { text-align: center; color: rgba(255,255,255,0.5); padding: 40px; }
+</style>

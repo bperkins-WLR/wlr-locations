@@ -1,0 +1,118 @@
+---
+// Brand lockup and headline stats; scripts/intro.js counts the numbers up.
+---
+<!-- ══ HERO SECTION ════════════════════════════════════ -->
+<div class="hero">
+  <img class="hero-logo" src="images/Logo-wlr-banner.png" alt="WLR Automotive Group"
+       onerror="this.style.display='none'; document.getElementById('heroFB').style.display='flex';">
+  <div class="hero-logo-fb" id="heroFB" style="display:none">WLR</div>
+
+  <div class="hero-tagline">Serving the Mid-Atlantic Since 1987</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statLocs">30</span>
+      <span class="hero-stat-label">Locations</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statYears">38</span>
+      <span class="hero-stat-label">Years</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="statStates">3</span>
+      <span class="hero-stat-label">States</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">4</span>
+      <span class="hero-stat-label">Brands</span>
+    </div>
+  </div>
+
+  <div class="hero-states">Maryland &nbsp;·&nbsp; Pennsylvania &nbsp;·&nbsp; West Virginia</div>
+
+  <div class="hero-note">
+    Location numbers reflect WLR's history — some numbers represent locations that have been converted or closed over the years.
+    <br>Ask Randy for the full story! &nbsp;<a onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">View all locations <svg class="ico" aria-hidden="true"><use href="#i-arrow-down"></use></svg></a>
+  </div>
+</div>
+
+<style is:global>
+/* ══ HERO SECTION ════════════════════════════════════ */
+.hero {
+  background: linear-gradient(170deg, #0a2755 0%, #1248a0 60%, #0d3268 100%);
+  padding: 28px 20px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.hero-logo {
+  height: auto; width: 100%; max-width: 480px; object-fit: contain;
+  margin: 0 auto 18px; display: block;
+}
+.hero-logo-fb {
+  width: 96px; height: 72px; background: var(--yellow); border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; color: var(--deep);
+  margin: 0 auto 18px;
+}
+.hero-tagline {
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 22px;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 0;
+  margin-bottom: 16px;
+}
+.hero-stat {
+  flex: 1; max-width: 110px; padding: 12px 8px;
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-num {
+  font-size: 40px; font-weight: 900; color: var(--yellow);
+  line-height: 1; display: block;
+}
+.hero-stat-label {
+  font-size: 10px; color: rgba(255,255,255,0.55);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-top: 4px; display: block;
+}
+.hero-states {
+  font-size: 13px; color: rgba(255,255,255,0.75);
+  letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.hero-note {
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  margin-top: 10px; line-height: 1.5;
+}
+.hero-note a { color: rgba(255,255,255,0.45); text-decoration: underline; cursor: pointer; }
+
+/* — Hero: slow drifting gradient — */
+@keyframes heroShift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+.hero {
+  background: linear-gradient(160deg, #060e24, #1248a0, #0a2960, #0d1f4a, #1a4fa8) !important;
+  background-size: 400% 400% !important;
+  animation: heroShift 13s ease infinite;
+}
+
+/* — Hero element entrances — */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-logo, .hero-logo-fb {
+  animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-tagline {
+  animation: heroFadeUp 0.8s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-stats {
+  animation: heroFadeUp 0.8s 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-states, .hero-note {
+  animation: heroFadeUp 0.8s 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+</style>
