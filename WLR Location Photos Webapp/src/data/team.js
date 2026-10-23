@@ -2,7 +2,7 @@
 // mp=Managing Partner, dm=District Manager, lm=Location Manager
 // am[]=Asst Manager(s), sup[]=Supervisor(s)
 export const MGMT = {
-  1:  { mp:null,               dm:'Michael Mastrangelo',    lm:'Tyler DeGrange',                        am:['Michael Morris'],                                sup:['Open'] },
+  1:  { mp:null,               dm:'Michael Mastrangelo',    lm:'Tyler DeGrange',                        am:['Open'],                                          sup:['Open'] },
   2:  { mp:null,               dm:'Michael Mastrangelo',    lm:'Cristian Botero',                       am:['John Strott','Jackson Krasche'],                 sup:['Jose Jandres'] },
   3:  { mp:null,               dm:'James "JT" Kelley',      lm:'Brian Haire',                           am:['Cesar Quinteros'],                               sup:['Lorraine Eiland'] },
   4:  { mp:null,               dm:'Mike Clark',             lm:'Aaron Gotthardt',                       am:['Nicqolas Clements'],                             sup:[] },
