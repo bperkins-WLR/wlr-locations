@@ -88,6 +88,9 @@ function renderAdmin() {
     const edited  = hasInfo(base.num);
     const tLabel  = base.type === 'TASE' ? 'TASe' : base.type;
     const info    = getInfo(base.num);
+    // The status the gallery shows: an admin edit, else the store's own status
+    // in the data (e.g. #13/#18 Permanently Closed), else Open.
+    const curStatus = info.status || base.status || 'Open';
     const isCustom = customNums.has(base.num);
     const isHidden = base.hidden === true;
     const isPublished = info.published === true;
@@ -195,10 +198,10 @@ function renderAdmin() {
           <div class="field-row">
             <label class="field-label">Status</label>
             <select class="status-select" id="f-status-${base.num}">
-              <option value="Open"         ${(info.status||'Open')==='Open'        ? 'selected':''}>Open</option>
-              <option value="Coming Soon"  ${(info.status||'')==='Coming Soon'     ? 'selected':''}>Coming Soon</option>
-              <option value="Temporarily Closed" ${(info.status||'')==='Temporarily Closed'?'selected':''}>Temporarily Closed</option>
-              <option value="Permanently Closed" ${(info.status||'')==='Permanently Closed'?'selected':''}>Permanently Closed</option>
+              <option value="Open"         ${curStatus==='Open'        ? 'selected':''}>Open</option>
+              <option value="Coming Soon"  ${curStatus==='Coming Soon'     ? 'selected':''}>Coming Soon</option>
+              <option value="Temporarily Closed" ${curStatus==='Temporarily Closed'?'selected':''}>Temporarily Closed</option>
+              <option value="Permanently Closed" ${curStatus==='Permanently Closed'?'selected':''}>Permanently Closed</option>
             </select>
           </div>
 
@@ -250,8 +253,9 @@ function saveInfo(num) {
     const val = parseInt(numOverrideEl.value);
     if (val && val !== num) obj.numOverride = val;
   }
-  // Only save keys that differ from base or are filled in
-  const base = BASE_LOCS.find(b => b.num === num);
+  // Only save keys that differ from base or are filled in. Admin-added
+  // locations aren't in BASE_LOCS, so look across both lists.
+  const base = getAllLocs().find(b => b.num === num);
   if (obj.name   === base.name)   delete obj.name;
   if (obj.city   === base.city)   delete obj.city;
   if (obj.state  === base.state)  delete obj.state;
@@ -259,7 +263,7 @@ function saveInfo(num) {
   if (!obj.addr)   delete obj.addr;
   if (!obj.phone)  delete obj.phone;
   if (!obj.notes)  delete obj.notes;
-  if (obj.status === 'Open') delete obj.status;
+  if (obj.status === (base.status || 'Open')) delete obj.status;
 
   if (Object.keys(obj).length === 0) {
     clearInfo(num);
