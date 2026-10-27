@@ -61,12 +61,32 @@ export function applyPendingFocus() {
   card.classList.add('card-focus');
   if (pendingFocusScrolled) return;             // only steal the scroll once
   pendingFocusScrolled = true;
-  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Jump, don't glide: a long smooth scroll is still running when the ratings
+  // land and resize the page, and on iPhone it then finishes at its old,
+  // now-wrong target — undoing the correction below. The card's highlight
+  // pulse shows where you've landed.
+  revealCard(card);
   holdFocusInView(pendingFocus);
   setTimeout(() => {
     pendingFocus = null;
     card.classList.remove('card-focus');
   }, 5000);
+}
+
+/* Scroll so the card sits in the part of the screen the sticky header + filter
+   bar and the fixed footer leave visible: centred when it fits, otherwise top
+   just under the bar so the store's name is never hidden behind it (a plain
+   block:'center' tucked tall cards' names under the bar on phones). Instant —
+   see applyPendingFocus. */
+function revealCard(card) {
+  const bar = document.querySelector('.controls');
+  const foot = document.querySelector('footer');
+  const top = bar ? (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight : 0;
+  const bottom = innerHeight - (foot ? foot.offsetHeight : 0);
+  const r = card.getBoundingClientRect();
+  const room = bottom - top;
+  const gap = r.height < room ? (room - r.height) / 2 : 12;
+  window.scrollTo({ top: Math.max(0, scrollY + r.top - top - gap) });
 }
 
 /* The page above a linked card keeps growing for a moment after the jump —
@@ -81,7 +101,7 @@ function holdFocusInView(num) {
   const ro = new ResizeObserver(() => {
     if (first) { first = false; return; }      // the initial report isn't a change
     const card = document.querySelector(`.card[data-num="${num}"]`);  // re-renders replace it
-    if (card) card.scrollIntoView({ block: 'center' });   // instant: smooth would trail the growth
+    if (card) revealCard(card);
   });
   const release = () => { ro.disconnect(); INPUTS.forEach(e => removeEventListener(e, release)); };
   INPUTS.forEach(e => addEventListener(e, release, { passive: true }));
