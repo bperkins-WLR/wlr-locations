@@ -59,7 +59,10 @@ export function applyPendingFocus() {
   if (!card) return;
   card.classList.remove('card-anim');           // never leave a linked card invisible
   card.classList.add('card-focus');
-  if (pendingFocusScrolled) return;             // only steal the scroll once
+  // A re-render (the ratings arriving) rebuilds the cards above this one at a
+  // new height: put it back in place directly, rather than relying only on the
+  // ResizeObserver, whose first report can already include the change.
+  if (pendingFocusScrolled) { if (holding) revealCard(card); return; }
   pendingFocusScrolled = true;
   // Jump, don't glide: a long smooth scroll is still running when the ratings
   // land and resize the page, and on iPhone it then finishes at its old,
@@ -95,15 +98,19 @@ function revealCard(card) {
    For a few seconds, re-centre it whenever the page's height changes, and stop
    as soon as the person scrolls or taps on their own so it never fights them. */
 const HOLD_MS = 6000;
+let holding = false;                            // true while holdFocusInView is active
 function holdFocusInView(num) {
+  holding = true;
   const INPUTS = ['touchstart', 'wheel', 'keydown', 'mousedown'];
-  let first = true;
+  // Act on every report, including the first: when the ratings come back fast
+  // the page has already grown by the time the first one arrives, and skipping
+  // it (as an earlier version did) left the card short on the live site.
+  // Re-revealing a card that is already in place is a no-op.
   const ro = new ResizeObserver(() => {
-    if (first) { first = false; return; }      // the initial report isn't a change
     const card = document.querySelector(`.card[data-num="${num}"]`);  // re-renders replace it
     if (card) revealCard(card);
   });
-  const release = () => { ro.disconnect(); INPUTS.forEach(e => removeEventListener(e, release)); };
+  const release = () => { holding = false; ro.disconnect(); INPUTS.forEach(e => removeEventListener(e, release)); };
   INPUTS.forEach(e => addEventListener(e, release, { passive: true }));
   ro.observe(document.body);
   setTimeout(release, HOLD_MS);
