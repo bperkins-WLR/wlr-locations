@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""Prepare a store photo for the gallery: crop to 3:2, resize to 1920x1280 and
-burn in the "#NN" plate every location photo carries in its top-left corner.
+"""Prepare a store photo for the gallery and burn in the "#NN" plate every
+location photo carries in its top-left corner.
 
     python3 tools/prepare-photo.py SOURCE NUM SLOT [--bias 0.5] [--out PATH]
 
-SLOT is 01 (exterior), 02 (interior) or 03 (aerial). --bias says where to crop
-along the axis that is too long: 0 keeps the top (or left) edge, 1 the bottom
-(or right), 0.5 the centre. Writes src/assets/locations/loc-NN/SLOT.jpg unless
---out is given. Needs Pillow (pip install pillow); runs on the Mac, not in the
-Vercel build.
+SLOT is 01 (exterior), 02 (interior) or 03 (aerial).
+- 01/02 are cropped to 3:2 and resized to 1920x1280, because they fill the
+  grid's photo tiles. --bias says where to crop along the axis that is too
+  long: 0 keeps the top (or left) edge, 1 the bottom (or right), 0.5 the centre.
+- 03 keeps the whole frame: aerials come square, wide or tall, have no grid
+  tile, and the viewer and slideshow fit any shape — cropping a tall site to
+  3:2 would throw away half the lot. Shrunk only if a side exceeds 1920px,
+  never enlarged.
+Writes src/assets/locations/loc-NN/SLOT.jpg unless --out is given. Needs Pillow
+(pip install pillow); runs on the Mac, not in the Vercel build.
 
-The plate matches the existing photos exactly: anchored at (23, 24), 67px tall,
-161px wide for two digits (126 for one), black at 175/255 with a 14px corner
-radius, white Arial Bold 46 centred.
+On a 1920x1280 photo the plate matches the existing ones exactly: anchored at
+(23, 24), 67px tall, 161px wide for two digits (126 for one), black at 175/255
+with a 14px corner radius, white Arial Bold 46 centred. On other sizes it is
+scaled by the shorter side relative to 1280.
 """
 import argparse, os
 from PIL import Image, ImageDraw, ImageFont
@@ -32,10 +38,12 @@ def crop_3x2(im, bias):
 
 def burn_plate(im, num):
     label = f"#{num}"
-    pw = 161 if len(label) >= 3 else 126
+    k = min(im.size) / H               # 1.0 on a standard 1920x1280 photo
+    pw = round((161 if len(label) >= 3 else 126) * k)
+    x, y, ph = round(23 * k), round(24 * k), round(67 * k)
     ov = Image.new("RGBA", im.size, (0, 0, 0, 0)); d = ImageDraw.Draw(ov)
-    d.rounded_rectangle([23, 24, 23 + pw - 1, 24 + 67 - 1], radius=14, fill=(0, 0, 0, 175))
-    d.text((23 + pw / 2, 24 + 67 / 2), label, font=ImageFont.truetype(FONT, 46),
+    d.rounded_rectangle([x, y, x + pw - 1, y + ph - 1], radius=round(14 * k), fill=(0, 0, 0, 175))
+    d.text((x + pw / 2, y + ph / 2), label, font=ImageFont.truetype(FONT, round(46 * k)),
            fill=(255, 255, 255, 255), anchor="mm")
     return Image.alpha_composite(im.convert("RGBA"), ov).convert("RGB")
 
@@ -48,7 +56,11 @@ def main():
     a = ap.parse_args()
     im = Image.open(a.source)
     im.draft("RGB", (W * 2, H * 2))   # decode big JPEGs at a reduced size, much faster
-    im = crop_3x2(im.convert("RGB"), a.bias).resize((W, H), Image.LANCZOS)
+    im = im.convert("RGB")
+    if a.slot == "03":
+        im.thumbnail((W, W), Image.LANCZOS)          # keep the whole frame; shrink only
+    else:
+        im = crop_3x2(im, a.bias).resize((W, H), Image.LANCZOS)
     im = burn_plate(im, a.num)
     out = a.out or os.path.join(APP, "src", "assets", "locations", f"loc-{a.num:02d}", f"{a.slot}.jpg")
     os.makedirs(os.path.dirname(out), exist_ok=True)
