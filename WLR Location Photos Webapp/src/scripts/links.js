@@ -62,10 +62,31 @@ export function applyPendingFocus() {
   if (pendingFocusScrolled) return;             // only steal the scroll once
   pendingFocusScrolled = true;
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  holdFocusInView(pendingFocus);
   setTimeout(() => {
     pendingFocus = null;
     card.classList.remove('card-focus');
   }, 5000);
+}
+
+/* The page above a linked card keeps growing for a moment after the jump —
+   the ratings arrive and re-render every card with its rating line, fonts and
+   logos finish loading — which left a slow phone stopped short of the card.
+   For a few seconds, re-centre it whenever the page's height changes, and stop
+   as soon as the person scrolls or taps on their own so it never fights them. */
+const HOLD_MS = 6000;
+function holdFocusInView(num) {
+  const INPUTS = ['touchstart', 'wheel', 'keydown', 'mousedown'];
+  let first = true;
+  const ro = new ResizeObserver(() => {
+    if (first) { first = false; return; }      // the initial report isn't a change
+    const card = document.querySelector(`.card[data-num="${num}"]`);  // re-renders replace it
+    if (card) card.scrollIntoView({ block: 'center' });   // instant: smooth would trail the growth
+  });
+  const release = () => { ro.disconnect(); INPUTS.forEach(e => removeEventListener(e, release)); };
+  INPUTS.forEach(e => addEventListener(e, release, { passive: true }));
+  ro.observe(document.body);
+  setTimeout(release, HOLD_MS);
 }
 
 /* Land on a specific location from ?loc=NN. Open sites live in the grid;
