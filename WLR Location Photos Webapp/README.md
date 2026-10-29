@@ -75,6 +75,12 @@ Run the check on its own with `npm run check-data`.
 - You don't run any manual stamping or image tools. The build stamp in the
   footer, the photo versions, the share pages (`l/NN.html`) and their
   preview images (`og/NN.jpg`) are all produced by the build.
+- **Phones update themselves**, including copies added to the home screen.
+  The app checks `version.json` when it's opened or switched back to, every
+  5 minutes while open, and when signal returns. Coming back to it, it updates
+  at once; left open, it updates after a minute untouched (never while a
+  photo, slideshow or panel is open), and puts the person back on the same
+  view, filters and spot. Nobody needs to close or re-add the app.
 
 ## Google ratings
 
