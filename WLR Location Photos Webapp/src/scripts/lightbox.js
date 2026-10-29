@@ -1,5 +1,5 @@
 import { locations } from '../data/locations.js';
-import { photoUrl, setLbSources } from './photos.js';
+import { photoUrl, setLbSources, photoSlots } from './photos.js';
 import { pad } from './util.js';
 import { getPhotoSrc, getLocInfo } from './store.js';
 import { state } from './state.js';
@@ -7,7 +7,6 @@ import { fitMapToPins } from './map.js';
 
 // ══ LIGHTBOX ══════════════════════════════════════════════
 let lbPhotos = [], lbIdx = 0, lbNum = null;
-const LB_SLOTS = ['ext','int'];
 
 const vtSupported = () =>
   typeof document.startViewTransition === 'function' &&
@@ -35,6 +34,7 @@ function lbMorphFrom(thumb, update) {
   try {
     t = document.startViewTransition(() => { clear(); update(); });
   } catch (e) { clear(); update(); return; }
+  t.ready.catch(() => {});            // a skipped transition rejects these; nothing to handle
   t.finished.catch(() => {}).finally(clear);
 }
 
@@ -47,6 +47,7 @@ function lbMorphTo(thumb, update) {
   try {
     t = document.startViewTransition(() => { update(); thumb.style.viewTransitionName = 'lb-photo'; });
   } catch (e) { clear(); update(); return; }
+  t.ready.catch(() => {});            // a skipped transition rejects these; nothing to handle
   t.finished.catch(() => {}).finally(clear);
 }
 
@@ -55,23 +56,22 @@ export function openLightboxForLoc(num, startSlot, sourceImg) {
   if (!baseLoc) return;
   const loc = { ...baseLoc, ...getLocInfo(num) };
   const dn     = loc.numOverride || num;
-  const slots  = ['ext','int'];
-  const photos = [];
-  slots.forEach(s => {
-    const local = getPhotoSrc(num, s);
-    const file  = `images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`;
-    const src   = local || file;
-    photos.push({ src, label: s === 'ext' ? 'Exterior' : 'Interior', caption: `#${pad(dn)} ${loc.name} — ${s==='ext'?'Exterior':'Interior'}` });
-  });
+  const slots  = photoSlots(dn);
+  const photos = slots.map(s => ({
+    slot: s.key,
+    src: getPhotoSrc(num, s.key) || `images/loc-${pad(dn)}/${s.file}.jpg`,
+    label: s.label,
+    caption: `#${pad(dn)} ${loc.name} — ${s.label}`,
+  }));
 
   // Filter to only photos that are actually loaded (either local or file that might exist)
   // We open with whatever slot was clicked
   lbPhotos = photos;
   lbNum    = num;
-  lbIdx    = slots.indexOf(startSlot);
+  lbIdx    = slots.findIndex(s => s.key === startSlot);
   if (lbIdx < 0) lbIdx = 0;
 
-  const thumb = sourceImg || lbThumbFor(num, LB_SLOTS[lbIdx]);
+  const thumb = sourceImg || lbThumbFor(num, lbPhotos[lbIdx].slot);
   lbMorphFrom(thumb, () => {
     // No slide-in on open — the morph is the entrance.
     showLightboxSlide(false);
@@ -109,7 +109,8 @@ function showLightboxSlide(animate = true) {
 export function closeLightbox() {
   const lb = document.getElementById('lightbox');
   if (!lb.classList.contains('open')) return;   // nothing to morph back to
-  const thumb = lbNum === null ? null : lbThumbFor(lbNum, LB_SLOTS[lbIdx]);
+  // The aerial has no grid tile, so closing from it simply fades out.
+  const thumb = lbNum === null ? null : lbThumbFor(lbNum, lbPhotos[lbIdx]?.slot);
   lbMorphTo(thumb, () => {
     lb.classList.remove('open');
     document.body.style.overflow = '';

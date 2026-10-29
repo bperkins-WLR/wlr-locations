@@ -25,6 +25,7 @@ export default function legacyPhotoVariants() {
         if (!m) { logger.warn('no photo manifest in index.html; legacy variants skipped'); return; }
         let n = 0;
         for (const [key, entry] of Object.entries(JSON.parse(m[1]))) {
+          if (!/\/0[12]$/.test(key)) continue;   // aerials (03) never had legacy URLs
           for (const fmt of ['avif', 'webp']) {
             for (const [i, w] of WIDTHS.entries()) {
               const dest = path.join(out, 'images', `${key}-${w}.${fmt}`);

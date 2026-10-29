@@ -5,10 +5,17 @@
 
 FORMAT:  src/assets/locations / loc-## / 01.jpg  →  Exterior photo
          src/assets/locations / loc-## / 02.jpg  →  Interior photo
+         src/assets/locations / loc-## / 03.jpg  →  Aerial (drone) photo — optional
 
-  Drop exactly 2 photos into each loc-## folder:
+  Each loc-## folder holds 2 photos, plus an optional aerial:
     01.jpg = Exterior (outside shot)
     02.jpg = Interior (inside shot)
+    03.jpg = Aerial (drone shot) — adds an "Aerial" button to the store's
+             card and a third slide in the photo viewer and slideshow
+
+  Prepare any of them with:
+    python3 tools/prepare-photo.py <source.jpg> <store #> <01|02|03> [--bias 0.5]
+  It crops to 3:2, resizes to 1920x1280 and burns in the #NN label.
 
 ─── FULL LIST (2 photos per location) ──────────────────────────
 

@@ -1,6 +1,6 @@
 import { TYPE_FULL } from '../data/brands.js';
 import { ic } from '../lib/icons.js';
-import { photoUrl } from './photos.js';
+import { photoUrl, photoSlots } from './photos.js';
 import { pad, esc } from './util.js';
 import { getPhotoSrc, getLocInfo, isLocVisible, yearsOpen } from './store.js';
 import { getSorted, matches } from './state.js';
@@ -14,19 +14,25 @@ let ssLastLoc = null;     // location whose details are on screen (only re-anima
 let ssKb      = 0;        // alternates the Ken Burns drift direction
 let ssLeft    = SS_DURATION, ssTickStart = 0;   // time left on this photo, for a true pause
 
+let ssStarts = [], ssTotal = 0;  // index of each location's first photo, and the photo count, for the progress bar
+
+// A location's slides: exterior, interior, and its aerial when it has one.
 function buildSSPhotos(loc) {
   const dn = loc.numOverride || loc.num;
-  return ['ext','int'].map(s => ({
-    src:   getPhotoSrc(loc.num,s) || photoUrl(`images/loc-${pad(dn)}/${s === 'ext' ? '01' : '02'}.jpg`),
-    label: s==='ext' ? 'Exterior' : 'Interior',
-    local: !!getPhotoSrc(loc.num,s),
+  return photoSlots(dn).map(s => ({
+    src:   getPhotoSrc(loc.num, s.key) || photoUrl(`images/loc-${pad(dn)}/${s.file}.jpg`),
+    label: s.label,
+    local: !!getPhotoSrc(loc.num, s.key),
   }));
 }
+const photosOf = i => buildSSPhotos({ ...ssLocs[i], ...getLocInfo(ssLocs[i].num) });
 
 function startSlideshow() {
   ssLocs = getSorted().filter(l => isLocVisible(l) && matches(l));
   if (ssLocs.length === 0) return;
   ssLocIdx  = 0; ssSlotIdx = 0; ssPaused = false; ssLastLoc = null;
+  ssStarts = []; ssTotal = 0;
+  ssLocs.forEach((_, i) => { ssStarts.push(ssTotal); ssTotal += photosOf(i).length; });
   document.getElementById('ssStage').innerHTML = '';
   const ss = document.getElementById('slideshow');
   ss.classList.add('open'); ss.classList.remove('paused');
@@ -53,10 +59,10 @@ function whenReady(img) {
 
 // Warm the cache with the next photo so the crossfade starts on time.
 function preloadNext() {
-  const next = ssSlotIdx === 0 ? { li: ssLocIdx, si: 1 } : { li: ssLocIdx + 1, si: 0 };
-  const loc = ssLocs[next.li];
-  if (!loc) return;
-  const src = buildSSPhotos({ ...loc, ...getLocInfo(loc.num) })[next.si]?.src;
+  const next = ssSlotIdx < photosOf(ssLocIdx).length - 1
+    ? { li: ssLocIdx, si: ssSlotIdx + 1 } : { li: ssLocIdx + 1, si: 0 };
+  if (!ssLocs[next.li]) return;
+  const src = photosOf(next.li)[next.si]?.src;
   if (src) { const im = new Image(); im.src = src; }
 }
 
@@ -111,8 +117,8 @@ function showSSSlide() {
   }
 
   // Counter & label
-  const totalPhotos = ssLocs.length * 2;
-  const curPhoto    = ssLocIdx * 2 + ssSlotIdx + 1;
+  const totalPhotos = ssTotal;
+  const curPhoto    = ssStarts[ssLocIdx] + ssSlotIdx + 1;
   document.getElementById('ssCounter').textContent   = `${ssLocIdx+1} of ${ssLocs.length} locations`;
   document.getElementById('ssPhotoLabel').textContent = photo.label;
 
@@ -169,7 +175,7 @@ function ssAdvance() {
 function ssGoBack() {
   clearTimeout(ssTimer);
   if (ssSlotIdx > 0) { ssSlotIdx--; }
-  else if (ssLocIdx > 0) { ssLocIdx--; ssSlotIdx = 1; }
+  else if (ssLocIdx > 0) { ssLocIdx--; ssSlotIdx = photosOf(ssLocIdx).length - 1; }
   showSSSlide();
 }
 

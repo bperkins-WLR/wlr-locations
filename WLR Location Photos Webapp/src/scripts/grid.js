@@ -2,7 +2,7 @@ import { locations } from '../data/locations.js';
 import { TYPE_FULL, TYPE_LOGO, LOC_LOGO } from '../data/brands.js';
 import { MGMT } from '../data/team.js';
 import { ic } from '../lib/icons.js';
-import { photoUrl, photoSources } from './photos.js';
+import { photoUrl, photoSources, hasPhoto } from './photos.js';
 import { pad, esc } from './util.js';
 import { getPhotoSrc, getLocInfo, isLocVisible, yearsOpen } from './store.js';
 import { hoursBlockHtml, callBtnHtml } from './opening-hours.js';
@@ -91,6 +91,9 @@ function buildCard(baseLoc) {
   const mapsBtn  = dirBtn(loc, 'loc-maps');
   const callBtn  = callBtnHtml(loc.num);
   const tourBtn  = loc.render3d ? `<a class="loc-3d" href="${loc.render3d}" target="_blank" onclick="event.stopPropagation()">${ic('cube')}3D Tour</a>` : '';
+  // The drone shot has no tile of its own (cards keep two photos side by side);
+  // this opens the photo viewer straight on it.
+  const aerialBtn = hasPhoto(displayNum, '03') ? `<button class="loc-aerial" type="button" data-num="${loc.num}">${ic('drone')}Aerial</button>` : '';
   const camBtn   = loc.cam ? `<a class="loc-cam" href="${loc.cam}" target="_blank" onclick="event.stopPropagation()">${ic('camera')}Live Cam</a>` : '';
   const teamBtn  = MGMT[loc.num] ? `<button class="loc-team" onclick="event.stopPropagation(); openTeam(${loc.num})">${ic('user')}Team</button>` : '';
   const hoursHtml = hoursBlockHtml(loc.num);
@@ -159,7 +162,7 @@ function buildCard(baseLoc) {
           ${statusBadge ? `<div class="loc-meta" style="margin-top:3px">${statusBadge}</div>` : ''}
           ${opened}
           ${hoursHtml}
-          <div class="loc-meta">${mapsBtn}${callBtn}${tourBtn}${camBtn}${teamBtn}</div>
+          <div class="loc-meta">${mapsBtn}${callBtn}${aerialBtn}${tourBtn}${camBtn}${teamBtn}</div>
           ${notesLine}
         </div>
       </div>
@@ -201,6 +204,13 @@ export function render() {
       const num  = parseInt(slot.dataset.num);
       const slot2 = slot.dataset.slot;
       openLightboxForLoc(num, slot2, img);
+    });
+  });
+
+  grid.querySelectorAll('.loc-aerial').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openLightboxForLoc(parseInt(btn.dataset.num), 'air');
     });
   });
 

@@ -14,10 +14,27 @@ const MANIFEST = (() => {
 /* The manifest entry for a bundled path like 'images/loc-05/01.jpg', or null
    for anything else (admin-uploaded blob:/data: URLs, unknown locations). */
 function bundled(path) {
-  const m = /^images\/loc-(\d+)\/(0[12])\.jpg$/i.exec(path || '');
+  const m = /^images\/loc-(\d+)\/(0[123])\.jpg$/i.exec(path || '');
   return (m && MANIFEST[`loc-${m[1]}/${m[2]}`]) || null;
 }
 const srcset = urls => `${urls[0]} 480w, ${urls[1]} 960w`;
+
+/* A location's photos in viewing order. Exterior and interior always (the
+   grid shows them, with a placeholder when missing); the drone aerial only
+   when one is bundled as 03.jpg — the admin page has no aerial slot. */
+export function photoSlots(dn) {
+  const slots = [
+    { key: 'ext', file: '01', label: 'Exterior' },
+    { key: 'int', file: '02', label: 'Interior' },
+  ];
+  if (hasPhoto(dn, '03')) slots.push({ key: 'air', file: '03', label: 'Aerial' });
+  return slots;
+}
+
+/* Whether location `dn` has bundled photo `file` ('03' = the optional aerial). */
+export function hasPhoto(dn, file) {
+  return !!MANIFEST[`loc-${String(dn).padStart(2, '0')}/${file}`];
+}
 
 /* The full-size (1920px) JPEG for a bundled photo; other srcs are returned as-is. */
 export function photoUrl(path) {

@@ -6,7 +6,8 @@ import fs from 'node:fs/promises';
 import { PHOTOS } from '../../../lib/location-photos.js';
 
 export function getStaticPaths() {
-  return Object.entries(PHOTOS).map(([key, meta]) => {
+  // Only the exterior and interior ever had these addresses; aerials (03) are new.
+  return Object.entries(PHOTOS).filter(([key]) => /\/0[12]$/.test(key)).map(([key, meta]) => {
     const [, n, file] = /^loc-(\d+)\/(0[12])$/.exec(key);
     return { params: { n, file }, props: { fsPath: meta.fsPath } };
   });
