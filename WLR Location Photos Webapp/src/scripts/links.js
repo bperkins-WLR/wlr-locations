@@ -16,7 +16,7 @@ function locShareUrl(num) {
 }
 
 let toastTimer = null;
-function toast(msg) {
+export function toast(msg) {
   let t = document.getElementById('toast');
   if (!t) {
     t = document.createElement('div');
