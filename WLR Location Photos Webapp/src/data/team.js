@@ -24,7 +24,7 @@ export const MGMT = {
   22: { mp:null,               dm:'James "JT" Kelley',      lm:'Dakota Belcher',                        am:['Kristen Alvarez'],                               sup:[] },
   23: { mp:'Megan Solomon',    dm:'Megan Monroe (interim)', lm:'Garrett Mayhew',                        am:['Maura Rivera Ramos'],                            sup:['Jonathan Hacen','Bill McKenna'] },
   24: { mp:'Megan Solomon',    dm:'Megan Solomon (interim)', lm:'Joseph Youngblood',                     am:['Levi Lauer'],                                    sup:['Damian Smith','Wallesca Cordero','Aaron Weatherill'] },
-  25: { mp:'Megan Solomon',    dm:'Megan Solomon (interim)', lm:'Daeshawn Covington',                    am:['Desmone Collins'],                               sup:['Malei Hawkins','Marquise Higgs'] },
+  25: { mp:'Megan Solomon',    dm:'Megan Solomon (interim)', lm:'Daeshawn Covington',                    am:['Desmone Collins'],                               sup:['Malei Hawkins','Marquise Higgs','Keon Groves'] },
   26: { mp:'Megan Solomon',    dm:'Megan Monroe (interim)', lm:'Jamila Mitchell',                       am:['Donte Winfield'],                                sup:['Ella Martin','Marcus Randolph','Yasmine Muse'] },
   27: { mp:'Megan Solomon',    dm:'Roy Whitehead (interim)', lm:'Demetrius "Demi" Wilson',               am:['Michael Shorter'],                               sup:['Tariq Robinson','Jordan Keller'] },
   28: { mp:'Megan Solomon',    dm:'Megan Monroe',           lm:'Carla Castellon',                       am:['Open'],                                          sup:['Sigourney Rodriguez','John Horstkamp'] },
