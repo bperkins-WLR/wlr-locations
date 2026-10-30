@@ -17,7 +17,7 @@ import { openTeam, closeTeam, initTeamModal } from './team-modal.js';
 import { initHeroCounter, initIntro } from './intro.js';
 import { initIncidents, closeIncPlayer, closeIncidents } from './incidents.js';
 import { initSales, closeSales } from './sales.js';
-import { initBuildStamp, initAutoUpdate } from './update.js';
+import { initBuildStamp, initAutoUpdate, restoreAfterUpdate } from './update.js';
 
 // ══ DATA ══════════════════════════════════════════════════
 mergeCustomLocations();
@@ -42,7 +42,9 @@ initIntro();
 dbGetAll()
   .then(all => { setPhotoCache(all); render(); })
   .catch(() => render())
-  .finally(() => focusLocFromUrl());     // honour ?loc= once the grid exists
+  // After an automatic update, put the user back where they were; otherwise
+  // honour a ?loc= link once the grid exists.
+  .finally(() => { if (!restoreAfterUpdate()) focusLocFromUrl(); });
 
 // Live Google ratings (refreshed daily by the GitHub Action → ratings.json)
 fetch('ratings.json', { cache: 'no-store' })
