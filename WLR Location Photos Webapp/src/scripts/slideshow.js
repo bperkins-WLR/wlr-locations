@@ -19,7 +19,7 @@ let ssStarts = [], ssTotal = 0;  // index of each location's first photo, and th
 // A location's slides: exterior, interior, and its aerial when it has one.
 function buildSSPhotos(loc) {
   const dn = loc.numOverride || loc.num;
-  return photoSlots(dn).map(s => ({
+  return photoSlots(dn, !!loc.aerialRender).map(s => ({
     src:   getPhotoSrc(loc.num, s.key) || photoUrl(`images/loc-${pad(dn)}/${s.file}.jpg`),
     label: s.label,
     local: !!getPhotoSrc(loc.num, s.key),
