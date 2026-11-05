@@ -74,15 +74,29 @@ export function isLocVisible(baseLoc) {
   return getLocInfo(baseLoc.num).published === true;
 }
 
-/* Closed sites stay on the grid for the record, but drop out of anything that
-   implies they're operating: live hours, Call, the location count and the tour. */
+/* A permanently closed site is not listed anywhere in the gallery (see
+   isListed) but stays in the data, the admin page and the Growth chart's
+   history; hours and Call also check it, for a site an admin edit closes. */
 export function isPermClosed(num) {
   const base = locations.find(l => l.num === num);
   return !!base && ({ ...base, ...getLocInfo(num) }).status === 'Permanently Closed';
 }
 
+/* Whether the gallery lists a location — grid, map, slideshow, search and
+   every count: not a future site still hidden (unless published from the
+   admin page), and not permanently closed. */
+export function isListed(baseLoc) {
+  return isLocVisible(baseLoc) && !isPermClosed(baseLoc.num);
+}
+
+/* Full years since an opening date (ts = YYYYMMDD; a 00 day means the 1st).
+   Counting from the month, not just the year: a store opened in December
+   2016 is 9 until this December, not 10 from New Year's Day. */
 export function yearsOpen(ts) {
   if (!ts || ts > 20991200) return null;
-  const yr = Math.floor(ts / 10000);
-  return NOW_YEAR - yr;
+  const y = Math.floor(ts / 10000), m = Math.floor(ts / 100) % 100 || 1, d = ts % 100 || 1;
+  const now = nowET();
+  let n = now.getFullYear() - y;
+  if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) n--;
+  return Math.max(0, n);
 }

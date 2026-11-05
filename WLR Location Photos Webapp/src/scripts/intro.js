@@ -1,15 +1,22 @@
 import { locations } from '../data/locations.js';
-import { NOW_YEAR, animateNum } from './util.js';
-import { isLocVisible, isPermClosed } from './store.js';
+import { animateNum } from './util.js';
+import { isListed, yearsOpen } from './store.js';
+
+// WLR's anniversary: October 5, 1987 (39 years on Oct 5, 2026).
+const FOUNDED = 19871005;
+const heroStats = () => {
+  const listed = locations.filter(isListed);
+  return { locs: listed.length, yrs: yearsOpen(FOUNDED), states: new Set(listed.map(l => l.state)).size };
+};
 
 // ══ HERO COUNTER ANIMATION ═════════════════════════════════
 export function initHeroCounter() {
   window.addEventListener('load', () => {
-    const yrs = NOW_YEAR - 1987;
+    const { locs, yrs, states } = heroStats();
     document.getElementById('statYears').textContent = yrs;
-    animateNum(document.getElementById('statLocs'),   locations.filter(l => isLocVisible(l) && !isPermClosed(l.num)).length, 800);
+    animateNum(document.getElementById('statLocs'),   locs, 800);
     animateNum(document.getElementById('statYears'),  yrs, 1200);
-    animateNum(document.getElementById('statStates'), 3, 600);
+    animateNum(document.getElementById('statStates'), states, 600);
   });
 }
 
@@ -42,9 +49,10 @@ export function initIntro() {
 
   // Count up once the stats have faded in
   setTimeout(() => {
-    animateNum(document.getElementById('introLocs'),   locations.filter(l => isLocVisible(l) && !isPermClosed(l.num)).length, 1100);
-    animateNum(document.getElementById('introYears'),  NOW_YEAR - 1987, 1100);
-    animateNum(document.getElementById('introStates'), 3, 900);
+    const { locs, yrs, states } = heroStats();
+    animateNum(document.getElementById('introLocs'),   locs, 1100);
+    animateNum(document.getElementById('introYears'),  yrs, 1100);
+    animateNum(document.getElementById('introStates'), states, 900);
   }, 950);
 
   intro.addEventListener('click', dismiss);

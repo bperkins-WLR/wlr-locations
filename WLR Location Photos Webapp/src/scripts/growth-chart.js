@@ -2,7 +2,7 @@ import { locations } from '../data/locations.js';
 import { GROWTH } from '../data/growth.js';
 import { ic } from '../lib/icons.js';
 import { NOW_YEAR, fmtMoney, fmtMoneyTick, fmtCount, fmtCountTick, niceMax } from './util.js';
-import { isLocVisible } from './store.js';
+import { isListed, yearsOpen } from './store.js';
 import { state } from './state.js';
 
 // ══ GROWTH TIMELINE ════════════════════════════════════════
@@ -20,13 +20,16 @@ const GROWTH_META = {
 
 function timelineData() {
   const { activeFilter, activeState } = state;
-  const qualifies = l => isLocVisible(l) && l.ts < 20991231 &&
+  // Today's stores by the year each opened, so the total matches the hero
+  // count (closed sites aren't subtracted on a date — there's none recorded).
+  const qualifies = l => isListed(l) && l.ts < 20991231 &&
     (activeFilter === 'ALL' || l.type === activeFilter) &&
     (!activeState || l.state === activeState);
   const items = locations.filter(qualifies)
-    .map(l => ({ year: Math.floor(l.ts / 10000), type: l.type, state: l.state }))
+    .map(l => ({ year: Math.floor(l.ts / 10000), ts: l.ts, type: l.type, state: l.state }))
     .filter(l => l.year >= 1980 && l.year <= NOW_YEAR);
   const firstYear = items.length ? Math.min(...items.map(i => i.year)) : 1987;
+  const firstTs   = items.length ? Math.min(...items.map(i => i.ts)) : 19871001;
   const minY = 1987, maxY = NOW_YEAR, years = [];
   for (let y = minY; y <= maxY; y++) years.push(y);
   const brands = TL_ORDER.filter(b => items.some(i => i.type === b));
@@ -35,7 +38,7 @@ function timelineData() {
   const perYear = years.map(y => items.filter(i => i.year === y).length);
   const bMax = Math.max(0, ...perYear), bIdx = perYear.indexOf(bMax);
   return {
-    years, brands, cum, perYear, total: items.length, firstYear,
+    years, brands, cum, perYear, total: items.length, firstYear, yearsSince: yearsOpen(firstTs),
     busiestYear: years[bIdx], busiestCount: bMax,
     statesCount: new Set(items.map(i => i.state)).size,
   };
@@ -196,7 +199,7 @@ function renderLocationsChart() {
       <h2>Our Growth <span>Since ${d.firstYear}</span></h2>
       <div class="tl-stats">
         <div class="tl-stat"><span class="tl-num">${d.total}</span><span class="tl-lab">Locations</span></div>
-        <div class="tl-stat"><span class="tl-num">${NOW_YEAR - d.firstYear}</span><span class="tl-lab">Years</span></div>
+        <div class="tl-stat"><span class="tl-num">${d.yearsSince}</span><span class="tl-lab">Years</span></div>
         <div class="tl-stat"><span class="tl-num">${d.statesCount}</span><span class="tl-lab">States</span></div>
         <div class="tl-stat"><span class="tl-num">${d.brands.length}</span><span class="tl-lab">Brands</span></div>
       </div>

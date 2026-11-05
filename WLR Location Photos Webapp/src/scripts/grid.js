@@ -4,7 +4,7 @@ import { MGMT } from '../data/team.js';
 import { ic } from '../lib/icons.js';
 import { photoUrl, photoSources, hasPhoto } from './photos.js';
 import { pad, esc } from './util.js';
-import { getPhotoSrc, getLocInfo, isLocVisible, yearsOpen } from './store.js';
+import { getPhotoSrc, getLocInfo, isListed, yearsOpen } from './store.js';
 import { hoursBlockHtml, callBtnHtml } from './opening-hours.js';
 import { state, getSorted, matches } from './state.js';
 import { dirDest, dirBtn } from './directions.js';
@@ -176,7 +176,7 @@ export function render() {
   const grid    = document.getElementById('grid');
   const noR     = document.getElementById('noResults');
   const statBar = document.getElementById('statsBar');
-  const visible = getSorted().filter(l => isLocVisible(l) && matches(l));
+  const visible = getSorted().filter(l => isListed(l) && matches(l));
 
   grid.innerHTML = visible.map(buildCard).join('');
 
@@ -216,16 +216,19 @@ export function render() {
 
   noR.classList.toggle('show', visible.length === 0);
 
+  // Counts are of the stores the gallery lists (open ones), not every row in
+  // the data — that included the map-only future sites and closed stores.
+  const listed = locations.filter(isListed);
   const counts = {};
-  locations.forEach(l => { counts[l.type] = (counts[l.type]||0)+1; });
+  listed.forEach(l => { counts[l.type] = (counts[l.type]||0)+1; });
   document.querySelectorAll('.filter-btn').forEach(btn => {
     const t = btn.dataset.type, s = { TLC:'Lube Centers', TAS:'Auto Spas', TAR:'Auto Repair', TASE:'Expresses' };
-    btn.textContent = t === 'ALL' ? `All (${locations.length})` : `${t==='TASE'?'TASe':t} — ${s[t]} (${counts[t]||0})`;
+    btn.textContent = t === 'ALL' ? `All (${listed.length})` : `${t==='TASE'?'TASe':t} — ${s[t]} (${counts[t]||0})`;
   });
 
   statBar.textContent = activeFilter === 'ALL'
-    ? `Showing all ${locations.length} locations`
-    : `Showing ${visible.length} of ${locations.length} — ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
+    ? `Showing all ${listed.length} locations`
+    : `Showing ${visible.length} of ${listed.length} — ${activeFilter==='TASE'?'TASe Expresses':TYPE_FULL[activeFilter]+'s'}`;
 
   if (currentView === 'map') updateMapMarkers();
   else if (currentView === 'timeline') renderTimeline();
