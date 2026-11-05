@@ -11,7 +11,7 @@ export const MGMT = {
   7:  { mp:null,               dm:'James "JT" Kelley',      lm:'Shane Seales',                          am:['Shelton Willett','Mekhi Anderson'],              sup:[] },
   8:  { mp:'Megan Solomon',    dm:'Roy Whitehead',          lm:'Daniel Martinez',                       am:['Anthony Tran'],                                  sup:['Open'] },
   9:  { mp:null,               dm:'Michael Mastrangelo',    lm:'William Simms',                         am:['Enrique Alfaro'],                                sup:['Open'] },
-  10: { mp:null,               dm:'Mike Clark',             lm:'Clyde McGee',                           am:['Open'],                                          sup:[] },
+  10: { mp:null,               dm:'Mike Clark',             lm:'Clyde McGee',                           am:['Roderic Thompson'],                              sup:[] },
   11: { mp:null,               dm:'James "JT" Kelley',      lm:'Ismaila "Ismail" Bangura',              am:['Sean Smith','Dustardi Davis'],                   sup:[] },
   12: { mp:null,               dm:'Michael Mastrangelo',    lm:'Alec Shackett',                         am:['Marriah Gunder'],                                sup:['Wendi Molina','Matthew Guivas'] },
   14: { mp:'Megan Solomon',    dm:'Roy Whitehead',          lm:'Erik Borkman',                          am:['Monica Aguilar Pena'],                           sup:['Ginger Reagle'] },
