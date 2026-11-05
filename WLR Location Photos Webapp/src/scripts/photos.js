@@ -21,13 +21,14 @@ const srcset = urls => `${urls[0]} 480w, ${urls[1]} 960w`;
 
 /* A location's photos in viewing order. Exterior and interior always (the
    grid shows them, with a placeholder when missing); the drone aerial only
-   when one is bundled as 03.jpg — the admin page has no aerial slot. */
-export function photoSlots(dn) {
+   when one is bundled as 03.jpg — the admin page has no aerial slot.
+   `aerialRender` labels an aerial that is a placeholder rendering, not a photo. */
+export function photoSlots(dn, aerialRender = false) {
   const slots = [
     { key: 'ext', file: '01', label: 'Exterior' },
     { key: 'int', file: '02', label: 'Interior' },
   ];
-  if (hasPhoto(dn, '03')) slots.push({ key: 'air', file: '03', label: 'Aerial' });
+  if (hasPhoto(dn, '03')) slots.push({ key: 'air', file: '03', label: aerialRender ? 'Aerial (rendering)' : 'Aerial' });
   return slots;
 }
 

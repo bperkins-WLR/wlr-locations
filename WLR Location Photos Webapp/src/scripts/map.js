@@ -2,7 +2,7 @@ import { locations, COORDS } from '../data/locations.js';
 import { ic } from '../lib/icons.js';
 import { photoUrl } from './photos.js';
 import { pad, esc } from './util.js';
-import { getPhotoSrc, getLocInfo, isLocVisible, isPermClosed } from './store.js';
+import { getPhotoSrc, getLocInfo, isListed, isPermClosed } from './store.js';
 import { hoursStatus } from './opening-hours.js';
 import { state, getSorted, matches } from './state.js';
 import { dirBtn } from './directions.js';
@@ -214,7 +214,7 @@ export function updateMapMarkers() {
   markerLayer = [];
   mapMarkers.clear();
 
-  const live = getSorted().filter(l => isLocVisible(l) && matches(l) && COORDS[l.num]);
+  const live = getSorted().filter(l => isListed(l) && matches(l) && COORDS[l.num]);
   live.forEach(baseLoc => {
     const loc = { ...baseLoc, ...getLocInfo(baseLoc.num) };
     const m = makePin(loc, `pin-${loc.type}`, pinPopupHtml(loc)).addTo(mapInstance);

@@ -1,15 +1,17 @@
 // Edited by hand. The gallery, admin page, location pages and the ratings job
 // all read this file, so a change here reaches all of them on the next deploy.
 
+// aerialRender:true marks a store whose aerial (03.jpg) is an AI placeholder
+// rendering rather than a photo; the viewer and slideshow label it so.
 export const locations = [
-  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP" },
+  { num:  1, name:"Route 40",               type:"TLC",  city:"Frederick",       state:"MD", opened:"October 1987",      ts:19871001, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=R4Cg8PtvKzP", aerialRender:true },
   { num:  2, name:"Route 85",               type:"TLC",  city:"Frederick",       state:"MD", opened:"September 2000",    ts:20000901, addr:"5715 Buckeystown Pike, Frederick, MD 21704", render3d:"https://my.matterport.com/show/?m=MLW9rLGqcbs" },
   { num:  3, name:"Columbia",               type:"TLC",  city:"Columbia",        state:"MD", opened:"June 1990",         ts:19900601, addr:"9225 Berger Road, Columbia, MD 21046" },
-  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995",          ts:19950501, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=qnr2UL3QC8D" },
-  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998",         ts:19980601, addr:"10007 Fields Road, Gaithersburg, MD 20878", render3d:"https://my.matterport.com/show/?m=CuzNBWW4JG1" },
+  { num:  4, name:"Frederick Auto Repair",  type:"TAR",  city:"Frederick",       state:"MD", opened:"May 1995",          ts:19950501, addr:"1395 West Patrick Street, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=qnr2UL3QC8D", aerialRender:true },
+  { num:  5, name:"Washingtonian",          type:"TLC",  city:"Gaithersburg",    state:"MD", opened:"June 1998",         ts:19980601, addr:"10007 Fields Road, Gaithersburg, MD 20878", render3d:"https://my.matterport.com/show/?m=CuzNBWW4JG1", aerialRender:true },
   { num:  6, name:"Frederick Auto Spa",     type:"TAS",  city:"Frederick",       state:"MD", opened:"December 2003",     ts:20031201, addr:"1509 Garrett Dr, Frederick, MD 21702", render3d:"https://my.matterport.com/show/?m=3yPoA8UP24q" },
   { num:  7, name:"Arundel Mills",           type:"TLC",  city:"Arundel Mills",   state:"MD", opened:"July 2020",         ts:20200701, addr:"7691 Arundel Mills Blvd, Hanover, MD 21076", render3d:"https://my.matterport.com/show/?m=hPA3o1R1VSu" },
-  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004",     ts:20040201, addr:"20440 Germantown Road, Germantown, MD 20876" },
+  { num:  8, name:"Germantown",             type:"TAS",  city:"Germantown",      state:"MD", opened:"February 2004",     ts:20040201, addr:"20440 Germantown Road, Germantown, MD 20876", aerialRender:true },
   { num:  9, name:"Germantown",             type:"TLC",  city:"Germantown",      state:"MD", opened:"March 2005",        ts:20050301, addr:"11612 Middlebrook Road, Germantown, MD 20876", render3d:"https://my.matterport.com/show/?m=9iZMvGzWgXr" },
   { num: 10, name:"Mid-Atlantic Gambrills", type:"TAR",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"672 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=epV8TadAFMN" },
   { num: 11, name:"Gambrills",              type:"TLC",  city:"Gambrills",       state:"MD", opened:"October 2009",      ts:20091001, addr:"676 State Route 3 North, Gambrills, MD", render3d:"https://my.matterport.com/show/?m=e2MiWFq9RGG" },

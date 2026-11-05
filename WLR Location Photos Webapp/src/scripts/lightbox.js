@@ -56,7 +56,7 @@ export function openLightboxForLoc(num, startSlot, sourceImg) {
   if (!baseLoc) return;
   const loc = { ...baseLoc, ...getLocInfo(num) };
   const dn     = loc.numOverride || num;
-  const slots  = photoSlots(dn);
+  const slots  = photoSlots(dn, !!loc.aerialRender);
   const photos = slots.map(s => ({
     slot: s.key,
     src: getPhotoSrc(num, s.key) || `images/loc-${pad(dn)}/${s.file}.jpg`,

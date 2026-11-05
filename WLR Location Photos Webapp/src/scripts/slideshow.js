@@ -2,7 +2,7 @@ import { TYPE_FULL } from '../data/brands.js';
 import { ic } from '../lib/icons.js';
 import { photoUrl, photoSlots } from './photos.js';
 import { pad, esc } from './util.js';
-import { getPhotoSrc, getLocInfo, isLocVisible, yearsOpen } from './store.js';
+import { getPhotoSrc, getLocInfo, isListed, yearsOpen } from './store.js';
 import { getSorted, matches } from './state.js';
 
 // ══ SLIDESHOW ══════════════════════════════════════════════
@@ -19,7 +19,7 @@ let ssStarts = [], ssTotal = 0;  // index of each location's first photo, and th
 // A location's slides: exterior, interior, and its aerial when it has one.
 function buildSSPhotos(loc) {
   const dn = loc.numOverride || loc.num;
-  return photoSlots(dn).map(s => ({
+  return photoSlots(dn, !!loc.aerialRender).map(s => ({
     src:   getPhotoSrc(loc.num, s.key) || photoUrl(`images/loc-${pad(dn)}/${s.file}.jpg`),
     label: s.label,
     local: !!getPhotoSrc(loc.num, s.key),
@@ -28,7 +28,7 @@ function buildSSPhotos(loc) {
 const photosOf = i => buildSSPhotos({ ...ssLocs[i], ...getLocInfo(ssLocs[i].num) });
 
 function startSlideshow() {
-  ssLocs = getSorted().filter(l => isLocVisible(l) && matches(l));
+  ssLocs = getSorted().filter(l => isListed(l) && matches(l));
   if (ssLocs.length === 0) return;
   ssLocIdx  = 0; ssSlotIdx = 0; ssPaused = false; ssLastLoc = null;
   ssStarts = []; ssTotal = 0;
